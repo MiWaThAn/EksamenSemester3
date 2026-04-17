@@ -1,1 +1,10 @@
-<Solution />
+<Solution>
+  <Project Path="API/API.csproj" Id="79662879-2a79-4392-a66f-9b5d8ad6d3f5" />
+  <Project Path="Application/Application.csproj" Id="d7dac3dd-0687-4302-b0a2-878f1f055866" />
+  <Project Path="Domain/Domain.csproj" Id="0b8419bd-4f2c-4669-a53b-93a789362367" />
+  <Project Path="Infrastructure/Infrastructure.csproj" Id="76db313b-3fb5-4bae-b037-0edd5e296e9f" />
+  <Project Path="Shared/Shared.csproj" Id="9a6b2eb9-35e0-4167-9c4a-9a79a0e46bf1" />
+  <Project Path="UI/UI.csproj" Id="048b11d0-b525-4b15-bd57-f8e9d5d78e14">
+    <Deploy Solution="Debug|*" />
+  </Project>
+</Solution>

@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Builders\Item\" />
+    <Folder Include="Builders\Person\" />
+    <Folder Include="Entity\Item\" />
+    <Folder Include="Entity\Person\" />
+    <Folder Include="Interfaces\Item\" />
+    <Folder Include="Interfaces\Person\" />
+    <Folder Include="Services\Item\" />
+    <Folder Include="Services\Person\" />
+  </ItemGroup>
+
+</Project>
