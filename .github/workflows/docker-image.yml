@@ -54,7 +54,6 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: .
-          file: API/Dockerfile
           push: true
           tags: ${{ env.REGISTRY }}/miwathan/${{env.IMAGE_NAME}}:latest
           
