@@ -8,7 +8,7 @@ namespace API.Controllers
     {
         private static readonly string[] Summaries =
         [
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+            "Bob", "Jack", "Billy", "Awesome", "Long", "Hard", "MegetKoldt", "MegetVarmt", "Wowza", "Bazoiiink"
         ];
 
         [HttpGet(Name = "GetWeatherForecast")]
