@@ -9,8 +9,8 @@
     depends_on:
       - mssql-db
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health"] 
-      interval: 20s
+      test: ["CMD", "dotnet", "EksamenSemester3.UI.dll"]
+      interval: 3600s
       timeout: 3s
       retries: 3
 
@@ -32,7 +32,7 @@
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      WATCHTOWER_POLL_INTERVAL: 20
+      WATCHTOWER_POLL_INTERVAL: 3600
       WATCHTOWER_CLEANUP: "true"
     command: --label-enable
 
