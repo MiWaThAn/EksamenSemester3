@@ -4,14 +4,27 @@
     restart: unless-stopped
     ports:
      - 8001:8001
-
     labels:
       com.centurylinklabs.watchtower.enable: "true"
+    depends_on:
+      - mssql-db
     healthcheck:
       test: ["CMD", "dotnet", "EksamenSemester3.UI.dll"]
       interval: 3600s
       timeout: 3s
       retries: 3
+
+  mssql-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: unless-stopped
+    container_name: mssql2022
+    ports:
+      - "1533:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=MyPass123$
+    volumes:
+      - mssql-data:/var/opt/mssql
 
   watchtower:
     image: nickfedor/watchtower
@@ -22,3 +35,6 @@
       WATCHTOWER_POLL_INTERVAL: 3600
       WATCHTOWER_CLEANUP: "true"
     command: --label-enable
+
+volumes:
+  mssql-data:
