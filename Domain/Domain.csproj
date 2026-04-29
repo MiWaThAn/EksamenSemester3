@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Builders\Item\" />
-    <Folder Include="Builders\Person\" />
-    <Folder Include="Entity\Item\" />
-    <Folder Include="Entity\Person\" />
     <Folder Include="Interfaces\Item\" />
     <Folder Include="Interfaces\Person\" />
     <Folder Include="Services\Item\" />
