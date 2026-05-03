@@ -1,5 +1,6 @@
 ﻿using Domain.Entity.Item;
 using Domain.Entity.Person;
+using Domain.Guards;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,27 +9,22 @@ namespace Domain.Builders.Item
 {
     public class ProjectBuilder
     {
-        private string ProjectNumber; //
         private string Name; //
-        private Guid AdressId; //
+        private Address? Address; //
         private Guid CompanyId; //
         private Guid? CustomerId; //
         private Guid? ResponsibleEmployeeId; //
-        private bool IsClosed; //
-        private string Description; //
-        public ProjectBuilder WithProjectNumber(string projectNumber)
-        {
-            ProjectNumber = projectNumber ?? throw new ArgumentNullException(nameof(projectNumber));
-            return this;
-        }
+        private Status Status; //
+        private string Description = string.Empty;
         public ProjectBuilder WithName(string name)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
+            Guard.AgainstNullOrEmpty(name, nameof(name));
+            Name = name;
             return this;
         }
         public ProjectBuilder WithAddress(Address address)
         {
-            AdressId = address.Id;
+            Address = address;
             return this;
         }
         public ProjectBuilder WithCustomer(Customer customer)
@@ -41,14 +37,15 @@ namespace Domain.Builders.Item
             ResponsibleEmployeeId = responsibleEmployee.Id;
             return this;
         }
-        public ProjectBuilder WithIsClosed(bool isClosed)
+        public ProjectBuilder WithIsStatus(Status status)
         {
-            IsClosed = isClosed;
+            Status = status;
             return this;
         }
         public ProjectBuilder WithDescription(string description)
         {
-            Description = description ?? throw new ArgumentNullException(nameof(description));
+            Guard.AgainstNull(description, nameof(description));
+            Description = description;
             return this;
         }
         internal ProjectBuilder WithCompany(Company company)
@@ -59,18 +56,9 @@ namespace Domain.Builders.Item
         }
         internal Project Build()
         {
-            if (string.IsNullOrEmpty(ProjectNumber)) throw new InvalidOperationException("Project number is required to build a project.");
-            if (string.IsNullOrEmpty(Name)) throw new InvalidOperationException("Name is required to build a project.");
-            if (AdressId == Guid.Empty) throw new InvalidOperationException("Address ID is required to build a project.");
-            if (CompanyId == Guid.Empty) throw new InvalidOperationException("Company ID is required to build a project.");
-            return new Project(
-                ProjectNumber, 
-                Name, 
-                AdressId, 
-                CompanyId, 
-                CustomerId ?? Guid.Empty, 
-                ResponsibleEmployeeId ?? Guid.Empty, 
-                Description);
+            Guard.AgainstNullOrEmpty(Name, nameof(Name));
+            Guard.AgainstEmptyGuid(CompanyId, nameof(CompanyId));
+            return new Project(Name, CompanyId, CustomerId, ResponsibleEmployeeId, Description, Status,Address);
         }
     }
 }

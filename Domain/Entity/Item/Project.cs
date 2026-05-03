@@ -1,7 +1,9 @@
 ﻿using Domain.Builders.Item;
 using Domain.Entity.Item.Activity;
 using Domain.Entity.Item.Registrations;
+using Domain.Entity.Mapping;
 using Domain.Entity.Person;
+using Domain.Guards;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,39 +12,37 @@ namespace Domain.Entity.Item
 {
     public class Project : Base
     {
-        public string ProjectNumber { get; internal set; }
         public string Name { get; internal set; }
-        public Guid AdressId { get; internal set; }
+        public Status Status { get; internal set; }
         public Guid CompanyId { get; internal set; }
         public Guid? CustomerId { get; internal set; }
         public Guid? ResponsibleEmployeeId { get; internal set; }
-        public bool IsClosed { get; internal set; }
-        public bool IsDeleted { get; internal set; }
-        public DateTime UpdatedAt { get; internal set; }
+        public Address? Address { get; internal set; }
         public string Description { get; internal set; } = string.Empty;
+
         private readonly List<ProjectActivity> _activities = new();
-        public IReadOnlyCollection<ProjectActivity> Activities => _activities.AsReadOnly();
+        public IReadOnlyCollection<ProjectActivity> Activities => _activities.Where(a => !a.IsDeleted).ToList().AsReadOnly();
         private readonly List<Registration> _registrations = new();
-        public IReadOnlyCollection<Registration> Registrations => _registrations.AsReadOnly();
-        internal Project(string projectNumber, string name, Guid adressId, Guid companyId, Guid? customerId, Guid? responsibleEmployeeId, string description) : base()
+        public IReadOnlyCollection<Registration> Registrations => _registrations.Where(r => !r.IsDeleted).ToList().AsReadOnly();
+        internal Project(string name, Guid companyId, Guid? customerId, Guid? responsibleEmployeeId, string description,Status status, Address? address) : base()
         {
-            ProjectNumber = projectNumber ?? throw new ArgumentNullException(nameof(projectNumber));
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            AdressId = adressId;
+            Guard.AgainstNullOrEmpty(name, nameof(name));
+            Guard.AgainstEmptyGuid(companyId, nameof(companyId));
+            Guard.AgainstNull(description, nameof(description));
+            Name = name;
             CompanyId = companyId;
             CustomerId = customerId;
             ResponsibleEmployeeId = responsibleEmployeeId;
-            IsClosed = false;
-            IsDeleted = false;
-            UpdatedAt = DateTime.UtcNow;
             Description = description;
+            Status = status;
+            Address = address;
         }
         public ProjectActivity CreateProjectActivity(ProjectActivityBuilder builder)
         {
-            if (builder == null) throw new ArgumentNullException(nameof(builder));
+            Guard.AgainstNull(builder, nameof(builder));
             var activity = builder.WithProject(this).Build();
-            if (activity.ProjectId != this.Id) throw new ArgumentException("Project activity does not belong to this project.");
-            if (_activities.Exists(a => a.Id == activity.Id)) throw new ArgumentException("This project activity is already added to the project.");
+            if (activity.ProjectId != this.Id) throw new ArgumentException("Projekt aktivite tilhører ikke dette projekt.");
+            if (_activities.Exists(a => a.Id == activity.Id)) throw new ArgumentException("Denne projekt aktivitet er allerede i dette projekt.");
             _activities.Add(activity);
             UpdatedAt = DateTime.UtcNow;
             return activity;
@@ -55,24 +55,49 @@ namespace Domain.Entity.Item
             _activities.Remove(activity);
             UpdatedAt = DateTime.UtcNow;
         }
+        public void LinkToEmployee(Employee employee)
+        {
+            Guard.AgainstNull(employee, nameof(employee));
+            ResponsibleEmployeeId = employee.Id;
+            UpdatedAt = DateTime.UtcNow;
+        }
+        public void LinkToCustomer(Customer customer)
+        {
+            Guard.AgainstNull(customer, nameof(customer));
+            CustomerId = customer.Id;
+            UpdatedAt = DateTime.UtcNow;
+        }
+        public void AddAddress(Address address)
+        {
+            Guard.AgainstNull(address, nameof(address));
+            Address = address;
+            UpdatedAt = DateTime.UtcNow;
+        }
         public void UpdateProjectName(string newName)
         {
-            Name = newName ?? throw new ArgumentNullException(nameof(newName));
+            Guard.AgainstNullOrEmpty(newName, nameof(newName));
+            Name = newName;
             UpdatedAt = DateTime.UtcNow;
         }
         public void MarkAsClosed()
         {
-            IsClosed = true;
+            Status = Status.Lukket;
             UpdatedAt = DateTime.UtcNow;
         }
-        public void MarkAsDeleted()
+        public void MarkAsOpen()
         {
-            IsDeleted = true;
+            Status = Status.Åben;
+            UpdatedAt = DateTime.UtcNow;
+        }
+        public void MarkAsOnHold()
+        {
+            Status = Status.Godkendes;
             UpdatedAt = DateTime.UtcNow;
         }
         public void UpdateDescription(string newDescription)
         {
-            Description = newDescription ?? throw new ArgumentNullException(nameof(newDescription));
+            Guard.AgainstNull(newDescription, nameof(newDescription));
+            Description = newDescription;
             UpdatedAt = DateTime.UtcNow;
         }
     }

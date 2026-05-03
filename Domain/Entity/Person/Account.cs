@@ -1,52 +1,95 @@
-﻿using System;
+﻿using Domain.Builders.Person;
+using Domain.Guards;
+using Domain.Interfaces.Person;
+using Domain.ValueObjects;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Domain.Entity.Person
 {
     //Account class handles the general indentity and authentication information for users. 
-    public abstract class Account : Base
+    public class Account : Base
     {
-        public string Name { get; protected set; }
-        public string HashedPassword { get; protected set; }
-        public string Username { get; protected set; }
-        public string? Email { get; protected set; }
-        public string? PhoneNumber { get; protected set; }
-        public bool IsDeleted { get; protected set; }
-        public DateTime CreatedAt { get; protected set; }
-        public DateTime UpdatedAt { get; protected set; }
-        public DateTime LastSync { get; protected set; } //Last time the account pinged the server (last activity time)
 
-        internal Account(string name, string hashedPassword, string username, string? email, string? phoneNumber) : base()
+        //Username is unique and used for login, while phone number is optional and can be used for 2FA or account recovery.
+        public string Username { get; internal set; }
+        public string HashedPassword { get; internal set; }
+        public string? PhoneNumber { get; internal set; }
+        //HashedPin is used for quick login on mobile devices, it is optional and can be null if the user has not set it up.
+        public string? HashedPin { get; internal set; }
+
+        //Company and Employee ID's are nullable because an account might not be associated with a company or employee yet (e.g. during registration or if the account is for a user that only has access to the app but is not an employee). Once the account is linked to a company and/or employee, these fields will be populated.
+        //If it is a company account it will have a company id and have admin rights over that companies employees and projects,
+        //if it is an employee account it will have an employee id and be linked to a company through that employee.
+        //An account could potentially have both if it is an admin user that also has an employee role,
+        //but it could also have neither if it is a generic user account that is not linked to any company or employee.
+        public Guid? CompanyId { get; internal set; }
+        public Guid? EmployeeId { get; internal set; }
+
+        //Helper methods to quickly check the type of account based on the presence of CompanyId and EmployeeId. This allows for flexible account types and easy role management.
+        public bool IsCompanyAccount => CompanyId.HasValue;
+        public bool IsEmployeeAccount => EmployeeId.HasValue;
+
+
+        //Last time the account pinged the server (last activity time)
+        public DateTime LastSync { get; internal set; } 
+
+        internal Account(string username, string hashedPassword, string? phoneNumber,string hashedPin) : base()
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            HashedPassword = hashedPassword ?? throw new ArgumentNullException(nameof(hashedPassword));
-            Username = username ?? throw new ArgumentNullException(nameof(username));
-            Email = email;
+            Guard.AgainstNullOrEmpty(hashedPassword, nameof(hashedPassword));
+            Guard.AgainstNullOrEmpty(username, nameof(username));
+            Guard.AgainstNullOrEmpty(hashedPin, nameof(hashedPin));
+            HashedPassword = hashedPassword;
+            Username = username;
             PhoneNumber = phoneNumber;
-            IsDeleted = false;
-            UpdatedAt = CreatedAt = LastSync = DateTime.UtcNow;
+            UpdatedAt = DateTime.UtcNow;
+            HashedPin = hashedPin;
         }
-        public void UpdateContactInfo(string? email, string? phoneNumber)
+        public void UpdatePhoneNumber(string? phoneNumber)
         {
-            Email = email;
             PhoneNumber = phoneNumber;
             UpdatedAt = DateTime.UtcNow;
         }
         public void UpdatePassword(string newHashedPassword)
         {
-            HashedPassword = newHashedPassword ?? throw new ArgumentNullException(nameof(newHashedPassword));
+            Guard.AgainstNullOrEmpty(newHashedPassword, nameof(newHashedPassword));
+            HashedPassword = newHashedPassword;
             UpdatedAt = DateTime.UtcNow;
         }
         public void UpdateUsername(string newUsername)
         {
-            Username = newUsername ?? throw new ArgumentNullException(nameof(newUsername));
+            Guard.AgainstNullOrEmpty(newUsername, nameof(newUsername));
             UpdatedAt = DateTime.UtcNow;
         }
-        public void MarkAsDeleted()
+        public void UpdatePin(string newHashedPin)
         {
-            IsDeleted = true;
+            Guard.AgainstNullOrEmpty(newHashedPin, nameof(newHashedPin));
+            HashedPin = newHashedPin;
             UpdatedAt = DateTime.UtcNow;
+        }
+        public void LinkToCompany(Guid companyId)
+        {
+            CompanyId = companyId;
+            UpdatedAt = DateTime.UtcNow;
+        }
+        public void LinkToEmployee(Guid employeeId)
+        {
+            EmployeeId = employeeId;
+            UpdatedAt = DateTime.UtcNow;
+        }
+        public async Task<Result<Company>> CreateCompany(CompanyBuilder builder, ICompanyFactory companyFactory)
+        {
+            Guard.AgainstNull(builder, nameof(builder));
+            Guard.AgainstNull(companyFactory, nameof(companyFactory));
+            builder = builder.WithAccountId(this);
+            var result = await companyFactory.CreateAsync(builder, this);
+            if(result.IsSuccess)
+            {
+                LinkToCompany(result.Value.Id);
+            }
+            UpdatedAt = DateTime.UtcNow;
+            return result;
         }
     }
 }

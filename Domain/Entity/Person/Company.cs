@@ -1,93 +1,151 @@
 ﻿using Domain.Builders.Item;
+using Domain.Builders.Mapping;
 using Domain.Builders.Person;
 using Domain.Entity.Item;
 using Domain.Entity.Item.Activity;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Domain.Entity.Item.Registrations;
+using Domain.Entity.Mapping;
+using Domain.Guards;
+using Domain.ValueObjects;
 
 namespace Domain.Entity.Person
 {
-    public class Company : Account
+    /// <summary>
+    /// Denne klasse ligger på grænsen af at være en fed aggregate root/gud klasse da den indeholder lister og forretnings logik over ansatte, projekter, aktiviteter, og udgifter.
+    /// Kunne godt overveje at flytte nogen af de her foretnings regler ned i nogen services eller lignende for at gøre klassen mere single responsibility
+    /// Kunne også godt gøre brug af bounded context og seperate projekter for at adskille de forskellige områder af domænet og undgå at have en stor klasse
+    /// Men jeg tror det går fint så længe vi holder det her på et rimeligt niveau og ikke tilføjer alt formeget kompleks logik.
+    /// 
+    /// </summary>
+    public class Company : Base
     {
-        private readonly List<Employee> _employees = new();
-        public IReadOnlyCollection<Employee> Employees => _employees.AsReadOnly();
-        private readonly List<Project> _projects = new();
-        public IReadOnlyCollection<Project> Projects => _projects.AsReadOnly();
-        private readonly List<Activity> _activities = new();
-        public IReadOnlyCollection<Activity> Activities => _activities.AsReadOnly();
-        private readonly List<Expense> _expenses = new();
-        public IReadOnlyCollection<Expense> Expenses => _expenses.AsReadOnly();
-        public string CVRNumber { get; internal set; }
-        public string HashedAgreementGrantToken { get; internal set; }
-        public string HashedAppSecretToken { get; internal set; }
-        public string HashedEconomicAgreementNumber { get; internal set; }
+        //Navn og email for notifikationer og information
+        public string Name { get; internal set; }
+        public EmailAddress Email { get; internal set; }
+        //Cvr til registrering så vi ved at firmaer der opretter sig er unikke
+        public CvrNumber CVRNumber { get; internal set; }
 
-        public Company(string name, string hashedPassword, string username, string? email, string? phoneNumber, string cvrNumber, string hashedAgreementGrantToken, string hashedAppSecretToken, string hashedEconomicAgreementNumber) : base(name, hashedPassword, username, email, phoneNumber)
+        //Et firma kan ikke eksiterer uden en konto, så AccountId er ikke nullable.
+        //Det er den konto der har admin rettigheder over firmaet og dets ansatte og projekter.
+        public Guid AccountId { get; internal set; }
+
+        //Lister over ansatte, projekter, aktiviteter, og udgifter.
+        //Disse lister håndteres internt i klassen for at sikre konsistens og integritet,
+        //og de eksponeres som read-only for at forhindre uautoriserede ændringer udefra.
+        //Readonly tvinger os til at bruge medtoderne i klassen for at tilføje og fjerne elementer fra listerne,
+        //hvilket giver os mulighed for at implementere forretningslogik og validering i disse metoder.
+        private readonly List<Employee> _employees = new();
+        public IReadOnlyCollection<Employee> Employees => _employees.Where(e=>!e.IsDeleted).ToList().AsReadOnly();
+        private readonly List<Project> _projects = new();
+        public IReadOnlyCollection<Project> Projects => _projects.Where(p=>!p.IsDeleted).ToList().AsReadOnly();
+        private readonly List<Activity> _activities = new();
+        public IReadOnlyCollection<Activity> Activities => _activities.Where(a=>!a.IsDeleted).ToList().AsReadOnly();
+        private readonly List<Expense> _expenses = new();
+        public IReadOnlyCollection<Expense> Expenses => _expenses.Where(e=>!e.IsDeleted).ToList().AsReadOnly();
+
+        //Lister over integration settings, som kan bruges til at gemme API nøgler og lignende for integrationer med eksterne systemer som e-conomic, Microsoft Graph, Slack, osv.
+        //Dette gør det muligt for firmaet at have fleksible og udvidelige integrationer uden at skulle ændre på selve datamodellen for firmaet.
+        //Det tillader også firmaet at have flere integrationer med forskellige systemer samtidig, og at håndtere disse integrationer på en struktureret måde.
+        //Dette er gjordt for skalerbarhed og for at imødekomme fremtidige behov for integrationer, som kan være en vigtig del af et moderne tidsregistreringssystem.
+        //Hver integration setting har en provider (f.eks. "e-conomic") og en key (f.eks. "APIKey"), som sammen unikt identificerer en integration setting for et firma.
+        //Denne liste kan også være tom hvis firmaet ikke har nogen integrationer, og det er op til firmaet at tilføje integration settings efter behov.
+        //Dvs. at et firma kan lave en konto og bruge appen uden nogensinde at tilføje en integration setting (ved at lave medarbejderer kun gemt lokalt på vores database)
+        private readonly List<IntegrationSetting> _settings = new();
+        public IReadOnlyCollection<IntegrationSetting> Settings => _settings.AsReadOnly();
+
+        internal Company(string name, CvrNumber cvrNumber, Guid ownerAccountId, EmailAddress email) : base()
         {
-            CVRNumber = cvrNumber ?? throw new ArgumentNullException(nameof(cvrNumber));
-            HashedAgreementGrantToken = hashedAgreementGrantToken ?? throw new ArgumentNullException(nameof(hashedAgreementGrantToken));
-            HashedAppSecretToken = hashedAppSecretToken ?? throw new ArgumentNullException(nameof(hashedAppSecretToken));
-            HashedEconomicAgreementNumber = hashedEconomicAgreementNumber ?? throw new ArgumentNullException(nameof(hashedEconomicAgreementNumber));
+            Guard.AgainstNullOrEmpty(name, nameof(name));
+            Name = name;
+            CVRNumber = cvrNumber;
+            AccountId = ownerAccountId;
+            Email = email;
         }
         public Employee CreateEmployee(EmployeeBuilder builder)
         {
             var employee = builder.WithCompany(this).Build();
-            if (_employees.Exists(e => e.Id == employee.Id)) throw new ArgumentException("This employee is already added to the company.");
+            if (_employees.Exists(e => e.Id == employee.Id)) throw new ArgumentException("Denne medarbejder er allerede i firmaet");
             _employees.Add(employee);
             UpdatedAt = DateTime.UtcNow;
             return employee;
         }
         public void RemoveEmployee(Guid employeeId)
         {
-            var employee = _employees.Find(e => e.Id == employeeId);
-            if (employee == null) throw new ArgumentException("Employee not found for this company.");
-            _employees.Remove(employee);
+            var employee = _employees.Find(e => e.Id == employeeId && !e.IsDeleted);
+            if (employee == null) throw new ArgumentException("Denne medarbejder blev ikke fundet i firmaet");
+            employee.SoftDelete();
             UpdatedAt = DateTime.UtcNow;
         }
         public Project CreateProject(ProjectBuilder builder)
         {
             var project = builder.WithCompany(this).Build();
-            if (_projects.Exists(p => p.Id == project.Id)) throw new ArgumentException("This project is already added to the company.");
+            if (_projects.Exists(p => p.Id == project.Id)) throw new ArgumentException("Dette projekt er allerede tilføjet til firmaet");
             _projects.Add(project);
             UpdatedAt = DateTime.UtcNow;
             return project;
         }
         public void RemoveProject(Guid projectId)
         {
-            var project = _projects.Find(p => p.Id == projectId);
-            if (project == null) throw new ArgumentException("Project not found for this company.");
-            _projects.Remove(project);
+            var project = _projects.Find(p => p.Id == projectId && !p.IsDeleted);
+            if (project == null) throw new ArgumentException("Dette projekt blev ikke fundet i firmaet");
+            project.SoftDelete();
             UpdatedAt = DateTime.UtcNow;
         }
         public Activity CreateActivity(ActivityBuilder builder)
         {
             var activity = builder.WithCompany(this).Build();
-            if (_activities.Exists(a => a.Id == activity.Id)) throw new ArgumentException("This activity is already added to the company.");
+            if (_activities.Exists(a => a.Id == activity.Id)) throw new ArgumentException("Denne aktivitet er allerede tilføjet til firmaet");
             _activities.Add(activity);
             UpdatedAt = DateTime.UtcNow;
             return activity;
         }
         public void RemoveActivity(Guid activityId)
         {
-            var activity = _activities.Find(a => a.Id == activityId);
-            if (activity == null) throw new ArgumentException("Activity not found for this company.");
-            _activities.Remove(activity);
+            var activity = _activities.Find(a => a.Id == activityId && !a.IsDeleted);
+            if (activity == null) throw new ArgumentException("Denne aktivitet blev ikke fundet i firmaet");
+            activity.SoftDelete();
             UpdatedAt = DateTime.UtcNow;
         }
         public Expense CreateExpense(ExpenseBuilder builder)
         {
             var expense = builder.WithCompany(this).Build();
-            if (_expenses.Exists(e => e.Id == expense.Id)) throw new ArgumentException("This expense is already added to the company.");
+            if (_expenses.Exists(e => e.Id == expense.Id)) throw new ArgumentException("Denne omkostning er allerede tilføjet til firmaet");
             _expenses.Add(expense);
             UpdatedAt = DateTime.UtcNow;
             return expense;
         }
         public void RemoveExpense(Guid expenseId)
         {
-            var expense = _expenses.Find(e => e.Id == expenseId);
-            if (expense == null) throw new ArgumentException("Expense not found for this company.");
-            _expenses.Remove(expense);
+            var expense = _expenses.Find(e => e.Id == expenseId && !e.IsDeleted);
+            if (expense == null) throw new ArgumentException("Denne omkostning blev ikke fundet i firmaet");
+            expense.SoftDelete();
+            UpdatedAt = DateTime.UtcNow;
+        }
+        public IntegrationSetting CreateIntegrationSetting(IntegrationSettingBuilder builder)
+        {
+            var setting = builder.WithCompany(this).Build();
+            if(_settings.Exists(s => s.Provider == setting.Provider && s.Key == setting.Key)) throw new ArgumentException("En integrationsindstilling med samme udbyder og nøgle findes allerede for dette firma.");
+            if (_settings.Exists(s => s.Id == setting.Id)) throw new ArgumentException("Denne integrationsindstilling er allerede tilføjet til firmaet.");
+            _settings.Add(setting);
+            UpdatedAt = DateTime.UtcNow;
+            return setting;
+        }
+        public void RemoveIntegrationSetting(Guid settingId)
+        {
+            var setting = _settings.Find(s => s.Id == settingId);
+            if (setting == null) throw new ArgumentException("Denne integrationsindstilling blev ikke fundet for dette firma.");
+            _settings.Remove(setting);
+            UpdatedAt = DateTime.UtcNow;
+        }
+        public void UpdateCompanyName(string newName)
+        {
+            Guard.AgainstNullOrEmpty(newName, nameof(newName));
+            Name = newName;
+            UpdatedAt = DateTime.UtcNow;
+        }
+        public void UpdateCompanyEmail(EmailAddress newEmail)
+        {
+            Email = newEmail;
             UpdatedAt = DateTime.UtcNow;
         }
     }

@@ -1,5 +1,6 @@
 ﻿using Domain.Entity.Item.Activity;
 using Domain.Entity.Person;
+using Domain.Guards;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,38 +9,33 @@ namespace Domain.Builders.Item
 {
     public class ActivityBuilder
     {
-        public string ActivityNumber { get; internal set; }
-        public string Name { get; internal set; }
-        public string Description { get; internal set; }
-        public Guid CompanyId { get; internal set; }
-        public ActivityBuilder WithActivityNumber(string activityNumber)
-        {
-            ActivityNumber = activityNumber ?? throw new ArgumentNullException(nameof(activityNumber));
-            return this;
-        }
+        private string Name;
+        private string Description;
+        private Guid CompanyId;
         public ActivityBuilder WithName(string name)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
+            Guard.AgainstNullOrEmpty(name, nameof(name));
+            Name = name;
             return this;
         }
         public ActivityBuilder WithDescription(string description)
         {
-            Description = description ?? throw new ArgumentNullException(nameof(description));
+            Guard.AgainstNullOrEmpty(description, nameof(description));
+            Description = description;
             return this;
         }
         internal ActivityBuilder WithCompany(Company company)
         {
-            if (company == null) throw new ArgumentNullException(nameof(company));
+            Guard.AgainstNull(company, nameof(company));
             CompanyId = company.Id;
             return this;
         }
         internal Activity Build()
         {
-            if (string.IsNullOrEmpty(ActivityNumber)) throw new InvalidOperationException("Activity number must be provided.");
-            if (string.IsNullOrEmpty(Name)) throw new InvalidOperationException("Name must be provided.");
-            if (string.IsNullOrEmpty(Description)) throw new InvalidOperationException("Description must be provided.");
-            if (CompanyId == Guid.Empty) throw new InvalidOperationException("Company must be provided.");
-            return new Activity(ActivityNumber, Name, Description) { CompanyId = CompanyId };
+            Guard.AgainstNullOrEmpty(Description, nameof(Description));
+            Guard.AgainstNullOrEmpty(Name, nameof(Name));
+            Guard.AgainstEmptyGuid(CompanyId, nameof(CompanyId));
+            return new Activity(Name, Description, CompanyId);
         }
     }
 }

@@ -3,6 +3,7 @@ using Domain.Entity.Item;
 using Domain.Entity.Item.Activity;
 using Domain.Entity.Item.Registrations;
 using Domain.Entity.Person;
+using Domain.Guards;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,37 +17,36 @@ namespace Domain.Builders.Item.Registration
         protected Guid EmployeeId;
         protected Guid ProjectId;
         protected Guid? ActivityId;
-        protected Status Status;
-        protected string RegistrationNumber;
+        protected RegistrationStatus Status = RegistrationStatus.Pending;
+        protected string RegistrationNumber = string.Empty;
         protected string Description = string.Empty;
         public TBuilder WithProject(Project project)
         {
-            ProjectId = project.Id == Guid.Empty ? throw new ArgumentException("Project ID cannot be empty.") : project.Id;
+            Guard.AgainstNull(project, nameof(project));
+            ProjectId = project.Id;
             return (TBuilder)this;
         }
         public TBuilder WithActivity(Activity activity)
         {
-            ActivityId = activity.Id == Guid.Empty ? throw new ArgumentException("Activity ID cannot be empty.") : activity.Id;
+            Guard.AgainstNull(activity, nameof(activity));
+            ActivityId = activity.Id;
             return (TBuilder)this;
         }
         public TBuilder WithDescription(string description)
         {
-            Description = description ?? throw new ArgumentNullException(nameof(description), "Description cannot be null.");
+            Guard.AgainstNull(description, nameof(description));
+            Description = description;
             return (TBuilder)this;
         }
         internal TBuilder WithEmployee(Employee employee)
         {
-            EmployeeId = employee.Id == Guid.Empty ? throw new ArgumentException("Employee ID cannot be empty.") : employee.Id;
+            Guard.AgainstNull(employee, nameof(employee));
+            EmployeeId = employee.Id;
             return (TBuilder)this;
         }
-        public TBuilder WithStatus(Status status)
+        public TBuilder WithStatus(RegistrationStatus status)
         {
             Status = status;
-            return (TBuilder)this;
-        }
-        public TBuilder WithRegistrationNumber(string registrationNumber)
-        {
-            RegistrationNumber = registrationNumber;
             return (TBuilder)this;
         }
         internal abstract TEntity Build();

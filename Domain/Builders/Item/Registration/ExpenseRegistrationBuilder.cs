@@ -1,5 +1,6 @@
 ﻿using Domain.Entity.Item;
 using Domain.Entity.Item.Registrations;
+using Domain.Guards;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,15 +12,16 @@ namespace Domain.Builders.Item.Registration
         private Guid ExpenseId;
         public ExpenseRegistrationBuilder WithExpense(Expense expense)
         {
+            Guard.AgainstNull(expense, nameof(expense));
             ExpenseId = expense.Id;
             return this;
         }
         internal override ExpenseRegistration Build()
         {
-            if (EmployeeId == Guid.Empty) throw new InvalidOperationException("Employee must be set before building a registration.");
-            if (ProjectId == Guid.Empty) throw new InvalidOperationException("Project must be set before building a registration.");
-            if (ExpenseId == Guid.Empty) throw new InvalidOperationException("Expense must be set before building a registration.");
-            return new ExpenseRegistration(EmployeeId, ProjectId, ActivityId, ExpenseId, Description);
+            Guard.AgainstEmptyGuid(EmployeeId, nameof(EmployeeId));
+            Guard.AgainstEmptyGuid(ProjectId, nameof(ProjectId));
+            Guard.AgainstEmptyGuid(ExpenseId, nameof(ExpenseId));
+            return new ExpenseRegistration(EmployeeId, ProjectId, ActivityId, ExpenseId, Description,Status);
         }
     }
 }

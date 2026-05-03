@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces.Repo.Person;
+using Domain.Interfaces.Repos;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System;

@@ -8,9 +8,7 @@
 
   <ItemGroup>
     <Folder Include="Interfaces\Item\" />
-    <Folder Include="Interfaces\Person\" />
     <Folder Include="Services\Item\" />
-    <Folder Include="Services\Person\" />
   </ItemGroup>
 
 </Project>

@@ -1,36 +1,39 @@
 ﻿using Domain.Entity.Item.Registrations;
 using Domain.Entity.Person;
+using Domain.Guards;
+using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Domain.Builders.Person
 {
-    public class EmployeeBuilder : AccountBuilder<EmployeeBuilder, Employee>
+    public class EmployeeBuilder
     {
-        private string EmployeeNumber;
-        private bool Autonomous;
-        private string HashedPin;
-        private EmployeeType EmployeeType;
+        private string Name;
         private Guid CompanyId;
-        public EmployeeBuilder WithEmployeeNumber(string employeeNumber)
+        private EmployeeType EmployeeType;
+        private EmailAddress Email;
+        private bool IsAutonomous;
+        public EmployeeBuilder WithAutonomy(bool autonomous)
         {
-            EmployeeNumber = employeeNumber ?? throw new ArgumentNullException(nameof(employeeNumber));
+            IsAutonomous = autonomous;
             return this;
         }
-        public EmployeeBuilder WithAustonomy(bool autonomous)
+        public EmployeeBuilder WithName(string name)
         {
-            Autonomous = autonomous;
-            return this;
-        }
-        public EmployeeBuilder WithHashedPin(string hashedPin)
-        {
-            HashedPin = hashedPin ?? throw new ArgumentNullException(nameof(hashedPin));
+            Guard.AgainstNullOrEmpty(name, nameof(name));
+            Name = name;
             return this;
         }
         public EmployeeBuilder WithEmployeeType(EmployeeType employeeType)
         {
             EmployeeType = employeeType;
+            return this;
+        }
+        public EmployeeBuilder WithEmail(EmailAddress email)
+        {
+            Email = email;
             return this;
         }
         internal EmployeeBuilder WithCompany(Company company)
@@ -41,12 +44,9 @@ namespace Domain.Builders.Person
         }
         internal Employee Build()
         {
-            if (string.IsNullOrEmpty(Name)) throw new InvalidOperationException("Name is required to build an employee.");
-            if (string.IsNullOrEmpty(HashedPassword)) throw new InvalidOperationException("Hashed password is required to build an employee.");
-            if (string.IsNullOrEmpty(Username)) throw new InvalidOperationException("Username is required to build an employee.");
-            if (string.IsNullOrEmpty(EmployeeNumber)) throw new InvalidOperationException("Employee number is required to build an employee.");
-            if (CompanyId == Guid.Empty) throw new InvalidOperationException("Company ID is required to build an employee.");
-            if (string.IsNullOrEmpty(HashedPin)) throw new InvalidOperationException("Hashed pin is required to build an employee.");
-            return new Employee(Username, HashedPassword, Name, Email, PhoneNumber, EmployeeNumber, CompanyId, Autonomous, EmployeeType, HashedPin);
+            Guard.AgainstNullOrEmpty(Name, nameof(Name));
+            Guard.AgainstEmptyGuid(CompanyId, nameof(CompanyId));
+            return new Employee(Name, CompanyId, EmployeeType, Email, IsAutonomous);
+        }
     }
 }

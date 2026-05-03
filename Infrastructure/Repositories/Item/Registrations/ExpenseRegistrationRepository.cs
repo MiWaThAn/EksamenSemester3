@@ -17,6 +17,5 @@ namespace Infrastructure.Repositories.Item.Registrations
         {
             return await _context.ExpenseRegistrations.FirstOrDefaultAsync(x => x.RegistrationNumber == registrationNumber);
         }
-        get by expense id implement infrastructure injecter and error handler pipeline
     }
 }

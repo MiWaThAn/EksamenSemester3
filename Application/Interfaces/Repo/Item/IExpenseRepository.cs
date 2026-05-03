@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Domain.Interfaces.Repos;
 
 namespace Application.Interfaces.Repo.Item
 {

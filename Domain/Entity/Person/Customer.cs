@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Domain.Guards;
+using Domain.ValueObjects;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,26 +8,31 @@ namespace Domain.Entity.Person
 {
     public class Customer : Base
     {
-        public string CustomerNumber { get; internal set; }
         public string Name { get; internal set; }
-        public string Email { get; internal set; }
+        public EmailAddress Email { get; internal set; }
         public string PhoneNumber { get; internal set; }
 
-        public Customer(string customerNumber, string name, string email, string phoneNumber) : base()
+
+        internal Customer(string name, EmailAddress email, string phoneNumber) : base()
         {
-            CustomerNumber = customerNumber ?? throw new ArgumentNullException(nameof(customerNumber));
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            Email = email ?? throw new ArgumentNullException(nameof(email));
-            PhoneNumber = phoneNumber ?? throw new ArgumentNullException(nameof(phoneNumber));
+            Guard.AgainstNullOrEmpty(name, nameof(name));
+            Guard.AgainstNullOrEmpty(phoneNumber, nameof(phoneNumber));
+            Name = name;
+            Email = email;
+            PhoneNumber = phoneNumber;
         }
-        public void UpdateContactInfo(string newEmail, string newPhoneNumber)
+        public void UpdateContactInfo(EmailAddress newEmail, string newPhoneNumber)
         {
-            Email = newEmail ?? throw new ArgumentNullException(nameof(newEmail));
-            PhoneNumber = newPhoneNumber ?? throw new ArgumentNullException(nameof(newPhoneNumber));
+            Guard.AgainstNullOrEmpty(newPhoneNumber, nameof(newPhoneNumber));
+            Email = newEmail;
+            PhoneNumber = newPhoneNumber;
+            UpdatedAt = DateTime.UtcNow;
         }
         public void UpdateName(string newName)
         {
-            Name = newName ?? throw new ArgumentNullException(nameof(newName));
+            Guard.AgainstNullOrEmpty(newName, nameof(newName));
+            Name = newName;
+            UpdatedAt = DateTime.UtcNow;
         }
     }
 }

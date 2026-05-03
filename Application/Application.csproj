@@ -7,11 +7,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Handlers\Item\" />
-    <Folder Include="Handlers\Person\" />
+    <Folder Include="Commands\Item\Handlers\" />
+    <Folder Include="Commands\Item\Responses\" />
+    <Folder Include="Commands\Mixed\Handlers\" />
+    <Folder Include="Commands\Mixed\Responses\" />
+    <Folder Include="Interfaces\Services\" />
     <Folder Include="Services\Item\" />
     <Folder Include="Services\Person\" />
     <Folder Include="Validation\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="14.1.0" />
+    <PackageReference Include="MediatR.Contracts" Version="2.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.7" />
   </ItemGroup>
 
   <ItemGroup>

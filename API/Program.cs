@@ -1,4 +1,7 @@
+using API;
+using Domain.Entity.Person;
 using Infrastructure;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,7 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails(); // Giver flottere standard-fejlformater
+builder.Services.AddScoped<IPasswordHasher<Account>,PasswordHasher<Account>>();
 
 //Adds Infrastructure repos and so on.
 var connectionstring = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -21,6 +26,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 

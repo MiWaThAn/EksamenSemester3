@@ -2,6 +2,7 @@
 using Application.Interfaces.Repo.Item;
 using Application.Interfaces.Repo.Item.IRegistrationRepo;
 using Application.Interfaces.Repo.Person;
+using Domain.Interfaces.Repos;
 using Infrastructure.Data;
 using Infrastructure.Repositories.Item;
 using Infrastructure.Repositories.Item.Registrations;

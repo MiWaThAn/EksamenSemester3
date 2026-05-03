@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Guards;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,23 +10,58 @@ namespace Domain.Entity.Item.Registrations
         public Guid EmployeeId { get; protected set; }
         public Guid ProjectId { get; protected set; }
         public Guid? ActivityId { get; protected set; }
-        public DateTime CreatedAt { get; protected set; }
-        public string RegistrationNumber { get; protected set; }
-        public string Description { get; protected set; } = string.Empty;
-        public Status Status { get; protected set; }
-        protected Registration(Guid employeeId, Guid projectId, Guid? activityId, string description, string registrationNumber) : base()
+        public string Description { get; protected set; }
+        public RegistrationStatus Status { get; protected set; }
+        protected Registration(Guid employeeId, Guid projectId, Guid? activityId, string description, RegistrationStatus status) : base()
         {
-            if (employeeId == Guid.Empty) throw new ArgumentException("Employee ID cannot be empty.");
-            if (projectId == Guid.Empty) throw new ArgumentException("Project ID cannot be empty.");
+            Guard.AgainstEmptyGuid(employeeId, nameof(employeeId));
+            Guard.AgainstEmptyGuid(projectId, nameof(projectId));
             EmployeeId = employeeId;
             ProjectId = projectId;
             ActivityId = activityId;
-            CreatedAt = DateTime.UtcNow;
             Description = description;
-            RegistrationNumber = registrationNumber;
+            Status = status;
         }
         internal virtual void ValidateAgainst(IEnumerable<Registration> existingRegistrations)
         {
+        }
+        public void UpdateDescription(string newDescription)
+        {
+            Guard.AgainstNull(newDescription, nameof(newDescription));
+            Description = newDescription;
+            UpdatedAt = DateTime.UtcNow;
+        }
+        public void MarkAsApproved()
+        {
+            Status = RegistrationStatus.Godkendt;
+            UpdatedAt = DateTime.UtcNow;
+        }
+        public void MarkAsRejected()
+        {
+            Status = RegistrationStatus.Afvist;
+            UpdatedAt = DateTime.UtcNow;
+        }
+        public void MarkAsPending()
+        {
+            Status = RegistrationStatus.Pending;
+            UpdatedAt = DateTime.UtcNow;
+        }
+        public void LinkToActivity(Guid activityId)
+        {
+            Guard.AgainstEmptyGuid(activityId, nameof(activityId));
+            ActivityId = activityId;
+            UpdatedAt = DateTime.UtcNow;
+        }
+        public void UnlinkFromActivity()
+        {
+            ActivityId = null;
+            UpdatedAt = DateTime.UtcNow;
+        }
+        public void UpdateProject(Guid newProjectId)
+        {
+            Guard.AgainstEmptyGuid(newProjectId, nameof(newProjectId));
+            ProjectId = newProjectId;
+            UpdatedAt = DateTime.UtcNow;
         }
     }
 }

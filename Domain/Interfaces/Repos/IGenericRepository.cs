@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Application.Interfaces.Repo
+namespace Domain.Interfaces.Repos
 {
     public interface IGenericRepository <T> where T : class
     {

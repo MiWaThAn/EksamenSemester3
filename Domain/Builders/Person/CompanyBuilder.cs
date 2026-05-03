@@ -1,46 +1,47 @@
 ﻿using Domain.Entity.Person;
+using Domain.Guards;
+using Domain.Interfaces.Person;
+using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Domain.Builders.Person
 {
-    public class CompanyBuilder : AccountBuilder<CompanyBuilder, Company>
+    public class CompanyBuilder
     {
-        private string CVRNumber;
-        private string HashedAgreementGrantToken;
-        private string HashedAppSecretToken;
-        private string HashedEconomicAgreementNumber;
-        public CompanyBuilder WithCVRNumber(string cvrNumber)
+        internal CvrNumber CVRNumber;
+        internal Guid AccountId;
+        internal EmailAddress Email;
+        internal string Name;
+        public CompanyBuilder WithCVRNumber(CvrNumber cvrNumber)
         {
-            CVRNumber = cvrNumber ?? throw new ArgumentNullException(nameof(cvrNumber));
+            CVRNumber = cvrNumber;
             return this;
         }
-        public CompanyBuilder WithHashedAgreementGrantToken(string hashedAgreementGrantToken)
+
+        public CompanyBuilder WithName(string name)
         {
-            HashedAgreementGrantToken = hashedAgreementGrantToken ?? throw new ArgumentNullException(nameof(hashedAgreementGrantToken));
+            Guard.AgainstNullOrEmpty(name, nameof(name));
+            Name = name;
             return this;
         }
-        public CompanyBuilder WithHashedAppSecretToken(string hashedAppSecretToken)
+        public CompanyBuilder WithEmail(EmailAddress email)
         {
-            HashedAppSecretToken = hashedAppSecretToken ?? throw new ArgumentNullException(nameof(hashedAppSecretToken));
+            Email = email;
             return this;
         }
-        public CompanyBuilder WithHashedEconomicAgreementNumber(string hashedEconomicAgreementNumber)
+        //Company can only be built through an account (to make sure every company has an account) so we don't end up with accountless companies
+        internal CompanyBuilder WithAccountId(Account account)
         {
-            HashedEconomicAgreementNumber = hashedEconomicAgreementNumber ?? throw new ArgumentNullException(nameof(hashedEconomicAgreementNumber));
+            AccountId = account.Id;
             return this;
         }
-        public Company Build()
+        internal Company Build()
         {
-            if (string.IsNullOrEmpty(Name)) throw new InvalidOperationException("Name is required to build a company.");
-            if (string.IsNullOrEmpty(HashedPassword)) throw new InvalidOperationException("Hashed password is required to build a company.");
-            if (string.IsNullOrEmpty(Username)) throw new InvalidOperationException("Username is required to build a company.");
-            if (string.IsNullOrEmpty(CVRNumber)) throw new InvalidOperationException("CVR number is required to build a company.");
-            if (string.IsNullOrEmpty(HashedAgreementGrantToken)) throw new InvalidOperationException("Hashed agreement grant token is required to build a company.");
-            if (string.IsNullOrEmpty(HashedAppSecretToken)) throw new InvalidOperationException("Hashed app secret token is required to build a company.");
-            if (string.IsNullOrEmpty(HashedEconomicAgreementNumber)) throw new InvalidOperationException("Hashed economic agreement number is required to build a company.");
-            return new Company(Name, HashedPassword, Username, Email, PhoneNumber, CVRNumber, HashedAgreementGrantToken, HashedAppSecretToken, HashedEconomicAgreementNumber);
+            Guard.AgainstNullOrEmpty(Name, nameof(Name));
+            Guard.AgainstEmptyGuid(AccountId, nameof(AccountId));
+            return new Company(Name, CVRNumber, AccountId, Email);
         }
     }
 }

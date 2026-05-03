@@ -15,7 +15,7 @@ namespace Infrastructure.Repositories.Person
         }
         public async Task<Employee?> GetByEmployeeNumberAsync(string employeeNumber)
         {
-            return await _context.Set<Employee>().FirstOrDefaultAsync(e => e.EmployeeNumber == employeeNumber);
+            return await _context.Set<Employee>().FirstOrDefaultAsync(e => e.ExternalId == employeeNumber);
         }
         public async Task<Employee?> GetByIdWithDetailsAsync(Guid id)
         {

@@ -1,40 +1,49 @@
-﻿using System;
+﻿using Domain.Entity.Person;
+using Domain.Guards;
+using Domain.Interfaces.Person;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Domain.Builders.Person
 {
-    public abstract class AccountBuilder<TBuilder, TEntity> where TBuilder : AccountBuilder<TBuilder, TEntity>
+    public class AccountBuilder
     {
-        protected string Name;
-        protected string HashedPassword;
-        protected string Username;
-        protected string Email;
-        protected string PhoneNumber;
-        public TBuilder WithName(string name)
+        internal string HashedPassword;
+        internal string HashedPin;
+        internal string Username;
+        internal string PhoneNumber;
+        public AccountBuilder WithHashedPassword(string hashedPassword)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            return (TBuilder)this;
+            Guard.AgainstNullOrEmpty(hashedPassword,nameof(hashedPassword));
+            HashedPassword = hashedPassword;
+            return this;
         }
-        public TBuilder WithHashedPassword(string hashedPassword)
+        public AccountBuilder WithHashedPin(string hashedPin)
         {
-            HashedPassword = hashedPassword ?? throw new ArgumentNullException(nameof(hashedPassword));
-            return (TBuilder)this;
+            Guard.AgainstNullOrEmpty(hashedPin,nameof(hashedPin));
+            HashedPin = hashedPin;
+            return this;
         }
-        public TBuilder WithUsername(string username)
+        public AccountBuilder WithUsername(string username)
         {
-            Username = username ?? throw new ArgumentNullException(nameof(username));
-            return (TBuilder)this;
+            Guard.AgainstNullOrEmpty(username, nameof(username));
+            Username = username;
+            return this;
         }
-        public TBuilder WithEmail(string email)
+        public AccountBuilder WithPhoneNumber(string phoneNumber)
         {
-            Email = email ?? throw new ArgumentNullException(nameof(email));
-            return (TBuilder)this;
+            Guard.AgainstNullOrEmpty(phoneNumber, nameof(phoneNumber));
+            PhoneNumber = phoneNumber;
+            return this;
         }
-        public TBuilder WithPhoneNumber(string phoneNumber)
+        internal Account Build()
         {
-            PhoneNumber = phoneNumber ?? throw new ArgumentNullException(nameof(phoneNumber));
-            return (TBuilder)this;
+            Guard.AgainstNullOrEmpty(Username, nameof(Username));
+            Guard.AgainstNullOrEmpty(PhoneNumber, nameof(PhoneNumber));
+            Guard.AgainstNullOrEmpty(HashedPassword, nameof(HashedPassword));
+            Guard.AgainstNullOrEmpty(HashedPin, nameof(HashedPin));
+            return new Account(Username, HashedPassword, PhoneNumber, HashedPin);
         }
     }
 }

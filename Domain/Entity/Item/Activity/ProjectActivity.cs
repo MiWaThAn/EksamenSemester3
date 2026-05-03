@@ -1,4 +1,6 @@
 ﻿using Domain.Entity.Item.Registrations;
+using Domain.Entity.Mapping;
+using Domain.Guards;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,27 +10,44 @@ namespace Domain.Entity.Item.Activity
     public class ProjectActivity : Base
     {
         public Guid ActivityId { get; internal set; }
-        public string ActivityNumber { get; internal set; }
         public Guid ProjectId { get; internal set; }
-        public DateTime UpdatedAt { get; internal set; }
+        public Status Status { get; internal set; }
         public DateTime StartDate { get; internal set; }
         public DateTime EndDate { get; internal set; }
-        public bool IsCompleted { get; internal set; }
         public Guid? ResponsibleEmployeeId { get; internal set; }
         private readonly List<Registration> _registrations = new();
-        public IReadOnlyCollection<Registration> Registrations => _registrations.AsReadOnly();
-        public ProjectActivity(Guid activityId, string activityNumber, Guid projectId, DateTime startDate, DateTime endDate, bool isCompleted, Guid? responsibleEmployeeId) : base()
+        public IReadOnlyCollection<Registration> Registrations => _registrations.Where(r=>!r.IsDeleted).ToList().AsReadOnly();
+        public ProjectActivity(Guid activityId, Guid projectId, DateTime startDate, DateTime endDate, Guid? responsibleEmployeeId, Status status) : base()
         {
-            ActivityId = activityId == Guid.Empty ? throw new ArgumentNullException(nameof(activityId)) : activityId;
-            ActivityNumber = activityNumber ?? throw new ArgumentNullException(nameof(activityNumber));
-            ProjectId = projectId == Guid.Empty ? throw new ArgumentNullException(nameof(projectId)) : projectId;
-            if(startDate >= endDate) throw new ArgumentException("Start date must be before end date.");
-            if(startDate > DateTime.UtcNow) throw new ArgumentException("Start date cannot be in the future.");
-            if(endDate > DateTime.UtcNow) throw new ArgumentException("End date cannot be in the future.");
+            Guard.AgainstEmptyGuid(projectId, nameof(projectId));
+            Guard.AgainstEmptyGuid(activityId, nameof(activityId));
+            Guard.AgainstInvalidTimeRange(startDate, endDate);
+            ActivityId = activityId;
+            ProjectId = projectId;
             StartDate = startDate;
             EndDate = endDate;
-            IsCompleted = isCompleted;
             ResponsibleEmployeeId = responsibleEmployeeId;
+            Status = status;
+        }
+        public void MarkAsClosed()
+        {
+            Status = Status.Lukket;
+            UpdatedAt = DateTime.UtcNow;
+        }
+        public void MarkAsOpen()
+        {
+            Status = Status.Åben;
+            UpdatedAt = DateTime.UtcNow;
+        }
+        public void MarkAsOnHold()
+        {
+            Status = Status.Godkendes;
+            UpdatedAt = DateTime.UtcNow;
+        }
+        public void AssignResponsibleEmployee(Guid employeeId)
+        {
+            Guard.AgainstEmptyGuid(employeeId, nameof(employeeId));
+            ResponsibleEmployeeId = employeeId;
             UpdatedAt = DateTime.UtcNow;
         }
     }

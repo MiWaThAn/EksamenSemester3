@@ -21,4 +21,5 @@ namespace Infrastructure.Repositories.Item
         {
             return await _context.Expenses.FirstOrDefaultAsync(e => e.ExpenseNumber == expenseNumber);
         }
+    }
 }

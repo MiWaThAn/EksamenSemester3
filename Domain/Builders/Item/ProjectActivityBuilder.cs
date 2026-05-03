@@ -1,6 +1,7 @@
 ﻿using Domain.Entity.Item;
 using Domain.Entity.Item.Activity;
 using Domain.Entity.Person;
+using Domain.Guards;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,27 +11,26 @@ namespace Domain.Builders.Item
     public class ProjectActivityBuilder
     {
         private Guid ActivityId;
-        private string ActivityNumber;
         private Guid ProjectId;
         private DateTime StartDate;
         private DateTime EndDate;
-        private bool IsCompleted;
+        private Status Status;
         private Guid? ResponsibleEmployeeId;
         public ProjectActivityBuilder WithActivity(Activity activity)
         {
             ActivityId = activity.Id;
-            ActivityNumber = activity.ActivityNumber;
             return this;
         }
         public ProjectActivityBuilder WithStartAndEndDates(DateTime startDate, DateTime endDate)
         {
+            Guard.AgainstInvalidTimeRange(startDate, endDate);
             StartDate = startDate;
             EndDate = endDate;
             return this;
         }
-        public ProjectActivityBuilder WithIsCompleted(bool isCompleted)
+        public ProjectActivityBuilder WithStatus(Status status)
         {
-            IsCompleted = isCompleted;
+            Status = status;
             return this;
         }
         public ProjectActivityBuilder WithResponsibleEmployee(Employee employee)
@@ -45,11 +45,10 @@ namespace Domain.Builders.Item
         }
         internal ProjectActivity Build()
         {
-            if (ActivityId == Guid.Empty) throw new ArgumentException("Activity ID cannot be empty.");
-            if (string.IsNullOrWhiteSpace(ActivityNumber)) throw new ArgumentException("Activity number cannot be null or whitespace.");
-            if (ProjectId == Guid.Empty) throw new ArgumentException("Project ID cannot be empty.");
-            if (StartDate == default) throw new ArgumentException("Start date must be set.");
-            if (EndDate == default) throw new ArgumentException("End date must be set.");
-            return new ProjectActivity(ActivityId, ActivityNumber, ProjectId, StartDate, EndDate, IsCompleted, ResponsibleEmployeeId);
+            Guard.AgainstEmptyGuid(ProjectId, nameof(ProjectId));
+            Guard.AgainstEmptyGuid(ActivityId, nameof(ActivityId));
+            Guard.AgainstInvalidTimeRange(StartDate,EndDate);
+            return new ProjectActivity(ActivityId, ProjectId, StartDate, EndDate, ResponsibleEmployeeId, Status);
         }
+    }
 }
