@@ -15,6 +15,9 @@ jobs:
         with:
           java-version: 17
           distribution: 'zulu' 
+
+      - name: Install Workloads
+        run: dotnet workload restore
           
       - uses: actions/checkout@v6
         with:
