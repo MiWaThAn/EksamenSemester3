@@ -18,7 +18,6 @@ namespace Domain.Entity.Item.Registrations
         public Project Project { get; protected set; }
         [ForeignKey("Activity")]
         public Guid? ActivityId { get; protected set; }
-        public Activity? Activity { get; protected set; }
         public string Description { get; protected set; }
         public RegistrationStatus Status { get; protected set; }
 

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
+using Activity = Domain.Entity.Item.Activities.Activity;
 
 namespace Domain.Entity.Item.Activities
 {

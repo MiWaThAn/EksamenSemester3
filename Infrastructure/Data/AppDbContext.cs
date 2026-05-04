@@ -49,11 +49,13 @@ namespace Infrastructure.Data
             {
                 entity.HasOne<Project>()
                     .WithMany(p => p.Registrations)
+                    .HasForeignKey(r => r.ProjectId)
                     .OnDelete(DeleteBehavior.Restrict);
 
                 // Do the same for Employee
                 entity.HasOne<Employee>()
                     .WithMany(e => e.Registrations)
+                    .HasForeignKey(r => r.EmployeeId)
                     .OnDelete(DeleteBehavior.Cascade);
 
 
