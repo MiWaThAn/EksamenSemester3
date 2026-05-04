@@ -6,8 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-using Domain.Entity.Item.Activity;
-using Activity = Domain.Entity.Item.Activity.Activity;
+using Domain.Entity.Item.Activities;
+using Activity = Domain.Entity.Item.Activities.Activity;
 
 namespace Infrastructure.Repositories.Item
 {

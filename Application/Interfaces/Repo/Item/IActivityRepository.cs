@@ -1,5 +1,5 @@
 ﻿using Domain.Entity.Item;
-using Domain.Entity.Item.Activity;
+using Domain.Entity.Item.Activities;
 using Domain.Interfaces.Repos;
 using System;
 using System.Collections.Generic;

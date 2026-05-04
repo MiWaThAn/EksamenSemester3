@@ -13,7 +13,7 @@ namespace Infrastructure.Repositories.Person
 {
     internal class CompanyRepository : GenericRepository<Company>, ICompanyRepository
     {
-        internal CompanyRepository(AppDbContext context) : base(context)
+        public CompanyRepository(AppDbContext context) : base(context)
         {
         }
         public async Task<Company?> GetByCVRAsync(CvrNumber cvrNumber)

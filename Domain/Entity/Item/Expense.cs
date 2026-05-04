@@ -1,7 +1,9 @@
 ﻿using Domain.Entity.Mapping;
+using Domain.Entity.Person;
 using Domain.Guards;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace Domain.Entity.Item
@@ -9,7 +11,12 @@ namespace Domain.Entity.Item
     public class Expense : Base
     {
         public string Name { get; internal set; }
+        [ForeignKey("Company")]
         public Guid CompanyId { get; internal set; }
+        public Expense() : base()
+        {
+
+        }
         public Expense(string name, Guid companyId) : base()
         {
             Guard.AgainstNullOrEmpty(name, nameof(name));

@@ -1,12 +1,12 @@
 ﻿using Domain.Entity.Item;
-using Domain.Entity.Item.Activity;
+using Domain.Entity.Item.Activities;
 using Domain.Entity.Item.Registrations;
 using Domain.Entity.Person;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-using Activity = Domain.Entity.Item.Activity.Activity;
+using Activity = Domain.Entity.Item.Activities.Activity;
 
 namespace Application.Interfaces.Adapters
 {

@@ -6,8 +6,8 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entity.Person;
 using System.Diagnostics;
-using Domain.Entity.Item.Activity;
-using Activity = Domain.Entity.Item.Activity.Activity;
+using Domain.Entity.Item.Activities;
+using Activity = Domain.Entity.Item.Activities.Activity;
 using Domain.Entity.Item.Registrations;
 using Domain.Entity.Mapping;
 
@@ -30,7 +30,6 @@ namespace Infrastructure.Data
         public DbSet<Project> Projects { get; set; }
         public DbSet<Activity> Activities { get; set; }
         public DbSet<Expense> Expenses { get; set; }
-        public DbSet<Address> Addresses { get; set; }
         public DbSet<ProjectActivity> ProjectActivities { get; set; }
 
         //Registrations
@@ -41,6 +40,26 @@ namespace Infrastructure.Data
         //Mappings
         public DbSet<IntegrationMapping> Mappings { get; set; }
         public DbSet<IntegrationSetting> IntegrationSettings { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Registration>(entity =>
+            {
+                entity.HasOne<Project>()
+                    .WithMany(p => p.Registrations)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Do the same for Employee
+                entity.HasOne<Employee>()
+                    .WithMany(e => e.Registrations)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+
+                entity.HasDiscriminator<string>("RegistrationType");
+            });
+        }
 
     }
 }

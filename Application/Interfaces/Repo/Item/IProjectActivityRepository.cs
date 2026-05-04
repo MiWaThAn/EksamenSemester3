@@ -1,4 +1,4 @@
-﻿using Domain.Entity.Item.Activity;
+﻿using Domain.Entity.Item.Activities;
 using System;
 using Domain.Interfaces.Repos;
 using System.Collections.Generic;

@@ -1,12 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace Domain.ValueObjects
 {
+    [ComplexType]
     public record CvrNumber
     {
-        public string Value { get; }
+        public string Value { get; init; }
+        public CvrNumber()
+        {
+
+        }
         public CvrNumber(string value)
         {
             if (string.IsNullOrWhiteSpace(value))

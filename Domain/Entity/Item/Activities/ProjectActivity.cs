@@ -3,20 +3,28 @@ using Domain.Entity.Mapping;
 using Domain.Guards;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
-namespace Domain.Entity.Item.Activity
+namespace Domain.Entity.Item.Activities
 {
     public class ProjectActivity : Base
     {
+        [ForeignKey("Activity")]
         public Guid ActivityId { get; internal set; }
+        [ForeignKey("Project")]
         public Guid ProjectId { get; internal set; }
         public Status Status { get; internal set; }
         public DateTime StartDate { get; internal set; }
         public DateTime EndDate { get; internal set; }
+        [ForeignKey("Employee")]
         public Guid? ResponsibleEmployeeId { get; internal set; }
         private readonly List<Registration> _registrations = new();
         public IReadOnlyCollection<Registration> Registrations => _registrations.Where(r=>!r.IsDeleted).ToList().AsReadOnly();
+        public ProjectActivity() : base()
+        {
+
+        }
         public ProjectActivity(Guid activityId, Guid projectId, DateTime startDate, DateTime endDate, Guid? responsibleEmployeeId, Status status) : base()
         {
             Guard.AgainstEmptyGuid(projectId, nameof(projectId));

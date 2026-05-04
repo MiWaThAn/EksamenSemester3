@@ -2,11 +2,12 @@
 using Domain.Builders.Mapping;
 using Domain.Builders.Person;
 using Domain.Entity.Item;
-using Domain.Entity.Item.Activity;
+using Domain.Entity.Item.Activities;
 using Domain.Entity.Item.Registrations;
 using Domain.Entity.Mapping;
 using Domain.Guards;
 using Domain.ValueObjects;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entity.Person
 {
@@ -27,6 +28,7 @@ namespace Domain.Entity.Person
 
         //Et firma kan ikke eksiterer uden en konto, så AccountId er ikke nullable.
         //Det er den konto der har admin rettigheder over firmaet og dets ansatte og projekter.
+        [ForeignKey("Account")]
         public Guid AccountId { get; internal set; }
 
         //Lister over ansatte, projekter, aktiviteter, og udgifter.
@@ -53,6 +55,10 @@ namespace Domain.Entity.Person
         private readonly List<IntegrationSetting> _settings = new();
         public IReadOnlyCollection<IntegrationSetting> Settings => _settings.AsReadOnly();
 
+        public Company() : base()
+        {
+
+        }
         internal Company(string name, CvrNumber cvrNumber, Guid ownerAccountId, EmailAddress email) : base()
         {
             Guard.AgainstNullOrEmpty(name, nameof(name));

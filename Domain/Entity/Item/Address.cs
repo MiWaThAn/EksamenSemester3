@@ -2,10 +2,12 @@
 using Domain.Guards;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace Domain.Entity.Item
 {
+    [ComplexType]
     public class Address
     {
         //ValueObject
@@ -16,6 +18,10 @@ namespace Domain.Entity.Item
         public string PostalCode { get; set; }
         public string Country { get; set; }
         public Guid CompanyId { get; internal set; }
+        public Address()
+        {
+
+        }
         internal Address(double latitude, double longitude, string street, string city, string postalCode, string country, Guid companyId) : base()
         {
             Guard.AgainstNullOrEmpty(street, nameof(street));

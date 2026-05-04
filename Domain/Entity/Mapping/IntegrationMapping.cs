@@ -19,6 +19,11 @@ namespace Domain.Entity.Mapping
         public string ExternalId { get; internal set; }
         public DataSource Provider { get; internal set; } 
 
+        public IntegrationMapping() : base()
+        {
+
+        }
+
         internal IntegrationMapping(Guid localId, IntegrationEntityType entityType, string externalId, DataSource provider)
         {
             LocalId = localId;

@@ -1,11 +1,12 @@
 ﻿using Domain.Builders.Item;
-using Domain.Entity.Item.Activity;
+using Domain.Entity.Item.Activities;
 using Domain.Entity.Item.Registrations;
 using Domain.Entity.Mapping;
 using Domain.Entity.Person;
 using Domain.Guards;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace Domain.Entity.Item
@@ -24,6 +25,10 @@ namespace Domain.Entity.Item
         public IReadOnlyCollection<ProjectActivity> Activities => _activities.Where(a => !a.IsDeleted).ToList().AsReadOnly();
         private readonly List<Registration> _registrations = new();
         public IReadOnlyCollection<Registration> Registrations => _registrations.Where(r => !r.IsDeleted).ToList().AsReadOnly();
+        
+        public Project() : base()
+        {
+        }
         internal Project(string name, Guid companyId, Guid? customerId, Guid? responsibleEmployeeId, string description,Status status, Address? address) : base()
         {
             Guard.AgainstNullOrEmpty(name, nameof(name));

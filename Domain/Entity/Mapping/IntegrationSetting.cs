@@ -1,16 +1,23 @@
 ﻿using Domain.Guards;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace Domain.Entity.Mapping
 {
     public class IntegrationSetting : Base
     {
+        [ForeignKey("Company")]
         public Guid CompanyId { get; private set; }
         public DataSource Provider { get; private set; } // F.eks. "Economic" eller "Dinero"
         public string Key { get; private set; }      // F.eks. "AgreementGrantToken"
         public string EncryptedValue { get; private set; }    // Selve token-strengen
+
+        public IntegrationSetting() : base()
+        {
+
+        }
         internal IntegrationSetting(Guid companyId, DataSource provider, string key, string encryptedValue) : base()
         {
             Guard.AgainstEmptyGuid(companyId, nameof(companyId));

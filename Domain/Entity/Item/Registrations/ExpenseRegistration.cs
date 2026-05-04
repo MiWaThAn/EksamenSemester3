@@ -1,13 +1,20 @@
 ﻿using Domain.Guards;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace Domain.Entity.Item.Registrations
 {
     public class ExpenseRegistration : Registration
     {
+        [ForeignKey("Expense")]
         public Guid ExpenseId { get; internal set; }
+
+        public ExpenseRegistration() : base()
+        {
+
+        }
         internal ExpenseRegistration(Guid employeeId, Guid projectId, Guid? activityId, Guid expenseId, string description, RegistrationStatus status) : base(employeeId, projectId, activityId, description, status)
         {
             Guard.AgainstEmptyGuid(expenseId, nameof(expenseId));

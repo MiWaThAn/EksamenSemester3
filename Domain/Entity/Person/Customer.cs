@@ -12,6 +12,10 @@ namespace Domain.Entity.Person
         public EmailAddress Email { get; internal set; }
         public string PhoneNumber { get; internal set; }
 
+        public Customer() : base()
+        {
+
+        }
 
         internal Customer(string name, EmailAddress email, string phoneNumber) : base()
         {

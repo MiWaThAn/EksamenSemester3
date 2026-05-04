@@ -1,17 +1,31 @@
-﻿using Domain.Guards;
+﻿using Domain.Entity.Person;
+using Domain.Guards;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics;
 using System.Text;
 
 namespace Domain.Entity.Item.Registrations
 {
     public abstract class Registration : Base
     {
+        [ForeignKey("Employee")]
         public Guid EmployeeId { get; protected set; }
+        public Employee Employee { get; protected set; }
+        [ForeignKey("Project")]
         public Guid ProjectId { get; protected set; }
+        public Project Project { get; protected set; }
+        [ForeignKey("Activity")]
         public Guid? ActivityId { get; protected set; }
+        public Activity? Activity { get; protected set; }
         public string Description { get; protected set; }
         public RegistrationStatus Status { get; protected set; }
+
+        public Registration() : base()
+        {
+
+        }
         protected Registration(Guid employeeId, Guid projectId, Guid? activityId, string description, RegistrationStatus status) : base()
         {
             Guard.AgainstEmptyGuid(employeeId, nameof(employeeId));

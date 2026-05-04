@@ -1,4 +1,4 @@
-﻿using Domain.Entity.Item.Activity;
+﻿using Domain.Entity.Item.Activities;
 using Domain.Entity.Person;
 using Domain.Guards;
 using System;

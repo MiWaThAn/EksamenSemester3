@@ -4,6 +4,7 @@ using Domain.Interfaces.Person;
 using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace Domain.Entity.Person
@@ -24,8 +25,10 @@ namespace Domain.Entity.Person
         //if it is an employee account it will have an employee id and be linked to a company through that employee.
         //An account could potentially have both if it is an admin user that also has an employee role,
         //but it could also have neither if it is a generic user account that is not linked to any company or employee.
+        [ForeignKey("Company")]
         public Guid? CompanyId { get; internal set; }
         public Company? Company { get; internal set; }
+        [ForeignKey("Employee")]
         public Guid? EmployeeId { get; internal set; }
         public Employee? Employee { get; internal set; }
 
@@ -37,6 +40,10 @@ namespace Domain.Entity.Person
         //Last time the account pinged the server (last activity time)
         public DateTime LastSync { get; internal set; } 
 
+        public Account() : base()
+        {
+
+        }
         internal Account(string username, string hashedPassword, string? phoneNumber,string hashedPin,Employee? employee,Company? company) : base()
         {
             Guard.AgainstNullOrEmpty(hashedPassword, nameof(hashedPassword));

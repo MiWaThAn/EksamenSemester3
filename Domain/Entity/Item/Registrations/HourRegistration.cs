@@ -10,6 +10,11 @@ namespace Domain.Entity.Item.Registrations
         public DateTime StartTime { get; internal set; }
         public DateTime EndTime { get; internal set; }
         public TimeSpan Duration => EndTime - StartTime;
+
+        public HourRegistration()
+        {
+
+        }
         internal HourRegistration(Guid employeeId, Guid projectId, Guid? activityId, DateTime startTime, DateTime endTime, string description, RegistrationStatus status) : base(employeeId, projectId, activityId, description, status)
         {
             Guard.AgainstInvalidTimeRange(startTime, endTime);

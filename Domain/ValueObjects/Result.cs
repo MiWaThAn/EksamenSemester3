@@ -9,6 +9,10 @@ namespace Domain.ValueObjects
         public bool IsSuccess { get; }
         public string Error { get; }
         public bool IsFailure => !IsSuccess;
+        public Result()
+        {
+
+        }
         protected Result(bool isSuccess, string error)
         {
             IsSuccess = isSuccess;

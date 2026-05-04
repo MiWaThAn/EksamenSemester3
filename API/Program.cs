@@ -9,7 +9,6 @@ using Infrastructure;
 using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -26,9 +25,6 @@ builder.Services.AddTransient<IAccountValidationService, AccountValidationServic
 //Adds Infrastructure repos and so on.
 var connectionstring = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddInfrastructure(connectionstring);
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
 
 var app = builder.Build();
 

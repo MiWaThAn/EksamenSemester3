@@ -1,5 +1,5 @@
 ﻿using Application.Interfaces.Repo.Item;
-using Domain.Entity.Item.Activity;
+using Domain.Entity.Item.Activities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System;

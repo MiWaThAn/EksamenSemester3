@@ -11,7 +11,7 @@ namespace Infrastructure.Repositories.Person
 {
     internal class AccountRepository : GenericRepository<Account>, IAccountRepository
     {
-        internal AccountRepository(AppDbContext context) : base(context) { }
+        public AccountRepository(AppDbContext context) : base(context) { }
         public async Task<Account?> GetByUsernameAsync(string username)
         {
             throw new NotImplementedException();

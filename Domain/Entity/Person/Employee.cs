@@ -4,6 +4,7 @@ using Domain.Guards;
 using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace Domain.Entity.Person
@@ -30,15 +31,20 @@ namespace Domain.Entity.Person
         //bool på om en medarbejder er selvstændig (har tilladelser til selv registrering osv...)
         public bool IsAutonomous { get; internal set; }
         //Id på firmaet de tilhøre
+        [ForeignKey("Company")]
         public Guid CompanyId { get; internal set; }
         //Id fra extern kilde (fx. e-conomic database)
+        [ForeignKey("Account")]
         public Guid? AccountId { get; internal set; }
 
         //Medarbejder registreringer
         private readonly List<Registration> _registrations = new();
         public IReadOnlyCollection<Registration> Registrations => _registrations.Where(r => !r.IsDeleted).ToList().AsReadOnly();
 
+        public Employee() : base()
+        {
 
+        }
         internal Employee(string name, Guid companyId, EmployeeType employeeType, EmailAddress email, bool isAutonomous) : base()
         {
             Guard.AgainstNullOrEmpty(name, nameof(name));;
