@@ -1,4 +1,5 @@
-﻿using Domain.Entity.Person;
+﻿using Domain.Entity.Item.Activities;
+using Domain.Entity.Person;
 using Domain.Guards;
 using System;
 using System.Collections.Generic;
@@ -8,16 +9,14 @@ using System.Text;
 
 namespace Domain.Entity.Item.Registrations
 {
-    public abstract class Registration : Base
+    public class Registration : Base
     {
-        [ForeignKey("Employee")]
         public Guid EmployeeId { get; protected set; }
         public Employee Employee { get; protected set; }
-        [ForeignKey("Project")]
         public Guid ProjectId { get; protected set; }
         public Project Project { get; protected set; }
-        [ForeignKey("Activity")]
         public Guid? ActivityId { get; protected set; }
+        public ProjectActivity Activity { get; protected set; }
         public string Description { get; protected set; }
         public RegistrationStatus Status { get; protected set; }
 

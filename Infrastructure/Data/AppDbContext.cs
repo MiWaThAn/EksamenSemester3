@@ -18,7 +18,6 @@ namespace Infrastructure.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
-        // DbSet properties for your entities go here
 
         //Person
         public DbSet<Employee> Employees { get; set; }
@@ -45,22 +44,29 @@ namespace Infrastructure.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Registration>(entity =>
-            {
-                entity.HasOne<Project>()
-                    .WithMany(p => p.Registrations)
-                    .HasForeignKey(r => r.ProjectId)
-                    .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Registration>()
+                .HasOne<Employee>()
+                .WithMany() 
+                .HasForeignKey(r => r.EmployeeId)
+                .OnDelete(DeleteBehavior.NoAction);
 
-                // Do the same for Employee
-                entity.HasOne<Employee>()
-                    .WithMany(e => e.Registrations)
-                    .HasForeignKey(r => r.EmployeeId)
-                    .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Registration>()
+                .HasOne<Project>()
+                .WithMany()
+                .HasForeignKey(r => r.ProjectId)
+                .OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<Registration>()
+                .HasOne<Activity>()
+                .WithMany()
+                .HasForeignKey(r => r.ActivityId)
+                .OnDelete(DeleteBehavior.NoAction);
 
-                entity.HasDiscriminator<string>("RegistrationType");
-            });
+            modelBuilder.Entity<ExpenseRegistration>()
+                .HasOne<Expense>()
+                .WithMany()
+                .HasForeignKey(e => e.ExpenseId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
 
     }

@@ -240,6 +240,9 @@ namespace Infrastructure.Migrations
                     b.Property<Guid?>("ActivityId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("ActivityId1")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -250,28 +253,25 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("nvarchar(21)");
+
                     b.Property<Guid>("EmployeeId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("EmployeeId1")
+                    b.Property<Guid?>("EmployeeId1")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
-
-                    b.Property<Guid?>("ProjectActivityId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ProjectId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ProjectId1")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("RegistrationType")
-                        .IsRequired()
-                        .HasMaxLength(21)
-                        .HasColumnType("nvarchar(21)");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -287,11 +287,13 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ActivityId");
+
+                    b.HasIndex("ActivityId1");
+
                     b.HasIndex("EmployeeId");
 
                     b.HasIndex("EmployeeId1");
-
-                    b.HasIndex("ProjectActivityId");
 
                     b.HasIndex("ProjectId");
 
@@ -299,7 +301,7 @@ namespace Infrastructure.Migrations
 
                     b.ToTable("Registration");
 
-                    b.HasDiscriminator<string>("RegistrationType").HasValue("Registration");
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Registration");
 
                     b.UseTphMappingStrategy();
                 });
@@ -610,6 +612,8 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("ExpenseId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.HasIndex("ExpenseId");
+
                     b.HasDiscriminator().HasValue("ExpenseRegistration");
                 });
 
@@ -664,33 +668,38 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entity.Item.Registrations.Registration", b =>
                 {
-                    b.HasOne("Domain.Entity.Person.Employee", null)
+                    b.HasOne("Domain.Entity.Item.Activities.Activity", null)
+                        .WithMany()
+                        .HasForeignKey("ActivityId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Domain.Entity.Item.Activities.ProjectActivity", "Activity")
                         .WithMany("Registrations")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ActivityId1");
 
                     b.HasOne("Domain.Entity.Person.Employee", "Employee")
                         .WithMany()
-                        .HasForeignKey("EmployeeId1")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entity.Item.Activities.ProjectActivity", null)
+                    b.HasOne("Domain.Entity.Person.Employee", null)
                         .WithMany("Registrations")
-                        .HasForeignKey("ProjectActivityId");
+                        .HasForeignKey("EmployeeId1");
 
                     b.HasOne("Domain.Entity.Item.Project", null)
-                        .WithMany("Registrations")
+                        .WithMany()
                         .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Domain.Entity.Item.Project", "Project")
-                        .WithMany()
+                        .WithMany("Registrations")
                         .HasForeignKey("ProjectId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Activity");
 
                     b.Navigation("Employee");
 
@@ -727,6 +736,15 @@ namespace Infrastructure.Migrations
                         .WithMany("Employees")
                         .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Entity.Item.Registrations.ExpenseRegistration", b =>
+                {
+                    b.HasOne("Domain.Entity.Item.Expense", null)
+                        .WithMany()
+                        .HasForeignKey("ExpenseId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
                 });
 

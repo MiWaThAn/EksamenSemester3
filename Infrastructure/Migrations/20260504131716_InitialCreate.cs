@@ -275,14 +275,14 @@ namespace Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     EmployeeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    EmployeeId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProjectId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ActivityId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ActivityId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    ProjectActivityId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    RegistrationType = table.Column<string>(type: "nvarchar(21)", maxLength: 21, nullable: false),
+                    Discriminator = table.Column<string>(type: "nvarchar(21)", maxLength: 21, nullable: false),
+                    EmployeeId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     ExpenseId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     StartTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     EndTime = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -296,28 +296,35 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Registration", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_Registration_Activities_ActivityId",
+                        column: x => x.ActivityId,
+                        principalTable: "Activities",
+                        principalColumn: "Id");
+                    table.ForeignKey(
                         name: "FK_Registration_Employees_EmployeeId",
                         column: x => x.EmployeeId,
                         principalTable: "Employees",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Registration_Employees_EmployeeId1",
                         column: x => x.EmployeeId1,
                         principalTable: "Employees",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Registration_ProjectActivities_ProjectActivityId",
-                        column: x => x.ProjectActivityId,
+                        name: "FK_Registration_Expenses_ExpenseId",
+                        column: x => x.ExpenseId,
+                        principalTable: "Expenses",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Registration_ProjectActivities_ActivityId1",
+                        column: x => x.ActivityId1,
                         principalTable: "ProjectActivities",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Registration_Projects_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Projects",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Registration_Projects_ProjectId1",
                         column: x => x.ProjectId1,
@@ -367,6 +374,16 @@ namespace Infrastructure.Migrations
                 column: "CompanyId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Registration_ActivityId",
+                table: "Registration",
+                column: "ActivityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Registration_ActivityId1",
+                table: "Registration",
+                column: "ActivityId1");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Registration_EmployeeId",
                 table: "Registration",
                 column: "EmployeeId");
@@ -377,9 +394,9 @@ namespace Infrastructure.Migrations
                 column: "EmployeeId1");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Registration_ProjectActivityId",
+                name: "IX_Registration_ExpenseId",
                 table: "Registration",
-                column: "ProjectActivityId");
+                column: "ExpenseId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Registration_ProjectId",
@@ -399,13 +416,7 @@ namespace Infrastructure.Migrations
                 name: "Accounts");
 
             migrationBuilder.DropTable(
-                name: "Activities");
-
-            migrationBuilder.DropTable(
                 name: "Customers");
-
-            migrationBuilder.DropTable(
-                name: "Expenses");
 
             migrationBuilder.DropTable(
                 name: "IntegrationSettings");
@@ -417,7 +428,13 @@ namespace Infrastructure.Migrations
                 name: "Registration");
 
             migrationBuilder.DropTable(
+                name: "Activities");
+
+            migrationBuilder.DropTable(
                 name: "Employees");
+
+            migrationBuilder.DropTable(
+                name: "Expenses");
 
             migrationBuilder.DropTable(
                 name: "ProjectActivities");
