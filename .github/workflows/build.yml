@@ -15,9 +15,6 @@ jobs:
         with:
           java-version: 17
           distribution: 'zulu' 
-
-      - name: Install Workloads
-        run: dotnet workload restore
           
       - uses: actions/checkout@v6
         with:
@@ -53,3 +50,6 @@ jobs:
           ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"3semestereksamen_3-semester-eksamens-projekt" /o:"3semestereksamen" /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
           dotnet build
           ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+
+           - name: Install Workloads
+             run: dotnet workload restore
