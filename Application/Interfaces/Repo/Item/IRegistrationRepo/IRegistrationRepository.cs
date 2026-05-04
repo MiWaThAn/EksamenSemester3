@@ -12,6 +12,6 @@ namespace Application.Interfaces.Repo.Item.IRegistrationRepo
         Task<IEnumerable<T>> GetByEmployeeIdAsync(Guid employeeId);
         Task<IEnumerable<T>> GetByProjectIdAsync(Guid projectId);
         Task<IEnumerable<T>> GetByActivityIdAsync(Guid activityId);
-        Task<IEnumerable<T>> GetByStatusAsync(Status status);
+        Task<IEnumerable<T>> GetByStatusAsync(RegistrationStatus status);
     }
 }

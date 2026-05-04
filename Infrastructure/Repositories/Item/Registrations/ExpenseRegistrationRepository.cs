@@ -13,9 +13,5 @@ namespace Infrastructure.Repositories.Item.Registrations
         public ExpenseRegistrationRepository(AppDbContext context) : base(context)
         {
         }
-        public async Task<ExpenseRegistration?> GetByRegistrationNumberAsync(string registrationNumber)
-        {
-            return await _context.ExpenseRegistrations.FirstOrDefaultAsync(x => x.RegistrationNumber == registrationNumber);
-        }
     }
 }

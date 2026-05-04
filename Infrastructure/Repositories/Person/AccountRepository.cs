@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces.Repo.Person;
+using Domain.Entity.Person;
 using Domain.Interfaces.Repos;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -8,8 +9,28 @@ using System.Text;
 
 namespace Infrastructure.Repositories.Person
 {
-    internal class AccountRepository<T> : GenericRepository<T>, IAccountRepository<T> where T : class
+    internal class AccountRepository : GenericRepository<Account>, IAccountRepository
     {
         internal AccountRepository(AppDbContext context) : base(context) { }
+        public async Task<Account?> GetByUsernameAsync(string username)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<Account?> GetByPhoneNumberAsync(string phoneNumber)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<Account?> GetWithCompanyAsync(string username)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<Account?> GetWithEmployeeAsync(string username)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<Account?> GetWithEmployeeAndCompany(string username)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

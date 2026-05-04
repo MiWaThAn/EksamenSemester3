@@ -16,7 +16,7 @@ namespace Domain.Services.Person
         }
         public async Task<bool> CvrExistsAsync(CvrNumber cvrNumber)
         {
-            var existingCompany = await _companyRepository.GetByCVRAsync(cvrNumber.Value);
+            var existingCompany = await _companyRepository.GetByCVRAsync(cvrNumber);
             return existingCompany == null;
         }
 

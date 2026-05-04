@@ -13,11 +13,6 @@ namespace Infrastructure.Repositories.Item
         internal ProjectRepository(AppDbContext context) : base(context)
         {
         }
-        public async Task<Project?> GetByProjectNumberAsync(string projectNumber)
-        {
-            return await _context.Projects
-                .FirstOrDefaultAsync(p => p.ProjectNumber == projectNumber);
-        }
         public async Task<IEnumerable<Project>> GetByEmployeeIdAsync(Guid employeeId)
         {
             return await _context.Projects

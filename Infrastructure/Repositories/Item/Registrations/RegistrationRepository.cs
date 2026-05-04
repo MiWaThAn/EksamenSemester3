@@ -26,7 +26,7 @@ namespace Infrastructure.Repositories.Item.Registrations
         {
             return await _context.Set<T>().Where(x => x.ActivityId == activityId).AsNoTracking().AsSplitQuery().ToListAsync();
         }
-        public async Task<IEnumerable<T>> GetByStatusAsync(Status status)
+        public async Task<IEnumerable<T>> GetByStatusAsync(RegistrationStatus status)
         {
             return await _context.Set<T>().Where(x => x.Status == status).AsNoTracking().AsSplitQuery().ToListAsync();
         }

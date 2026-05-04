@@ -1,9 +1,12 @@
 ﻿using Application.Interfaces.Repo.Item;
 using Application.Interfaces.Repo.Item.IRegistrationRepo;
+using Application.Interfaces.Repo.Mapping;
 using Application.Interfaces.Repo.Person;
+using Domain.Interfaces.Repos;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Data;
 
 namespace Application.Interfaces
 {
@@ -14,6 +17,7 @@ namespace Application.Interfaces
         ICustomerRepository Customers { get; }
         IEmployeeRepository Employees { get; }
         ICompanyRepository Companies { get; }
+        IAccountRepository Accounts { get; }
 
         //Item
         IProjectRepository Projects { get; }
@@ -27,10 +31,15 @@ namespace Application.Interfaces
         IExpenseRegistrationRepository ExpenseRegistrations { get; }
 
 
+        //Mappings
+        IIntegrationMappingRepository Mappings { get; }
+        IIntegrationSettingsRepository IntegrationSettings { get; }
 
-        //Save changes to the database
-        Task<int> CompleteAsync();
 
-        void Dispose();
+        // Transaction Management
+        Task BeginTransactionAsync(IsolationLevel isolationLevel);
+        Task CommitTransactionAsync();
+        Task RollbackTransactionAsync();
+
     }
 }

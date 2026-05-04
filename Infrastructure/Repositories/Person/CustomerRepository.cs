@@ -17,9 +17,5 @@ namespace Infrastructure.Repositories.Person
         {
             throw new NotImplementedException();
         }
-        public async Task<Customer?> GetByCustomerNumberAsync(string customerNumber)
-        {
-            return await _context.Customers.FirstOrDefaultAsync(c => c.CustomerNumber == customerNumber);
-        }
     }
 }

@@ -13,6 +13,8 @@ namespace Domain.Builders.Person
         internal string HashedPin;
         internal string Username;
         internal string PhoneNumber;
+        internal Company? Company;
+        internal Employee? Employee;
         public AccountBuilder WithHashedPassword(string hashedPassword)
         {
             Guard.AgainstNullOrEmpty(hashedPassword,nameof(hashedPassword));
@@ -23,6 +25,18 @@ namespace Domain.Builders.Person
         {
             Guard.AgainstNullOrEmpty(hashedPin,nameof(hashedPin));
             HashedPin = hashedPin;
+            return this;
+        }
+        public AccountBuilder WithCompany(Company company)
+        {
+            Guard.AgainstNull(company, nameof(company));
+            Company = company;
+            return this;
+        }
+        public AccountBuilder WithEmployee(Employee employee)
+        {
+            Guard.AgainstNull(employee, nameof(employee));
+            Employee = employee;
             return this;
         }
         public AccountBuilder WithUsername(string username)
@@ -43,7 +57,7 @@ namespace Domain.Builders.Person
             Guard.AgainstNullOrEmpty(PhoneNumber, nameof(PhoneNumber));
             Guard.AgainstNullOrEmpty(HashedPassword, nameof(HashedPassword));
             Guard.AgainstNullOrEmpty(HashedPin, nameof(HashedPin));
-            return new Account(Username, HashedPassword, PhoneNumber, HashedPin);
+            return new Account(Username, HashedPassword, PhoneNumber, HashedPin,Employee,Company);
         }
     }
 }

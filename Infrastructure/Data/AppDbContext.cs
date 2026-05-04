@@ -9,6 +9,7 @@ using System.Diagnostics;
 using Domain.Entity.Item.Activity;
 using Activity = Domain.Entity.Item.Activity.Activity;
 using Domain.Entity.Item.Registrations;
+using Domain.Entity.Mapping;
 
 namespace Infrastructure.Data
 {
@@ -23,6 +24,7 @@ namespace Infrastructure.Data
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Company> Companies { get; set; }
         public DbSet<Customer> Customers { get; set; }
+        public DbSet<Account> Accounts { get; set; }
 
         //Item
         public DbSet<Project> Projects { get; set; }
@@ -34,6 +36,11 @@ namespace Infrastructure.Data
         //Registrations
         public DbSet<HourRegistration> HourRegistrations { get; set; }
         public DbSet<ExpenseRegistration> ExpenseRegistrations { get; set; }
+
+
+        //Mappings
+        public DbSet<IntegrationMapping> Mappings { get; set; }
+        public DbSet<IntegrationSetting> IntegrationSettings { get; set; }
 
     }
 }

@@ -9,7 +9,6 @@ namespace Application.Interfaces.Repo.Item
 {
     public interface IActivityRepository : IGenericRepository<Activity>
     {
-        Task<Activity?> GetByActivityNumberAsync(string activityNumber);
         Task<IEnumerable<Activity>> GetByCompanyIdAsync(Guid companyId);
     }
 }

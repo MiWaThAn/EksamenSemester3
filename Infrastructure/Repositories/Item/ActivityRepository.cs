@@ -22,9 +22,5 @@ namespace Infrastructure.Repositories.Item
                 .Where(a => a.CompanyId == companyId)
                 .ToListAsync();
         }
-        public async Task<Activity?> GetByActivityNumberAsync(string activityNumber)
-        {
-            return await _context.Activities.FirstOrDefaultAsync(a => a.ActivityNumber == activityNumber);
-        }
     }
 }

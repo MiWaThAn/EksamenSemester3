@@ -17,9 +17,5 @@ namespace Infrastructure.Repositories.Item
         {
             return await _context.Expenses.Where(e => e.CompanyId == companyId).ToListAsync();
         }
-        public async Task<Expense?> GetByExpenseNumberAsync(string expenseNumber)
-        {
-            return await _context.Expenses.FirstOrDefaultAsync(e => e.ExpenseNumber == expenseNumber);
-        }
     }
 }

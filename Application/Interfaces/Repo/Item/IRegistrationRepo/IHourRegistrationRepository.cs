@@ -8,6 +8,5 @@ namespace Application.Interfaces.Repo.Item.IRegistrationRepo
 {
     public interface IHourRegistrationRepository : IRegistrationRepository<HourRegistration>
     {
-        Task<HourRegistration?> GetByRegistrationNumberAsync(string registrationNumber);
     }
 }

@@ -9,7 +9,6 @@ namespace Application.Interfaces.Repo.Person
 {
     public interface ICustomerRepository : IGenericRepository<Customer>
     {
-        Task<Customer?> GetByCustomerNumberAsync(string customerNumber);
         Task<Customer?> GetByCompanyIdAsync(Guid companyId);
     }
 }

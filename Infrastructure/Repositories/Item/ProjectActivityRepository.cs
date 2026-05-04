@@ -11,10 +11,6 @@ namespace Infrastructure.Repositories.Item
     internal class ProjectActivityRepository : GenericRepository<ProjectActivity>, IProjectActivityRepository
     {
         internal ProjectActivityRepository(AppDbContext context) : base(context) { }
-        public async Task<ProjectActivity?> GetByProjectActivityNumberAsync(string activityNumber)
-        {
-            return await _context.ProjectActivities.FirstOrDefaultAsync(a => a.ActivityNumber == activityNumber);
-        }
         public async Task<IEnumerable<ProjectActivity>> GetByEmployeeIdAsync(Guid employeeId)
         {
             return await _context.ProjectActivities.Where(a => a.ResponsibleEmployeeId == employeeId).ToListAsync();

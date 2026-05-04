@@ -8,7 +8,6 @@ namespace Application.Interfaces.Repo.Item
 {
     public interface IProjectRepository : IGenericRepository<Project>
     {
-        Task<Project?> GetByProjectNumberAsync(string projectNumber);
         Task<IEnumerable<Project>> GetByEmployeeIdAsync(Guid employeeId);
         Task<IEnumerable<Project>> GetByActivityIdAsync(Guid activityId);
         Task<IEnumerable<Project>> GetByCompanyIdAsync(Guid companyId);

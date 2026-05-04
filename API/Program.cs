@@ -1,5 +1,7 @@
 using API;
 using Domain.Entity.Person;
+using Domain.Interfaces.Person;
+using Domain.Services.Person;
 using Infrastructure;
 using Microsoft.AspNetCore.Identity;
 
@@ -13,6 +15,10 @@ builder.Services.AddOpenApi();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails(); // Giver flottere standard-fejlformater
 builder.Services.AddScoped<IPasswordHasher<Account>,PasswordHasher<Account>>();
+builder.Services.AddTransient<IAccountFactory, AccountFactory>();
+builder.Services.AddTransient<ICompanyFactory, CompanyFactory>();
+builder.Services.AddTransient<ICompanyValidationService, CompanyValidationService>();
+builder.Services.AddTransient<IAccountValidationService, AccountValidationService>();
 
 //Adds Infrastructure repos and so on.
 var connectionstring = builder.Configuration.GetConnectionString("DefaultConnection");

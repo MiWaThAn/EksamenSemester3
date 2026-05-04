@@ -8,7 +8,6 @@ namespace Application.Interfaces.Repo.Person
 {
     public interface IEmployeeRepository : IGenericRepository<Employee>
     {
-        Task<Employee?> GetByEmployeeNumberAsync(string employeeNumber);
         Task<Employee?> GetByIdWithDetailsAsync(Guid id); 
     }
 }

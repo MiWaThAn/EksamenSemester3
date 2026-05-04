@@ -8,6 +8,5 @@ namespace Application.Interfaces.Repo.Item.IRegistrationRepo
 {
     public interface IExpenseRegistrationRepository : IRegistrationRepository<ExpenseRegistration>
     {
-        Task<ExpenseRegistration?> GetByRegistrationNumberAsync(string registrationNumber);
     }
 }

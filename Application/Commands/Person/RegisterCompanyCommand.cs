@@ -12,6 +12,7 @@ namespace Application.Commands.Person
         string Username,
         string Email,
         string PhoneNumber,
-        string CVRNumber
+        string CVRNumber,
+        string Pincode
         ) : IRequest<RegisterCompanyResponse>;
 }

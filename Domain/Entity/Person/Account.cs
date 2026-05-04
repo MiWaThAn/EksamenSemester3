@@ -25,7 +25,9 @@ namespace Domain.Entity.Person
         //An account could potentially have both if it is an admin user that also has an employee role,
         //but it could also have neither if it is a generic user account that is not linked to any company or employee.
         public Guid? CompanyId { get; internal set; }
+        public Company? Company { get; internal set; }
         public Guid? EmployeeId { get; internal set; }
+        public Employee? Employee { get; internal set; }
 
         //Helper methods to quickly check the type of account based on the presence of CompanyId and EmployeeId. This allows for flexible account types and easy role management.
         public bool IsCompanyAccount => CompanyId.HasValue;
@@ -35,7 +37,7 @@ namespace Domain.Entity.Person
         //Last time the account pinged the server (last activity time)
         public DateTime LastSync { get; internal set; } 
 
-        internal Account(string username, string hashedPassword, string? phoneNumber,string hashedPin) : base()
+        internal Account(string username, string hashedPassword, string? phoneNumber,string hashedPin,Employee? employee,Company? company) : base()
         {
             Guard.AgainstNullOrEmpty(hashedPassword, nameof(hashedPassword));
             Guard.AgainstNullOrEmpty(username, nameof(username));
@@ -45,6 +47,8 @@ namespace Domain.Entity.Person
             PhoneNumber = phoneNumber;
             UpdatedAt = DateTime.UtcNow;
             HashedPin = hashedPin;
+            if (Company != null) LinkToCompany(Company);
+            if (Employee != null) LinkToEmployee(Employee);
         }
         public void UpdatePhoneNumber(string? phoneNumber)
         {
@@ -68,14 +72,16 @@ namespace Domain.Entity.Person
             HashedPin = newHashedPin;
             UpdatedAt = DateTime.UtcNow;
         }
-        public void LinkToCompany(Guid companyId)
+        public void LinkToCompany(Company company)
         {
-            CompanyId = companyId;
+            CompanyId = company.Id;
+            Company = company;
             UpdatedAt = DateTime.UtcNow;
         }
-        public void LinkToEmployee(Guid employeeId)
+        public void LinkToEmployee(Employee employee)
         {
-            EmployeeId = employeeId;
+            EmployeeId = employee.Id;
+            Employee = employee;
             UpdatedAt = DateTime.UtcNow;
         }
         public async Task<Result<Company>> CreateCompany(CompanyBuilder builder, ICompanyFactory companyFactory)
@@ -86,7 +92,7 @@ namespace Domain.Entity.Person
             var result = await companyFactory.CreateAsync(builder, this);
             if(result.IsSuccess)
             {
-                LinkToCompany(result.Value.Id);
+                LinkToCompany(result.Value);
             }
             UpdatedAt = DateTime.UtcNow;
             return result;

@@ -13,9 +13,5 @@ namespace Infrastructure.Repositories.Item.Registrations
         public HourRegistrationRepository(AppDbContext context) : base(context)
         {
         }
-        public async Task<HourRegistration?> GetByRegistrationNumberAsync(string registrationNumber)
-        {
-            return await _context.HourRegistrations.FirstOrDefaultAsync(x => x.RegistrationNumber == registrationNumber);
-        }
     }
 }

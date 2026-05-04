@@ -8,14 +8,10 @@ using System.Text;
 
 namespace Infrastructure.Repositories.Person
 {
-    internal class EmployeeRepository : AccountRepository<Employee>, IEmployeeRepository
+    internal class EmployeeRepository : GenericRepository<Employee>, IEmployeeRepository
     {
         public EmployeeRepository(AppDbContext context) : base(context)
         {
-        }
-        public async Task<Employee?> GetByEmployeeNumberAsync(string employeeNumber)
-        {
-            return await _context.Set<Employee>().FirstOrDefaultAsync(e => e.ExternalId == employeeNumber);
         }
         public async Task<Employee?> GetByIdWithDetailsAsync(Guid id)
         {
