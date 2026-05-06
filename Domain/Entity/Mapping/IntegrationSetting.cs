@@ -50,8 +50,11 @@ namespace Domain.Entity.Mapping
         }
         public IntegrationMapping CreateMapping(IntegrationMappingBuilder builder)
         {
+            Guard.AgainstNull(builder, nameof(builder));
             //rules
-            return builder.WithSetting(this).Build();
+            var mapping = builder.WithSetting(this).Build();
+            _mappings.Add(mapping);
+            return mapping;
         }
     }
 }
