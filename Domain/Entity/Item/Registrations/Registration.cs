@@ -15,8 +15,8 @@ namespace Domain.Entity.Item.Registrations
         public Employee Employee { get; protected set; }
         public Guid ProjectId { get; protected set; }
         public Project Project { get; protected set; }
-        public Guid? ActivityId { get; protected set; }
-        public Activities.Activity Activity { get; protected set; }
+        public Guid? ProjectActivityId { get; protected set; }
+        public ProjectActivity ProjectActivity { get; protected set; }
         public string Description { get; protected set; }
         public RegistrationStatus Status { get; protected set; }
 
@@ -30,7 +30,7 @@ namespace Domain.Entity.Item.Registrations
             Guard.AgainstEmptyGuid(projectId, nameof(projectId));
             EmployeeId = employeeId;
             ProjectId = projectId;
-            ActivityId = activityId;
+            ProjectActivityId = activityId;
             Description = description;
             Status = status;
         }
@@ -61,12 +61,12 @@ namespace Domain.Entity.Item.Registrations
         public void LinkToActivity(Guid activityId)
         {
             Guard.AgainstEmptyGuid(activityId, nameof(activityId));
-            ActivityId = activityId;
+            ProjectActivityId = activityId;
             UpdatedAt = DateTime.UtcNow;
         }
         public void UnlinkFromActivity()
         {
-            ActivityId = null;
+            ProjectActivityId = null;
             UpdatedAt = DateTime.UtcNow;
         }
         public void UpdateProject(Guid newProjectId)

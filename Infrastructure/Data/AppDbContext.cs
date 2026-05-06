@@ -53,22 +53,27 @@ namespace Infrastructure.Data
                       .HasForeignKey(r => r.ProjectId)
                       .OnDelete(DeleteBehavior.NoAction);
 
-                modelBuilder.Entity<Project>()
-                      .Navigation(p => p.Registrations)
-                      .HasField("_registrations")
-                      .UsePropertyAccessMode(PropertyAccessMode.Field);
+                entity.HasOne(r => r.ProjectActivity)
+                      .WithMany(pa => pa.Registrations)
+                      .HasForeignKey(r => r.ProjectActivityId)
+                      .IsRequired(false)
+                      .OnDelete(DeleteBehavior.NoAction);
 
                 entity.HasOne(r => r.Employee)
                       .WithMany(e => e.Registrations)
                       .HasForeignKey(r => r.EmployeeId)
                       .OnDelete(DeleteBehavior.NoAction);
-
-                entity.HasOne(r => r.Activity)
-                      .WithMany()
-                      .HasForeignKey(r => r.ActivityId)
-                      .IsRequired(false)
-                      .OnDelete(DeleteBehavior.NoAction);
             });
+
+            modelBuilder.Entity<Project>()
+                  .Navigation(p => p.Registrations)
+                  .HasField("_registrations")
+                  .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+            modelBuilder.Entity<ProjectActivity>()
+                  .Navigation(pa => pa.Registrations)
+                  .HasField("_registrations")
+                  .UsePropertyAccessMode(PropertyAccessMode.Field);
 
             modelBuilder.Entity<Company>()
                 .HasOne(c => c.Account)
