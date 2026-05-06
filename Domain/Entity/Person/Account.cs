@@ -25,10 +25,8 @@ namespace Domain.Entity.Person
         //if it is an employee account it will have an employee id and be linked to a company through that employee.
         //An account could potentially have both if it is an admin user that also has an employee role,
         //but it could also have neither if it is a generic user account that is not linked to any company or employee.
-        [ForeignKey("Company")]
         public Guid? CompanyId { get; internal set; }
         public Company? Company { get; internal set; }
-        [ForeignKey("Employee")]
         public Guid? EmployeeId { get; internal set; }
         public Employee? Employee { get; internal set; }
 

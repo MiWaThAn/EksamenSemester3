@@ -16,7 +16,7 @@ namespace Domain.Entity.Item.Registrations
         public Guid ProjectId { get; protected set; }
         public Project Project { get; protected set; }
         public Guid? ActivityId { get; protected set; }
-        public ProjectActivity Activity { get; protected set; }
+        public Activities.Activity Activity { get; protected set; }
         public string Description { get; protected set; }
         public RegistrationStatus Status { get; protected set; }
 

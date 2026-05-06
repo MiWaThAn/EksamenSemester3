@@ -8,8 +8,8 @@ namespace Domain.Entity.Item.Registrations
 {
     public class ExpenseRegistration : Registration
     {
-        [ForeignKey("Expense")]
         public Guid ExpenseId { get; internal set; }
+        public Expense Expense { get; internal set; }
 
         public ExpenseRegistration() : base()
         {

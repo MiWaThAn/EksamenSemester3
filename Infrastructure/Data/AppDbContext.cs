@@ -44,29 +44,79 @@ namespace Infrastructure.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Registration>()
-                .HasOne<Employee>()
-                .WithMany() 
-                .HasForeignKey(r => r.EmployeeId)
-                .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Registration>(entity =>
+            {
+                entity.HasKey(r => r.Id);
 
-            modelBuilder.Entity<Registration>()
-                .HasOne<Project>()
-                .WithMany()
-                .HasForeignKey(r => r.ProjectId)
-                .OnDelete(DeleteBehavior.NoAction);
+                entity.HasOne(r => r.Project)
+                      .WithMany(p => p.Registrations)
+                      .HasForeignKey(r => r.ProjectId)
+                      .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<Registration>()
-                .HasOne<Activity>()
-                .WithMany()
-                .HasForeignKey(r => r.ActivityId)
-                .OnDelete(DeleteBehavior.NoAction);
+                modelBuilder.Entity<Project>()
+                      .Navigation(p => p.Registrations)
+                      .HasField("_registrations")
+                      .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+                entity.HasOne(r => r.Employee)
+                      .WithMany(e => e.Registrations)
+                      .HasForeignKey(r => r.EmployeeId)
+                      .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne(r => r.Activity)
+                      .WithMany()
+                      .HasForeignKey(r => r.ActivityId)
+                      .IsRequired(false)
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<Company>()
+                .HasOne(c => c.Account)
+                .WithOne(a => a.Company)
+                .HasForeignKey<Company>(c => c.AccountId);
+
+            modelBuilder.Entity<Employee>()
+                .HasOne(e => e.Account)
+                .WithOne(a => a.Employee)
+                .HasForeignKey<Employee>(e => e.AccountId);
 
             modelBuilder.Entity<ExpenseRegistration>()
+                .HasOne(er => er.Expense)
+                .WithMany()
+                .HasForeignKey(er => er.ExpenseId)
+                .OnDelete(DeleteBehavior.NoAction);
+        
+
+        modelBuilder.Entity<ExpenseRegistration>()
                 .HasOne<Expense>()
                 .WithMany()
                 .HasForeignKey(e => e.ExpenseId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ExpenseRegistration>()
+                .HasOne(er => er.Expense)
+                .WithMany()
+                .HasForeignKey(er => er.ExpenseId);
+            modelBuilder.Entity<Company>()
+                .HasOne(c => c.Account)
+                .WithOne(a => a.Company)
+                .HasForeignKey<Company>(c => c.AccountId);
+
+            modelBuilder.Entity<ProjectActivity>(entity =>
+            {
+                entity.HasKey(pa => pa.Id);
+
+                entity.HasOne(pa => pa.Employee)
+                      .WithMany()
+                      .HasForeignKey(pa => pa.ResponsibleEmployeeId)
+                      .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne(pa => pa.Project)
+                      .WithMany(p => p.Activities)
+                      .HasForeignKey(pa => pa.ProjectId)
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
+
         }
 
     }

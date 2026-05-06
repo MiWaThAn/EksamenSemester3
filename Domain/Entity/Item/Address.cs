@@ -1,4 +1,5 @@
 ﻿using Domain.Entity.Mapping;
+using Domain.Entity.Person;
 using Domain.Guards;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,6 @@ namespace Domain.Entity.Item
         public string City { get; set; }
         public string PostalCode { get; set; }
         public string Country { get; set; }
-        public Guid CompanyId { get; internal set; }
         public Address()
         {
 

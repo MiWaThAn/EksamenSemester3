@@ -31,11 +31,11 @@ namespace Domain.Entity.Person
         //bool på om en medarbejder er selvstændig (har tilladelser til selv registrering osv...)
         public bool IsAutonomous { get; internal set; }
         //Id på firmaet de tilhøre
-        [ForeignKey("Company")]
         public Guid CompanyId { get; internal set; }
+        public Company Company { get; internal set; }
         //Id fra extern kilde (fx. e-conomic database)
-        [ForeignKey("Account")]
         public Guid? AccountId { get; internal set; }
+        public Account Account { get; internal set; }
 
         //Medarbejder registreringer
         private readonly List<Registration> _registrations = new();

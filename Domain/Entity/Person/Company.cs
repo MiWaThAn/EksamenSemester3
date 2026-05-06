@@ -28,8 +28,8 @@ namespace Domain.Entity.Person
 
         //Et firma kan ikke eksiterer uden en konto, så AccountId er ikke nullable.
         //Det er den konto der har admin rettigheder over firmaet og dets ansatte og projekter.
-        [ForeignKey("Account")]
         public Guid AccountId { get; internal set; }
+        public Account Account { get; internal set; }
 
         //Lister over ansatte, projekter, aktiviteter, og udgifter.
         //Disse lister håndteres internt i klassen for at sikre konsistens og integritet,

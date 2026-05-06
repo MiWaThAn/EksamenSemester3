@@ -16,8 +16,11 @@ namespace Domain.Entity.Item
         public string Name { get; internal set; }
         public Status Status { get; internal set; }
         public Guid CompanyId { get; internal set; }
+        public Company Company { get; internal set; }
         public Guid? CustomerId { get; internal set; }
+        public Customer? Customer { get; internal set; }
         public Guid? ResponsibleEmployeeId { get; internal set; }
+        public Employee? ResponsibleEmployee { get; internal set; }
         public Address? Address { get; internal set; }
         public string Description { get; internal set; } = string.Empty;
 

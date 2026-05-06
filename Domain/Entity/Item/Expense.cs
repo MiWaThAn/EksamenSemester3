@@ -11,8 +11,8 @@ namespace Domain.Entity.Item
     public class Expense : Base
     {
         public string Name { get; internal set; }
-        [ForeignKey("Company")]
         public Guid CompanyId { get; internal set; }
+        public Company Company { get; internal set; }
         public Expense() : base()
         {
 
