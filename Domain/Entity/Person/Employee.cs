@@ -32,10 +32,8 @@ namespace Domain.Entity.Person
         public bool IsAutonomous { get; internal set; }
         //Id på firmaet de tilhøre
         public Guid CompanyId { get; internal set; }
-        public Company Company { get; internal set; }
         //Id fra extern kilde (fx. e-conomic database)
         public Guid? AccountId { get; internal set; }
-        public Account Account { get; internal set; }
 
         //Medarbejder registreringer
         private readonly List<Registration> _registrations = new();

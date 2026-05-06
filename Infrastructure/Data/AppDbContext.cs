@@ -48,7 +48,7 @@ namespace Infrastructure.Data
             {
                 entity.HasKey(r => r.Id);
 
-                entity.HasOne(r => r.Project)
+                entity.HasOne<Project>()
                       .WithMany(p => p.Registrations)
                       .HasForeignKey(r => r.ProjectId)
                       .OnDelete(DeleteBehavior.NoAction);
@@ -58,16 +58,23 @@ namespace Infrastructure.Data
                       .HasField("_registrations")
                       .UsePropertyAccessMode(PropertyAccessMode.Field);
 
-                entity.HasOne(r => r.Employee)
+                entity.HasOne<Employee>()
                       .WithMany(e => e.Registrations)
                       .HasForeignKey(r => r.EmployeeId)
                       .OnDelete(DeleteBehavior.NoAction);
 
-                entity.HasOne(r => r.Activity)
+                entity.HasOne<ProjectActivity>()
                       .WithMany()
-                      .HasForeignKey(r => r.ActivityId)
+                      .HasForeignKey(r => r.ProjectActivityId)
                       .IsRequired(false)
                       .OnDelete(DeleteBehavior.NoAction);
+
+                modelBuilder.Entity<ProjectActivity>()
+                      .Navigation(p => p.Registrations)
+                      .HasField("_registrations")
+                      .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+
             });
 
             modelBuilder.Entity<Company>()
@@ -76,7 +83,7 @@ namespace Infrastructure.Data
                 .HasForeignKey<Company>(c => c.AccountId);
 
             modelBuilder.Entity<Employee>()
-                .HasOne(e => e.Account)
+                .HasOne<Account>()
                 .WithOne(a => a.Employee)
                 .HasForeignKey<Employee>(e => e.AccountId);
 
@@ -106,13 +113,22 @@ namespace Infrastructure.Data
             {
                 entity.HasKey(pa => pa.Id);
 
-                entity.HasOne(pa => pa.Employee)
+                entity.HasOne<Employee>()
                       .WithMany()
                       .HasForeignKey(pa => pa.ResponsibleEmployeeId)
                       .OnDelete(DeleteBehavior.NoAction);
 
-                entity.HasOne(pa => pa.Project)
+                entity.HasOne<Project>()
                       .WithMany(p => p.Activities)
+                      .HasForeignKey(pa => pa.ProjectId)
+                      .OnDelete(DeleteBehavior.NoAction);
+
+                modelBuilder.Entity<ProjectActivity>()
+                      .Navigation(p => p.Registrations)
+                      .HasField("_registrations")
+                      .UsePropertyAccessMode(PropertyAccessMode.Field);
+                entity.HasMany<Registration>()
+                      .WithOne()
                       .HasForeignKey(pa => pa.ProjectId)
                       .OnDelete(DeleteBehavior.NoAction);
             });

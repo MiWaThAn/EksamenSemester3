@@ -12,14 +12,11 @@ namespace Domain.Entity.Item.Activities
     public class ProjectActivity : Base
     {
         public Guid ActivityId { get; internal set; }
-        public Activity Activity { get; internal set; }
         public Guid ProjectId { get; internal set; }
-        public Project Project { get; internal set; }
         public Status Status { get; internal set; }
         public DateTime StartDate { get; internal set; }
         public DateTime EndDate { get; internal set; }
         public Guid? ResponsibleEmployeeId { get; internal set; }
-        public Employee Employee { get; internal set; }
         private readonly List<Registration> _registrations = new();
         public IReadOnlyCollection<Registration> Registrations => _registrations.Where(r=>!r.IsDeleted).ToList().AsReadOnly();
         public ProjectActivity() : base()
