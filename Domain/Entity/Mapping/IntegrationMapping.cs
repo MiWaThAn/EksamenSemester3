@@ -11,6 +11,7 @@ namespace Domain.Entity.Mapping
 
         // LocalId kan være ID'et på både en Employee, et Project eller en Activity
         public Guid LocalId { get; internal set; }
+        public Guid IntegrationSettingId { get; internal set; }
 
         // Hvilken type entitet mapper vi? (f.eks. "Employee", "Project")
         // Dette hjælper med at undgå sammenstød hvis to forskellige typer har samme GUID
@@ -24,12 +25,13 @@ namespace Domain.Entity.Mapping
 
         }
 
-        internal IntegrationMapping(Guid localId, IntegrationEntityType entityType, string externalId, DataSource provider)
+        internal IntegrationMapping(Guid localId, IntegrationEntityType entityType, string externalId, DataSource provider,IntegrationSetting setting)
         {
             LocalId = localId;
             EntityType = entityType;
             ExternalId = externalId;
             Provider = provider;
+            IntegrationSettingId = setting.Id;
         }
     }
 }

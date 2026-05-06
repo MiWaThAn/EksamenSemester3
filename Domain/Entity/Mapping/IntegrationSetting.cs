@@ -1,4 +1,6 @@
-﻿using Domain.Guards;
+﻿using Domain.Builders.Mapping;
+using Domain.Entity.Item.Registrations;
+using Domain.Guards;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,11 +10,12 @@ namespace Domain.Entity.Mapping
 {
     public class IntegrationSetting : Base
     {
-        [ForeignKey("Company")]
         public Guid CompanyId { get; private set; }
         public DataSource Provider { get; private set; } // F.eks. "Economic" eller "Dinero"
         public string Key { get; private set; }      // F.eks. "AgreementGrantToken"
         public string EncryptedValue { get; private set; }    // Selve token-strengen
+        private readonly List<IntegrationMapping> _mappings = new();
+        public IReadOnlyCollection<IntegrationMapping> Mappings => _mappings.Where(r => !r.IsDeleted).ToList().AsReadOnly();
 
         public IntegrationSetting() : base()
         {
@@ -44,6 +47,11 @@ namespace Domain.Entity.Mapping
             Guard.AgainstNullOrEmpty(newKey, nameof(newKey));
             Key = newKey;
             UpdatedAt = DateTime.UtcNow;
+        }
+        public IntegrationMapping CreateMapping(IntegrationMappingBuilder builder)
+        {
+            //rules
+            return builder.WithSetting(this).Build();
         }
     }
 }
