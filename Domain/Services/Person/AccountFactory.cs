@@ -1,5 +1,6 @@
 ﻿using Domain.Builders.Person;
 using Domain.Entity.Person;
+using Domain.Guards;
 using Domain.Interfaces.Person;
 using Domain.ValueObjects;
 using System;
@@ -17,7 +18,7 @@ namespace Domain.Services.Person
         }
         public async Task<Result<Account>> CreateAsync(AccountBuilder builder)
         {
-            if (builder == null) throw new ArgumentNullException(nameof(builder));
+            Guard.AgainstNull(builder, nameof(builder));
             if(await _validationService.UsernameExistsAsync(builder.Username))return Result<Account>.Failure("Brugernavnet er allerede i brug.");
             return Result<Account>.Success(builder.Build());
         }

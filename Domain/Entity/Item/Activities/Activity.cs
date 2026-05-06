@@ -14,7 +14,6 @@ namespace Domain.Entity.Item.Activities
         public string Name { get; internal set; }
         public string Description { get; internal set; }
         public Guid CompanyId { get; internal set; }
-        public Company Company { get; internal set; }
 
         public Activity() : base()
         {

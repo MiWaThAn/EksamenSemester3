@@ -1,6 +1,7 @@
 ﻿using Domain.Entity.Person;
 using Domain.Guards;
 using Domain.Interfaces.Person;
+using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,7 +13,7 @@ namespace Domain.Builders.Person
         internal string HashedPassword;
         internal string HashedPin;
         internal string Username;
-        internal string PhoneNumber;
+        internal PhoneNumber PhoneNumber;
         internal Company? Company;
         internal Employee? Employee;
         public AccountBuilder WithHashedPassword(string hashedPassword)
@@ -45,16 +46,16 @@ namespace Domain.Builders.Person
             Username = username;
             return this;
         }
-        public AccountBuilder WithPhoneNumber(string phoneNumber)
+        public AccountBuilder WithPhoneNumber(PhoneNumber phoneNumber)
         {
-            Guard.AgainstNullOrEmpty(phoneNumber, nameof(phoneNumber));
+            Guard.AgainstNull(phoneNumber, nameof(phoneNumber));
             PhoneNumber = phoneNumber;
             return this;
         }
         internal Account Build()
         {
             Guard.AgainstNullOrEmpty(Username, nameof(Username));
-            Guard.AgainstNullOrEmpty(PhoneNumber, nameof(PhoneNumber));
+            Guard.AgainstNull(PhoneNumber, nameof(PhoneNumber));
             Guard.AgainstNullOrEmpty(HashedPassword, nameof(HashedPassword));
             Guard.AgainstNullOrEmpty(HashedPin, nameof(HashedPin));
             return new Account(Username, HashedPassword, PhoneNumber, HashedPin,Employee,Company);

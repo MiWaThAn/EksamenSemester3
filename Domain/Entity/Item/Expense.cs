@@ -12,7 +12,6 @@ namespace Domain.Entity.Item
     {
         public string Name { get; internal set; }
         public Guid CompanyId { get; internal set; }
-        public Company Company { get; internal set; }
         public Expense() : base()
         {
 

@@ -50,6 +50,7 @@ namespace Application.Commands.Person.Handlers
             string secureHash = _passwordHasher.HashPassword(default!, request.Password);
             string pinHash = _passwordHasher.HashPassword(default!, request.Pincode);
             EmailAddress emailAddress = new EmailAddress(request.Email);
+            PhoneNumber phoneNumber = new PhoneNumber(request.PhoneNumber);
 
             var companyBuilder = new CompanyBuilder()
                 .WithCVRNumber(cvr)
@@ -59,7 +60,7 @@ namespace Application.Commands.Person.Handlers
             var accountBuilder = new AccountBuilder()
                 .WithHashedPassword(secureHash)
                 .WithHashedPin(pinHash)
-                .WithPhoneNumber(request.PhoneNumber)
+                .WithPhoneNumber(phoneNumber)
                 .WithUsername(request.Username);
 
             var result = await _accountFactory.CreateAsync(accountBuilder);

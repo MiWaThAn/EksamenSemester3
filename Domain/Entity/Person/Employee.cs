@@ -1,4 +1,6 @@
 ﻿using Domain.Builders.Item.Registration;
+using Domain.Entity.Item;
+using Domain.Entity.Item.Activities;
 using Domain.Entity.Item.Registrations;
 using Domain.Guards;
 using Domain.ValueObjects;
@@ -40,7 +42,6 @@ namespace Domain.Entity.Person
         //Medarbejder registreringer
         private readonly List<Registration> _registrations = new();
         public IReadOnlyCollection<Registration> Registrations => _registrations.Where(r => !r.IsDeleted).ToList().AsReadOnly();
-
         public Employee() : base()
         {
 

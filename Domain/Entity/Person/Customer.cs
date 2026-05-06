@@ -9,25 +9,25 @@ namespace Domain.Entity.Person
     public class Customer : Base
     {
         public string Name { get; internal set; }
-        public EmailAddress Email { get; internal set; }
-        public string PhoneNumber { get; internal set; }
+        public EmailAddress? Email { get; internal set; }
+        public PhoneNumber? PhoneNumber { get; internal set; }
 
         public Customer() : base()
         {
 
         }
 
-        internal Customer(string name, EmailAddress email, string phoneNumber) : base()
+        internal Customer(string name, EmailAddress? email, PhoneNumber? phoneNumber) : base()
         {
             Guard.AgainstNullOrEmpty(name, nameof(name));
-            Guard.AgainstNullOrEmpty(phoneNumber, nameof(phoneNumber));
+            Guard.AgainstNull(phoneNumber, nameof(phoneNumber));
             Name = name;
             Email = email;
             PhoneNumber = phoneNumber;
         }
-        public void UpdateContactInfo(EmailAddress newEmail, string newPhoneNumber)
+        public void UpdateContactInfo(EmailAddress newEmail, PhoneNumber newPhoneNumber)
         {
-            Guard.AgainstNullOrEmpty(newPhoneNumber, nameof(newPhoneNumber));
+            Guard.AgainstNull(newPhoneNumber, nameof(newPhoneNumber));
             Email = newEmail;
             PhoneNumber = newPhoneNumber;
             UpdatedAt = DateTime.UtcNow;

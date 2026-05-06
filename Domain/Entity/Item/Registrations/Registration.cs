@@ -12,11 +12,8 @@ namespace Domain.Entity.Item.Registrations
     public class Registration : Base
     {
         public Guid EmployeeId { get; protected set; }
-        public Employee Employee { get; protected set; }
         public Guid ProjectId { get; protected set; }
-        public Project Project { get; protected set; }
         public Guid? ProjectActivityId { get; protected set; }
-        public ProjectActivity ProjectActivity { get; protected set; }
         public string Description { get; protected set; }
         public RegistrationStatus Status { get; protected set; }
 
