@@ -16,7 +16,7 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
-//builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails(); // Giver flottere standard-fejlformater
 builder.Services.AddScoped<IPasswordHasher<Account>,PasswordHasher<Account>>();
 builder.Services.AddTransient<IAccountFactory, AccountFactory>();
@@ -35,12 +35,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-//app.UseExceptionHandler();
+app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 
