@@ -11,8 +11,6 @@
     <Folder Include="Commands\Item\Responses\" />
     <Folder Include="Commands\Mixed\Handlers\" />
     <Folder Include="Commands\Mixed\Responses\" />
-    <Folder Include="Services\Item\" />
-    <Folder Include="Services\Person\" />
     <Folder Include="Validation\" />
   </ItemGroup>
 
