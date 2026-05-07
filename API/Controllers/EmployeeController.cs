@@ -1,4 +1,5 @@
 ﻿using Application.Commands.Person;
+using Application.Commands.Person.Queries;
 using Application.DTOs;
 using Application.Interfaces.Services;
 using MediatR;
@@ -11,7 +12,6 @@ namespace API.Controllers
     [Route("api/[controller]")] 
     public class EmployeeController : ControllerBase
     {
-        private readonly IEmployeeService _employeeService;
         private readonly IMediator _mediator;
 
         public EmployeeController(IMediator mediator)
@@ -23,14 +23,16 @@ namespace API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<EmployeeDTO>> GetById(Guid id)
         {
-            var employee = await _employeeService.GetByIdAsync(id);
+            var query = new GetEmployeeByIdQuery(id);
 
-            if (employee == null)
+            var result = await _mediator.Send(query);
+
+            if (result == null)
             {
                 return NotFound(new { Message = $"We couldn't find employee with ID: {id}" });
             }
 
-            return Ok(employee);
+            return Ok(result);
         }
 
         // POST: api/employee
