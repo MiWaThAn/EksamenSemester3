@@ -1,7 +1,12 @@
 ﻿using Application.Interfaces;
+using Application.Interfaces.Repo.Person;
+using Application.Interfaces.Services;
+using Domain.Entity.Person;
 using Domain.Interfaces.Repos;
 using Infrastructure.Data;
 using Infrastructure.Repositories.Person;
+using Infrastructure.Service;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -20,8 +25,11 @@ namespace Infrastructure
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            services.AddScoped<IPasswordHasher<Account>, PasswordHasher<Account>>();
             services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddScoped<ICompanyRepository, CompanyRepository>();
+            services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+            services.AddScoped<IEncryptionService, EncryptionService>();
 
             return services;
         }
