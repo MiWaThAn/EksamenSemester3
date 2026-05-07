@@ -14,7 +14,7 @@ namespace Application.Workers
     public class SyncWithExternalWorker : BackgroundService
     {
         private readonly ILogger<SyncWithExternalWorker> _logger;
-        private const int _intervalBetweenSyncs = 300;
+        private const int _intervalBetweenSyncs = 900;
         private readonly IExternalAPIService _externalAPIService;
         public SyncWithExternalWorker(ILogger<SyncWithExternalWorker> logger, IExternalAPIService externalAPIService)
         {
