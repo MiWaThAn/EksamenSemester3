@@ -19,19 +19,27 @@ namespace Domain.Entity.Mapping
 
         public string ExternalId { get; internal set; }
         public DataSource Provider { get; internal set; } 
+        public string ObjectVersion { get; internal set; }
 
         public IntegrationMapping() : base()
         {
 
         }
 
-        internal IntegrationMapping(Guid localId, IntegrationEntityType entityType, string externalId, DataSource provider,IntegrationSetting setting)
+        internal IntegrationMapping(Guid localId, IntegrationEntityType entityType, string externalId, DataSource provider,IntegrationSetting setting, string objectVersion)
         {
             LocalId = localId;
             EntityType = entityType;
             ExternalId = externalId;
             Provider = provider;
             IntegrationSettingId = setting.Id;
+            ObjectVersion = objectVersion;
+        }
+
+        public void UpdateObjectVersion(string objectVersion)
+        {
+            if (objectVersion == null) return;
+            ObjectVersion = objectVersion;
         }
     }
 }

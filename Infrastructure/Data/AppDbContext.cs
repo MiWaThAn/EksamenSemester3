@@ -106,6 +106,12 @@ namespace Infrastructure.Data
                 .HasOne(c => c.Account)
                 .WithOne(a => a.Company)
                 .HasForeignKey<Company>(c => c.AccountId);
+            modelBuilder.Entity<Account>()
+                .HasIndex(a => a.Username)
+                .IsUnique();
+            modelBuilder.Entity<Company>()
+                .HasIndex(c => c.CVRNumber)
+                .IsUnique();
 
             modelBuilder.Entity<ProjectActivity>(entity =>
             {
@@ -121,6 +127,9 @@ namespace Infrastructure.Data
                       .HasForeignKey(pa => pa.ProjectId)
                       .OnDelete(DeleteBehavior.NoAction);
             });
+            modelBuilder.Entity<IntegrationMapping>()
+    .HasIndex(m => new { m.IntegrationSettingId, m.ExternalId, m.EntityType })
+    .IsUnique();
 
         }
 
