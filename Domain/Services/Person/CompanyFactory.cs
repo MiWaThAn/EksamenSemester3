@@ -19,7 +19,7 @@ namespace Domain.Services.Person
         {
             if (builder == null) throw new ArgumentNullException(nameof(builder));
             if(await _validationService.CvrExistsAsync(builder.CVRNumber)) return Result<Company>.Failure($"Et firma med dette CVR nummer {builder.CVRNumber} findes alerede.");
-            return Result<Company>.Success(builder.WithAccountId(account).Build());
+            return Result<Company>.Success(builder.WithAccount(account).Build());
         }
     }
 }

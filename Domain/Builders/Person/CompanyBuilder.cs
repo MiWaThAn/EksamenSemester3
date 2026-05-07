@@ -11,7 +11,7 @@ namespace Domain.Builders.Person
     public class CompanyBuilder
     {
         internal CvrNumber CVRNumber;
-        internal Guid AccountId;
+        internal Account Account;
         internal EmailAddress Email;
         internal string Name;
         public CompanyBuilder WithCVRNumber(CvrNumber cvrNumber)
@@ -32,16 +32,16 @@ namespace Domain.Builders.Person
             return this;
         }
         //Company can only be built through an account (to make sure every company has an account) so we don't end up with accountless companies
-        internal CompanyBuilder WithAccountId(Account account)
+        internal CompanyBuilder WithAccount(Account account)
         {
-            AccountId = account.Id;
+            Account = account;
             return this;
         }
         internal Company Build()
         {
             Guard.AgainstNullOrEmpty(Name, nameof(Name));
-            Guard.AgainstEmptyGuid(AccountId, nameof(AccountId));
-            return new Company(Name, CVRNumber, AccountId, Email);
+            Guard.AgainstNull(Account,nameof(Account));
+            return new Company(Name, CVRNumber, Account, Email);
         }
     }
 }

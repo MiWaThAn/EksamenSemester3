@@ -93,7 +93,7 @@ namespace Domain.Entity.Person
         {
             Guard.AgainstNull(builder, nameof(builder));
             Guard.AgainstNull(companyFactory, nameof(companyFactory));
-            builder = builder.WithAccountId(this);
+            builder = builder.WithAccount(this);
             var result = await companyFactory.CreateAsync(builder, this);
             if(result.IsSuccess)
             {

@@ -59,12 +59,14 @@ namespace Domain.Entity.Person
         {
 
         }
-        internal Company(string name, CvrNumber cvrNumber, Guid ownerAccountId, EmailAddress email) : base()
+        internal Company(string name, CvrNumber cvrNumber, Account account, EmailAddress email) : base()
         {
             Guard.AgainstNullOrEmpty(name, nameof(name));
+            Guard.AgainstNull(account, nameof(account));
             Name = name;
             CVRNumber = cvrNumber;
-            AccountId = ownerAccountId;
+            Account = account;
+            AccountId = account.Id;
             Email = email;
         }
         public Employee CreateEmployee(EmployeeBuilder builder)
