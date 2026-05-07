@@ -14,6 +14,7 @@ namespace Domain.Builders.Mapping
         private string ExternalId;
         private IntegrationSetting Setting;
         private DataSource Provider;
+        private string ObjectVersion;
 
         public IntegrationMappingBuilder WithLocalId(Base @base)
         {
@@ -43,10 +44,15 @@ namespace Domain.Builders.Mapping
             setting= Setting;
             return this;
         }
+        public IntegrationMappingBuilder WithObjectVersion(string objectVersion)
+        {
+            ObjectVersion = objectVersion;
+            return this;
+        }
         internal IntegrationMapping Build()
         {
             Guard.AgainstNullOrEmpty(ExternalId, nameof(ExternalId));
-            return new IntegrationMapping(LocalId, EntityType, ExternalId, Provider, Setting);
+            return new IntegrationMapping(LocalId, EntityType, ExternalId, Provider, Setting,ObjectVersion);
         }
     }
 }
