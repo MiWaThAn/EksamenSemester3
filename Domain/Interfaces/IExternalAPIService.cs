@@ -10,8 +10,8 @@ namespace Domain.Interfaces
 
 
 
-        Task <IEnumerable<CustomerDTO>> GetCustomersAsync();
-        Task <IEnumerable<ProjectDTO>> GetProjectsAsync();
-        Task <IEnumerable<EmployeeDTO>> GetEmployeesAsync();
+        //Task <IEnumerable<CustomerDTO>> GetCustomersAsync();
+        //Task <IEnumerable<ProjectDTO>> GetProjectsAsync();
+        //Task <IEnumerable<EmployeeDTO>> GetEmployeesAsync();
     }
 }
