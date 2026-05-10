@@ -7,12 +7,11 @@ using System.Text;
 namespace Application.Commands.Person
 {
     public record RegisterCompanyCommand(
-        string Name,
+        string CompanyName,
         string Password,
         string Username,
         string Email,
         string PhoneNumber,
-        string CVRNumber,
-        string Pincode
+        string CVRNumber
         ) : IRequest<RegisterCompanyResponse>;
 }

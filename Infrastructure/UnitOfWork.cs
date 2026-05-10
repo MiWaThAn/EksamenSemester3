@@ -60,7 +60,7 @@ namespace Infrastructure
             Expenses = new ExpenseRepository(_context);
 
             HourRegistrations = new HourRegistrationRepository(_context);
-            Expenses = new ExpenseRepository(_context);
+            ExpenseRegistrations = new ExpenseRegistrationRepository(_context);
 
             Mappings = new IntegrationMappingsRepository(_context);
             IntegrationSettings = new IntegrationSettingsRepository(_context);
@@ -73,6 +73,10 @@ namespace Infrastructure
             _currentTransaction = await _context.Database.BeginTransactionAsync(isolationLevel);
         }
         //Save changes to the database
+        public async Task<int> CompleteAsync()
+        {
+            return await _context.SaveChangesAsync();
+        }
         public async Task CommitTransactionAsync()
         {
             if (_currentTransaction != null)

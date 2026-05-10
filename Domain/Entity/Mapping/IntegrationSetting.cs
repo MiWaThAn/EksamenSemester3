@@ -12,7 +12,8 @@ namespace Domain.Entity.Mapping
     {
         public Guid CompanyId { get; private set; }
         public DataSource Provider { get; private set; } // F.eks. "Economic" eller "Dinero"
-        public List<IntegrationEntityType> EntityTypes { get; private set; } = new List<IntegrationEntityType>();
+        private readonly List<IntegrationEntityType> _entityTypes = new();
+        public IReadOnlyCollection<IntegrationEntityType> EntityTypes => _entityTypes.AsReadOnly();
         public string Key { get; private set; }      // F.eks. "AgreementGrantToken"
         public string EncryptedValue { get; private set; }    // Selve token-strengen
         private readonly List<IntegrationMapping> _mappings = new();

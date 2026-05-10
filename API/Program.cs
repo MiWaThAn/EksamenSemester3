@@ -23,6 +23,7 @@ builder.Services.AddTransient<IAccountFactory, AccountFactory>();
 builder.Services.AddTransient<ICompanyFactory, CompanyFactory>();
 builder.Services.AddTransient<ICompanyValidationService, CompanyValidationService>();
 builder.Services.AddTransient<IAccountValidationService, AccountValidationService>();
+builder.Services.AddTransient<IRegistrationDomainService, RegistrationDomainService>();
 builder.Services.AddHostedService<SyncWithExternalWorker>();
 builder.Services.AddHttpClient();
 //Adds Infrastructure repos and so on.

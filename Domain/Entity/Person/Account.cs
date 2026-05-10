@@ -16,7 +16,7 @@ namespace Domain.Entity.Person
         //Username is unique and used for login, while phone number is optional and can be used for 2FA or account recovery.
         public string Username { get; internal set; }
         public string HashedPassword { get; internal set; }
-        public PhoneNumber? PhoneNumber { get; internal set; }
+        public PhoneNumber PhoneNumber { get; internal set; }
         //HashedPin is used for quick login on mobile devices, it is optional and can be null if the user has not set it up.
         public string? HashedPin { get; internal set; }
 
@@ -42,7 +42,7 @@ namespace Domain.Entity.Person
         {
 
         }
-        internal Account(string username, string hashedPassword, PhoneNumber? phoneNumber,string hashedPin,Employee? employee,Company? company) : base()
+        internal Account(string username, string hashedPassword, PhoneNumber phoneNumber,string hashedPin,Employee? employee,Company? company) : base()
         {
             Guard.AgainstNullOrEmpty(hashedPassword, nameof(hashedPassword));
             Guard.AgainstNullOrEmpty(username, nameof(username));
@@ -55,7 +55,7 @@ namespace Domain.Entity.Person
             if (Company != null) LinkToCompany(Company);
             if (Employee != null) LinkToEmployee(Employee);
         }
-        public void UpdatePhoneNumber(PhoneNumber? phoneNumber)
+        public void UpdatePhoneNumber(PhoneNumber phoneNumber)
         {
             PhoneNumber = phoneNumber;
             UpdatedAt = DateTime.UtcNow;

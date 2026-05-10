@@ -12,7 +12,7 @@ namespace Domain.Services.Person
     public class AccountFactory : IAccountFactory
     {
         private IAccountValidationService _validationService;
-        public AccountFactory(IAccountValidationService validationService)
+        internal AccountFactory(IAccountValidationService validationService)
         {
             _validationService = validationService ?? throw new ArgumentNullException(nameof(validationService));
         }
@@ -24,3 +24,4 @@ namespace Domain.Services.Person
         }
     }
 }
+

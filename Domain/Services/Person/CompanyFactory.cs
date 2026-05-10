@@ -11,7 +11,7 @@ namespace Domain.Services.Person
     public class CompanyFactory : ICompanyFactory
     {
         private ICompanyValidationService _validationService;
-        public CompanyFactory(ICompanyValidationService validationService)
+        internal CompanyFactory(ICompanyValidationService validationService)
         {
             _validationService = validationService ?? throw new ArgumentNullException(nameof(validationService));
         }
