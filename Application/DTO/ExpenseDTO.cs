@@ -4,7 +4,8 @@ using System.Text;
 
 namespace Application.DTO
 {
-    public class ExpenseDTO
+    public class ExpenseDTO : BaseIntegrationDTO
     {
+
     }
 }

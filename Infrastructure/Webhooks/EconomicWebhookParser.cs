@@ -1,6 +1,9 @@
 ﻿using Application.DTO;
 using Application.Interfaces.Adapters;
+using Application.Interfaces.Services.Sync;
 using Domain.Entity.Mapping;
+using Infrastructure.Webhooks;
+using Infrastructure.Webhooks.Models;
 using Microsoft.AspNetCore.Http;
 using System.Text.Json;
 
