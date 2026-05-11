@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Domain.Interfaces.Item
 {
-    public interface IPasswordHashService
+    public interface IHashingService
     {
         string HashPassword(string plainTextPassword);
         bool VerifyPassword(string hash, string plainTextPassword);

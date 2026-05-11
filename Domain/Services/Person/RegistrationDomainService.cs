@@ -11,12 +11,12 @@ namespace Domain.Services.Person
 {
     public class RegistrationDomainService : IRegistrationDomainService
     {
-        private readonly IPasswordHashService _passwordHasher;
+        private readonly IHashingService _passwordHasher;
         private readonly ICompanyValidationService _companyValidationService;
         private readonly IAccountValidationService _accountValidationService;
         private readonly IAccountFactory _accountFactory;
         private readonly ICompanyFactory _companyFactory;
-        public RegistrationDomainService(IPasswordHashService passwordHasher, IAccountValidationService accountValidationService, ICompanyValidationService companyValidationService, IAccountFactory accountFactory, ICompanyFactory companyFactory)
+        public RegistrationDomainService(IHashingService passwordHasher, IAccountValidationService accountValidationService, ICompanyValidationService companyValidationService, IAccountFactory accountFactory, ICompanyFactory companyFactory)
         {
             _passwordHasher = passwordHasher;
             _accountValidationService = accountValidationService;
