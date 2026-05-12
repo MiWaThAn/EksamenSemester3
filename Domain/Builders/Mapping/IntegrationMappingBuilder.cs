@@ -1,5 +1,6 @@
 ﻿using Domain.Entity;
 using Domain.Entity.Mapping;
+using Domain.Entity.Mapping.ValueObjects;
 using Domain.Guards;
 using System;
 using System.Collections.Generic;

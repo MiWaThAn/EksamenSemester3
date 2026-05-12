@@ -1,7 +1,8 @@
 ﻿
 using Domain.Interfaces;
 
-
+using Application.DTOs;
+using Domain.Entity.Person;
 namespace API.ExternalApiServices
 {
     public class EconomicAPIService : IExternalAPIService
@@ -12,7 +13,7 @@ namespace API.ExternalApiServices
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<IEnumerable<CustomerDTO>> GetCustomersAsync(//modtag setting)
+        public async Task<IEnumerable<CustomerDTO>> GetCustomersAsync(Account.Settings.Provider provider)
         {
             var client = _httpClientFactory.CreateClient();
             var response = await client.GetAsync();

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-
+using Domain.Entity.Mapping.ValueObjects;
 namespace Domain.Entity.Mapping
 {
     public class IntegrationMapping : Base
@@ -12,13 +12,13 @@ namespace Domain.Entity.Mapping
         // LocalId kan være ID'et på både en Employee, et Project eller en Activity
         public Guid LocalId { get; internal set; }
         public Guid IntegrationSettingId { get; internal set; }
-
+        public IntegrationSetting IntegrationSetting { get; internal set; }
         // Hvilken type entitet mapper vi? (f.eks. "Employee", "Project")
         // Dette hjælper med at undgå sammenstød hvis to forskellige typer har samme GUID
-        public IntegrationEntityType EntityType { get; internal set; }
+        public IntegrationEntityType IntegrationEntityType { get; internal set; }
 
         public string ExternalId { get; internal set; }
-        public DataSource Provider { get; internal set; } 
+       
         public string ObjectVersion { get; internal set; }
 
         public IntegrationMapping() : base()
@@ -26,12 +26,11 @@ namespace Domain.Entity.Mapping
 
         }
 
-        internal IntegrationMapping(Guid localId, IntegrationEntityType entityType, string externalId, DataSource provider,IntegrationSetting setting, string objectVersion)
+        internal IntegrationMapping(Guid localId, IntegrationEntityType integrationEntityType, string externalId,IntegrationSetting setting, string objectVersion)
         {
             LocalId = localId;
-            EntityType = entityType;
+            IntegrationEntityType = integrationEntityType;
             ExternalId = externalId;
-            Provider = provider;
             IntegrationSettingId = setting.Id;
             ObjectVersion = objectVersion;
         }

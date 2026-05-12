@@ -39,6 +39,8 @@ namespace Infrastructure.Data
         //Mappings
         public DbSet<IntegrationMapping> Mappings { get; set; }
         public DbSet<IntegrationSetting> IntegrationSettings { get; set; }
+        public DbSet<Provider> Providers { get; set; }
+        public DbSet<SelectedEntityType> SelectedEntityTypes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -128,7 +130,7 @@ namespace Infrastructure.Data
                       .OnDelete(DeleteBehavior.NoAction);
             });
             modelBuilder.Entity<IntegrationMapping>()
-    .HasIndex(m => new { m.IntegrationSettingId, m.ExternalId, m.EntityType })
+    .HasIndex(m => new { m.IntegrationSettingId, m.ExternalId, m.IntegrationEntityType })
     .IsUnique();
 
         }
