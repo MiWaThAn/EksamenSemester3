@@ -1,11 +1,11 @@
 ﻿using Application.Commands.Person.Queries;
-using Application.DTOs;
 using Application.Interfaces;
 using MediatR;
+using Shared.Model;
 
 namespace Application.Commands.Person.Handlers
 {
-    internal class GetEmployeesByCompanyHandler : IRequestHandler<GetEmployeesByCompanyQuery, IEnumerable<EmployeeDTO>>
+    internal class GetEmployeesByCompanyHandler : IRequestHandler<GetEmployeesByCompanyQuery, IEnumerable<CompanyEmployeeModel>>
     {
         private readonly IUnitOfWork _uow;
 
@@ -14,14 +14,18 @@ namespace Application.Commands.Person.Handlers
             _uow = uow;
         }
 
-        public async Task<IEnumerable<EmployeeDTO>> Handle(GetEmployeesByCompanyQuery request, CancellationToken ct)
+        public async Task<IEnumerable<CompanyEmployeeModel>> Handle(GetEmployeesByCompanyQuery request, CancellationToken ct)
         {
             var company = await _uow.Companies.GetWithEmployeesAsync(request.CompanyId);
 
             if (company == null || company.Employees == null)
-                return Enumerable.Empty<EmployeeDTO>();
+                return Enumerable.Empty<CompanyEmployeeModel>();
 
-            return company.Employees.Select(e => EmployeeDTO.FromEntity(e));
+            return company.Employees.Select(e => new CompanyEmployeeModel
+            {
+                Id = e.Id,
+                FullName = e.Name
+            });
         }
     }
 }

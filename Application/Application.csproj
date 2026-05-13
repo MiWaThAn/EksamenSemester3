@@ -11,6 +11,7 @@
     <Folder Include="Commands\Item\Responses\" />
     <Folder Include="Commands\Mixed\Handlers\" />
     <Folder Include="Commands\Mixed\Responses\" />
+    <Folder Include="DTO\" />
     <Folder Include="Validation\" />
   </ItemGroup>
 
@@ -24,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
+    <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 
 </Project>

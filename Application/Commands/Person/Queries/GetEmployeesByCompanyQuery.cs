@@ -1,10 +1,15 @@
-﻿using Application.DTOs;
-using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using MediatR;
+using Shared.Model;
 
 namespace Application.Commands.Person.Queries
 {
-    public record GetEmployeesByCompanyQuery(Guid CompanyId) : IRequest<IEnumerable<EmployeeDTO>>;
+    public class GetEmployeesByCompanyQuery : IRequest<IEnumerable<CompanyEmployeeModel>>
+    {
+        public Guid CompanyId { get; }
+
+        public GetEmployeesByCompanyQuery(Guid companyId)
+        {
+            CompanyId = companyId;
+        }
+    }
 }

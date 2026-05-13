@@ -26,6 +26,7 @@ builder.Services.AddTransient<ICompanyValidationService, CompanyValidationServic
 builder.Services.AddTransient<IAccountValidationService, AccountValidationService>();
 //builder.Services.AddHostedService<SyncWithExternalWorker>();
 builder.Services.AddHttpClient();
+
 //Adds Infrastructure repos and so on.
 var connectionstring = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddInfrastructure(connectionstring);

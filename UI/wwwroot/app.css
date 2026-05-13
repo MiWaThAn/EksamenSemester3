@@ -99,3 +99,144 @@ h1:focus {
         padding-left: env(safe-area-inset-left);
     }
 }
+
+.admin-container {
+    background-color: #5b6b4e;
+    border-radius: 40px;
+    padding: 2rem;
+    margin: 0;
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+
+.tab-header {
+    display: flex;
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 10px;
+    border: 2px solid #333;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #c0c0c0;
+}
+
+.tab-item {
+    flex: 1;
+    padding: 17px;
+    text-align: center;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+    background-color: #c0c0c0;
+}
+
+    .tab-item.active {
+        background-color: #e0e0e0; 
+        border-bottom: none;
+    }
+    .tab-item:not(.active):hover {
+        background-color: #d1d1d1;
+    }
+
+.list-wrapper {
+    width: 93%;
+    max-width: 600px;
+    background-color: transparent;
+    padding: 0;
+    margin-bottom: 2rem;
+}
+
+.employee-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #e0e0e0;
+    margin-bottom: 12px;
+    border: 1px solid #333;
+    height: 50px;
+    padding-left: 15px;
+    overflow: hidden;
+}
+
+    .employee-row.selected {
+        background-color: #a8c0d8 !important;
+    }
+
+.mail-container {
+    width: 60px;
+    height: 100%;
+    background-color: #c0c0c0; /* En anelse mørkere grå end rækken */
+    border-left: 1px solid #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.mail-badge {
+    position: absolute;
+    top: 2px;
+    right: 5px;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+.bi-envelope-fill {
+    color: white !important;
+    font-size: 2.3rem;
+    display: flex;
+}
+
+.btn-new-registration {
+    background-color: #e0e0e0;
+    border: 2px solid #333;
+    border-radius: 20px;
+    padding: 15px;
+    width: 100%;
+    max-width: 600px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.shadow-box {
+    box-shadow: 0px 8px 0px rgba(0, 0, 0, 0.2);
+}
+
+.page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+
+.content {
+    padding: 0;
+    margin: 0;
+}
+
+main {
+    width: 100%;
+}
+
+/* Specifikke admin-overskrifter */
+.header-section {
+    text-align: center;
+    color: white;
+    margin-bottom: 20px;
+}
+
+    .header-section h1 {
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+.name-text {
+    font-weight: 600;
+}

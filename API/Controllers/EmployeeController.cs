@@ -3,6 +3,7 @@ using Application.Commands.Person.Queries;
 using Application.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Model;
 
 namespace API.Controllers
 {
@@ -20,7 +21,7 @@ namespace API.Controllers
         // GET: api/employee
         // Denne rute henter alle medarbejdere
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<EmployeeDTO>>> GetAll()
+        public async Task<ActionResult<IEnumerable<CompanyEmployeeModel>>> GetAll()
         {
             var result = await _mediator.Send(new GetAllEmployeesQuery());
             return Ok(result);
@@ -29,10 +30,10 @@ namespace API.Controllers
         // GET: api/employee/company/{companyId}
         // Denne rute henter medarbejdere for et firma
         [HttpGet("company/{companyId}")]
-        public async Task<ActionResult<IEnumerable<EmployeeDTO>>> GetByCompany(Guid companyId)
+        public async Task<ActionResult<IEnumerable<CompanyEmployeeModel>>> GetByCompany(Guid companyId)
         {
             var result = await _mediator.Send(new GetEmployeesByCompanyQuery(companyId));
-            return Ok(result);
+            return Ok(result); 
         }
 
         // GET: api/employee/{id}

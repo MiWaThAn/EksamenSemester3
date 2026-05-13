@@ -1,25 +1,32 @@
 ﻿using Application.Commands.Person.Queries;
 using Application.DTOs;
 using Application.Interfaces;
+using Application.Interfaces.Repo.Person;
 using MediatR;
+using Shared.Model;
 
 namespace Application.Commands.Person.Handlers
 {
-    internal class GetAllEmployeesHandler : IRequestHandler<GetAllEmployeesQuery, IEnumerable<EmployeeDTO>>
+    public class GetAllEmployeesHandler : IRequestHandler<GetAllEmployeesQuery, IEnumerable<CompanyEmployeeModel>>
     {
-        private readonly IUnitOfWork _uow;
+        private readonly IEmployeeRepository _repository;
 
-        public GetAllEmployeesHandler(IUnitOfWork uow)
+        public GetAllEmployeesHandler(IEmployeeRepository repository)
         {
-            _uow = uow;
+            _repository = repository;
         }
 
-        public async Task<IEnumerable<EmployeeDTO>> Handle(GetAllEmployeesQuery request, CancellationToken ct)
+        public async Task<IEnumerable<CompanyEmployeeModel>> Handle(GetAllEmployeesQuery request, CancellationToken cancellationToken)
         {
-            var employees = await _uow.Employees.GetAllAsync();
+            var employees = await _repository.GetAllAsync();
 
-            // Vi bruger din FromEntity metode på hver enkelt i listen
-            return employees.Select(e => EmployeeDTO.FromEntity(e));
+            return employees.Select(e => new CompanyEmployeeModel
+            {
+                Id = e.Id,
+                FullName = e.Name,
+                IsSelected = false,
+                NotificationCount = 0
+            });
         }
     }
 }
