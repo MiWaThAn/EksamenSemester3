@@ -1,6 +1,7 @@
 using API;
-using Application;
-//using Application.Workers;
+using API.ExternalApiServices;
+using Application.Interfaces.Services;
+using Application.Workers;
 using Domain.Entity.Person;
 using Domain.Interfaces;
 using Domain.Interfaces.Person;
@@ -24,7 +25,8 @@ builder.Services.AddTransient<IAccountFactory, AccountFactory>();
 builder.Services.AddTransient<ICompanyFactory, CompanyFactory>();
 builder.Services.AddTransient<ICompanyValidationService, CompanyValidationService>();
 builder.Services.AddTransient<IAccountValidationService, AccountValidationService>();
-//builder.Services.AddHostedService<SyncWithExternalWorker>();
+builder.Services.AddHostedService<SyncWithExternalWorker>();
+builder.Services.AddSingleton<IExternalAPIService, EconomicAPIService>();
 builder.Services.AddHttpClient();
 
 //Adds Infrastructure repos and so on.
