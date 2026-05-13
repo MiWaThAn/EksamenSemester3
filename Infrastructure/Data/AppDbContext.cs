@@ -12,6 +12,9 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using Domain.Entity.Person;
+using System.Diagnostics;
+using Domain.Entity.Item.Activities;
 using Activity = Domain.Entity.Item.Activities.Activity;
 
 namespace Infrastructure.Data
@@ -120,6 +123,36 @@ namespace Infrastructure.Data
             modelBuilder.Entity<Company>()
                 .HasIndex(c => c.CVRNumber)
                 .IsUnique();
+
+            modelBuilder.Entity<Account>(entity =>
+            {
+                entity.Property(a => a.PhoneNumber)
+                    .HasConversion(v => v.Value, v => new PhoneNumber(v));
+            });
+
+            modelBuilder.Entity<Company>(entity =>
+            {
+                entity.Property(c => c.CVRNumber)
+                    .HasConversion(
+                        v => v.Value,
+                        v => new CvrNumber(v)
+                    );
+
+                entity.Property(c => c.Email)
+                    .HasConversion(
+                        v => v.Value,
+                        v => new EmailAddress(v)
+                    );
+            });
+
+            modelBuilder.Entity<Employee>(entity =>
+            {
+                entity.Property(e => e.Email)
+                    .HasConversion(
+                        v => v.Value,
+                        v => new EmailAddress(v)
+                    );
+            });
 
             modelBuilder.Entity<ProjectActivity>(entity =>
             {

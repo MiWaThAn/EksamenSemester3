@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using Infrastructure.Data;
+using Application;
 using API;
 using API.ExternalApiServices;
 using Application.Interfaces.Services;
@@ -30,6 +33,7 @@ builder.Services.AddHttpClient();
 //Adds Infrastructure repos and so on.
 var connectionstring = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddInfrastructure(connectionstring);
+builder.Services.AddApplication();
 
 var app = builder.Build();
 

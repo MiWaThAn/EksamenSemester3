@@ -23,7 +23,7 @@ namespace Application.Commands.Person.Handlers
         {
 
             var company = await _uow.Companies.GetByIdAsync(request.CompanyId);
-            if (company == null) throw new Exception("Company not found, big boss!");
+            if (company == null) throw new Exception("Company not found");
 
             var employeeBuilder = new EmployeeBuilder()
                 .WithName(request.Name)

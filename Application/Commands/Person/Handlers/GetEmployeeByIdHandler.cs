@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Application.Commands.Person.Handlers
 {
-    public class GetEmployeeByIdHandler : IRequestHandler<GetEmployeeByIdQuery, EmployeeDTO>
+    internal class GetEmployeeByIdHandler : IRequestHandler<GetEmployeeByIdQuery, EmployeeDTO>
     {
         private readonly IUnitOfWork _uow;
 
