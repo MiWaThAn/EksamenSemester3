@@ -1,0 +1,30 @@
+﻿@page "/time-registration"
+@inject IJSRuntime JS
+
+
+<h2>Stop-Ur</h2>
+
+<div style="font-size:2rem; margin-bottom:1rem;">
+	<span id="display">00:00:00.0</span>
+</div>
+
+<button type="button">Start</button>
+<button type="button">Stop</button>
+<button type="button">Reset</button>
+
+
+@code {
+	private IJSObjectReference? _module;
+
+	protected override async Task OnAfterRenderAsync (bool firstrender)
+	{
+		if (firstrender)
+		{
+			_module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/stopwatch.js");
+			await _module.InvokeVoidAsync("intializeStopwatch");
+		}
+	}
+	private async Task Start() => await _module!.InvokeVoidAsync("startStopwatch");
+	private async Task Stop() => await _module!.InvokeVoidAsync("stopStopwatch");
+	private async Task Reset() => await _module!.InvokeVoidAsync("resetStopwatch");
+}
