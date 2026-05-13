@@ -33,9 +33,10 @@ namespace Application.Workers
                     break;
                 }
 
-                try {     
-                _logger.LogInformation("SyncWithExternalWorker is running at: {time}", DateTime.UtcNow);
-                    
+                try
+                {
+                    _logger.LogInformation("SyncWithExternalWorker is running at: {time}", DateTime.UtcNow);
+
                     //Skal have nogle if statements ift de indstillinger firma har sat.
 
 
@@ -47,7 +48,7 @@ namespace Application.Workers
                 await Task.Delay(TimeSpan.FromSeconds(_intervalBetweenSyncs), stoppingToken);
 
             }
-           
-            }
+
         }
-    }   
+    }
+}

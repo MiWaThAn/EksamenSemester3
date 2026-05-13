@@ -9,5 +9,7 @@ namespace Application.Interfaces.Services
     {
         Task<EmployeeDTO> GetByIdAsync(Guid id);
         Task<EmployeeDTO> CreateEmployeeAsync();
+        Task<IEnumerable<EmployeeDTO>> GetAllEmployeesAsync();
+        Task<IEnumerable<EmployeeDTO>> GetEmployeesByCompanyIdAsync(Guid companyId);
     }
 }

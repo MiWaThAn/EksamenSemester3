@@ -14,8 +14,20 @@ namespace UI
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 });
 
+            var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
+
+            if (string.IsNullOrEmpty(apiBaseUrl))
+            {
+                // If dev tunnel doesn't work, try localhost instead
+                apiBaseUrl = "https://localhost:7020/";
+            }
+
             builder.Services.AddMauiBlazorWebView();
 
+            builder.Services.AddScoped(sp => new HttpClient
+            {
+                BaseAddress = new Uri(apiBaseUrl)
+            });
 #if DEBUG
     		builder.Services.AddBlazorWebViewDeveloperTools();
     		builder.Logging.AddDebug();

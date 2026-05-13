@@ -46,7 +46,7 @@
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
         <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
-        <UserSecretsId>e18aae3f-e471-45bb-945e-26584ebc23f9</UserSecretsId>
+        <UserSecretsId>a2e7c75c-ffad-45a2-a5c9-142d10a040ff</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
