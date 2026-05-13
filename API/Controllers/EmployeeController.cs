@@ -18,15 +18,6 @@ namespace API.Controllers
             _mediator = mediator;
         }
 
-        // GET: api/employee
-        // Denne rute henter alle medarbejdere
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<CompanyEmployeeModel>>> GetAll()
-        {
-            var result = await _mediator.Send(new GetAllEmployeesQuery());
-            return Ok(result);
-        }
-
         // GET: api/employee/company/{companyId}
         // Denne rute henter medarbejdere for et firma
         [HttpGet("company/{companyId}")]
