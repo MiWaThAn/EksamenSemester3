@@ -1,7 +1,6 @@
 using API;
 using API.ExternalApiServices;
 using Application.Interfaces.Services;
-using Application.Workers;
 using Domain.Entity.Person;
 using Domain.Interfaces;
 using Domain.Interfaces.Person;
@@ -10,6 +9,8 @@ using Infrastructure;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Application;
+using Application.Workers;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.

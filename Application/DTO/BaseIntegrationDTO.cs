@@ -1,4 +1,5 @@
 ﻿using Domain.Entity.Mapping;
+using Domain.Entity.Mapping.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Text;
