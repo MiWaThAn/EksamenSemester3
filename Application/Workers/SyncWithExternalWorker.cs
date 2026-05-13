@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Domain.Interfaces;
 using System.Linq.Expressions;
+using Application.Interfaces.Services;
 
 namespace Application.Workers
 {

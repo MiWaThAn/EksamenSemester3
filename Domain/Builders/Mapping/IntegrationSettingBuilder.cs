@@ -4,26 +4,28 @@ using Domain.Guards;
 using System;
 using System.Collections.Generic;
 using System.Text;
-
+using Domain.Entity.Mapping.ValueObjects;
 namespace Domain.Builders.Mapping
 {
     public class IntegrationSettingBuilder
     {
         private Guid CompanyId;
-        private DataSource Provider;
+        private Guid ProviderId;
+        private Provider Provider;
         private string Key;
         private string EncryptedValue;
-
+        private List<IntegrationEntityType> SelectedEntityTypes = new();
         public IntegrationSettingBuilder WithCompany(Company company)
         {
             Guard.AgainstNull(company, nameof(company));
             CompanyId = company.Id;
             return this;
         }
-        public IntegrationSettingBuilder WithProvider(DataSource provider)
+        public IntegrationSettingBuilder WithProvider(Provider provider)
         {
             Guard.AgainstNull(provider, nameof(provider));
             Provider = provider;
+            ProviderId = provider.Id;
             return this;
         }
         public IntegrationSettingBuilder WithKey(string key)
@@ -38,9 +40,21 @@ namespace Domain.Builders.Mapping
             EncryptedValue = encryptedValue;
             return this;
         }
+        public IntegrationSettingBuilder WithIntegrationEntityTypes(List<IntegrationEntityType> entityTypes)
+        {
+            Guard.AgainstNull(entityTypes, nameof(entityTypes));
+            SelectedEntityTypes = entityTypes;
+            return this;
+        }
         internal IntegrationSetting Build()
         {
-            return new IntegrationSetting(CompanyId, Provider, Key, EncryptedValue);
+            return new IntegrationSetting(
+            CompanyId,
+            ProviderId,
+            SelectedEntityTypes,
+            Provider,
+            Key,
+            EncryptedValue);
         }
     }
 }
