@@ -1,13 +1,14 @@
-using Microsoft.EntityFrameworkCore;
-using Infrastructure.Data;
-
 using API;
+using API.ExternalApiServices;
+using Application.Interfaces.Services;
+using Application.Workers;
 using Domain.Entity.Person;
 using Domain.Interfaces.Person;
 using Domain.Services.Person;
 using Infrastructure;
+using Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
-using Application.Workers;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -24,6 +25,7 @@ builder.Services.AddTransient<ICompanyFactory, CompanyFactory>();
 builder.Services.AddTransient<ICompanyValidationService, CompanyValidationService>();
 builder.Services.AddTransient<IAccountValidationService, AccountValidationService>();
 builder.Services.AddHostedService<SyncWithExternalWorker>();
+builder.Services.AddSingleton<IExternalAPIService, EconomicAPIService>();
 builder.Services.AddHttpClient();
 //Adds Infrastructure repos and so on.
 var connectionstring = builder.Configuration.GetConnectionString("DefaultConnection");

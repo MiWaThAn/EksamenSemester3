@@ -16,13 +16,13 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Username = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     HashedPassword = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     HashedPin = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CompanyId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     EmployeeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     LastSync = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PhoneNumber_Value = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -40,8 +40,8 @@ namespace Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email_Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email_Value = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber_Value = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -54,14 +54,11 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Mappings",
+                name: "Providers",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    LocalId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    EntityType = table.Column<int>(type: "int", nullable: false),
-                    ExternalId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Provider = table.Column<int>(type: "int", nullable: false),
+                    Datasource = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -70,7 +67,7 @@ namespace Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Mappings", x => x.Id);
+                    table.PrimaryKey("PK_Providers", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -79,9 +76,9 @@ namespace Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CVRNumber = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     AccountId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CVRNumber_Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email_Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -95,6 +92,31 @@ namespace Infrastructure.Migrations
                         name: "FK_Companies_Accounts_AccountId",
                         column: x => x.AccountId,
                         principalTable: "Accounts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProviderUrls",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ProviderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EntityType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Url = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProviderUrls", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProviderUrls_Providers_ProviderId",
+                        column: x => x.ProviderId,
+                        principalTable: "Providers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -187,7 +209,7 @@ namespace Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CompanyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Provider = table.Column<int>(type: "int", nullable: false),
+                    ProviderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Key = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EncryptedValue = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false),
@@ -205,6 +227,11 @@ namespace Infrastructure.Migrations
                         principalTable: "Companies",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_IntegrationSettings_Providers_ProviderId",
+                        column: x => x.ProviderId,
+                        principalTable: "Providers",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -244,11 +271,56 @@ namespace Infrastructure.Migrations
                         column: x => x.CustomerId,
                         principalTable: "Customers",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Mappings",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LocalId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IntegrationSettingId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EntityType = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ExternalId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ObjectVersion = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Mappings", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Projects_Employees_ResponsibleEmployeeId",
-                        column: x => x.ResponsibleEmployeeId,
-                        principalTable: "Employees",
+                        name: "FK_Mappings_IntegrationSettings_IntegrationSettingId",
+                        column: x => x.IntegrationSettingId,
+                        principalTable: "IntegrationSettings",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SelectedEntityTypes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IntegrationSettingId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EntityType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SelectedEntityTypes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SelectedEntityTypes_IntegrationSettings_IntegrationSettingId",
+                        column: x => x.IntegrationSettingId,
+                        principalTable: "IntegrationSettings",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -296,11 +368,10 @@ namespace Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     EmployeeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ActivityId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ProjectActivityId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     Discriminator = table.Column<string>(type: "nvarchar(21)", maxLength: 21, nullable: false),
-                    ProjectActivityId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     ExpenseId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     StartTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     EndTime = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -313,11 +384,6 @@ namespace Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Registration", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Registration_Activities_ActivityId",
-                        column: x => x.ActivityId,
-                        principalTable: "Activities",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Registration_Employees_EmployeeId",
                         column: x => x.EmployeeId,
@@ -341,6 +407,12 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Accounts_Username",
+                table: "Accounts",
+                column: "Username",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Activities_CompanyId",
                 table: "Activities",
                 column: "CompanyId");
@@ -349,6 +421,12 @@ namespace Infrastructure.Migrations
                 name: "IX_Companies_AccountId",
                 table: "Companies",
                 column: "AccountId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Companies_CVRNumber",
+                table: "Companies",
+                column: "CVRNumber",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -372,6 +450,17 @@ namespace Infrastructure.Migrations
                 name: "IX_IntegrationSettings_CompanyId",
                 table: "IntegrationSettings",
                 column: "CompanyId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_IntegrationSettings_ProviderId",
+                table: "IntegrationSettings",
+                column: "ProviderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Mappings_IntegrationSettingId_ExternalId_EntityType",
+                table: "Mappings",
+                columns: new[] { "IntegrationSettingId", "ExternalId", "EntityType" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProjectActivities_ActivityId",
@@ -399,14 +488,9 @@ namespace Infrastructure.Migrations
                 column: "CustomerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Projects_ResponsibleEmployeeId",
-                table: "Projects",
-                column: "ResponsibleEmployeeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Registration_ActivityId",
-                table: "Registration",
-                column: "ActivityId");
+                name: "IX_ProviderUrls_ProviderId",
+                table: "ProviderUrls",
+                column: "ProviderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Registration_EmployeeId",
@@ -427,19 +511,27 @@ namespace Infrastructure.Migrations
                 name: "IX_Registration_ProjectId",
                 table: "Registration",
                 column: "ProjectId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SelectedEntityTypes_IntegrationSettingId",
+                table: "SelectedEntityTypes",
+                column: "IntegrationSettingId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "IntegrationSettings");
-
-            migrationBuilder.DropTable(
                 name: "Mappings");
 
             migrationBuilder.DropTable(
+                name: "ProviderUrls");
+
+            migrationBuilder.DropTable(
                 name: "Registration");
+
+            migrationBuilder.DropTable(
+                name: "SelectedEntityTypes");
 
             migrationBuilder.DropTable(
                 name: "Expenses");
@@ -448,19 +540,25 @@ namespace Infrastructure.Migrations
                 name: "ProjectActivities");
 
             migrationBuilder.DropTable(
+                name: "IntegrationSettings");
+
+            migrationBuilder.DropTable(
                 name: "Activities");
-
-            migrationBuilder.DropTable(
-                name: "Projects");
-
-            migrationBuilder.DropTable(
-                name: "Customers");
 
             migrationBuilder.DropTable(
                 name: "Employees");
 
             migrationBuilder.DropTable(
+                name: "Projects");
+
+            migrationBuilder.DropTable(
+                name: "Providers");
+
+            migrationBuilder.DropTable(
                 name: "Companies");
+
+            migrationBuilder.DropTable(
+                name: "Customers");
 
             migrationBuilder.DropTable(
                 name: "Accounts");

@@ -14,7 +14,7 @@ namespace Domain.Builders.Mapping
         private IntegrationEntityType EntityType;
         private string ExternalId;
         private IntegrationSetting Setting;
-        private DataSource Provider;
+        
         private string ObjectVersion;
 
         public IntegrationMappingBuilder WithLocalId(Base @base)
@@ -33,11 +33,7 @@ namespace Domain.Builders.Mapping
             ExternalId = externalId;
             return this;
         }
-        public IntegrationMappingBuilder WithDataSource(DataSource dataSource)
-        {
-            Provider = dataSource;
-            return this;
-        }
+        
         internal IntegrationMappingBuilder WithSetting(IntegrationSetting setting)
         {
             Guard.AgainstNull(Setting,nameof(Setting));
@@ -53,7 +49,7 @@ namespace Domain.Builders.Mapping
         internal IntegrationMapping Build()
         {
             Guard.AgainstNullOrEmpty(ExternalId, nameof(ExternalId));
-            return new IntegrationMapping(LocalId, EntityType, ExternalId, Provider, Setting,ObjectVersion);
+            return new IntegrationMapping(LocalId, EntityType, ExternalId,Setting,ObjectVersion);
         }
     }
 }

@@ -9,13 +9,12 @@ namespace Domain.Entity.Mapping
     {
         
         public DataSource Datasource { get; private set; }
-        private readonly Dictionary<IntegrationEntityType, string> _urls = new();  
-
-        public IReadOnlyDictionary<IntegrationEntityType, string> Urls => _urls;
+        private readonly List<ProviderUrl> _urls = new();
+        public IReadOnlyCollection<ProviderUrl> Urls => _urls.AsReadOnly();
         //settings.Provider.Urls[IntegrationEntityType.Employee] = "https://restapi.e-conomic.com/employees";
-        
 
-            internal Provider(DataSource datasource, Dictionary<IntegrationEntityType, string> urls)
+        public Provider() { }
+        internal Provider(DataSource datasource, Dictionary<IntegrationEntityType, string> urls)
             {
             Guard.AgainstNull(datasource, nameof(datasource));
             Guard.AgainstNull(urls, nameof(urls));
@@ -32,10 +31,10 @@ namespace Domain.Entity.Mapping
             Guard.AgainstNull(entityType, nameof(entityType));
             Guard.AgainstNullOrEmpty(url, nameof(url));
 
-            if (_urls.ContainsKey(entityType))
+            if (_urls.Any(u => u.EntityType == entityType))
                 throw new Exception($"URL for '{entityType}' already exists.");
 
-            _urls[entityType] = url;
+            _urls.Add(new ProviderUrl(entityType, url));
         }
 
         public void UpdateUrl(IntegrationEntityType entityType, string url)
@@ -43,14 +42,22 @@ namespace Domain.Entity.Mapping
             Guard.AgainstNull(entityType, nameof(entityType));
             Guard.AgainstNullOrEmpty(url, nameof(url));
 
-            _urls[entityType] = url;
+            var existing = _urls.FirstOrDefault(u => u.EntityType == entityType);
+            if (existing == null)
+                throw new Exception($"No URL registered for '{entityType}'.");
+
+            existing.UpdateUrl(url);
         }
 
         public void RemoveUrl(IntegrationEntityType entityType)
         {
             Guard.AgainstNull(entityType, nameof(entityType));
 
-            _urls.Remove(entityType);
+            var existing = _urls.FirstOrDefault(u => u.EntityType == entityType);
+            if (existing == null)
+                throw new Exception($"No URL registered for '{entityType}'.");
+
+            _urls.Remove(existing);
         }
 
 

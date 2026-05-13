@@ -1,4 +1,5 @@
-﻿using Application.Interfaces;
+﻿
+using Application.Interfaces;
 using Application.Interfaces.Repo.Item;
 using Application.Interfaces.Repo.Item.IRegistrationRepo;
 using Application.Interfaces.Repo.Mapping;
@@ -44,7 +45,7 @@ namespace Infrastructure
         //Mappings
         public IIntegrationMappingRepository Mappings { get; }
         public IIntegrationSettingsRepository IntegrationSettings { get; }
-
+        public IProviderRepository Providers { get; }
         public UnitOfWork(AppDbContext context)
         {
             _context = context;
@@ -64,7 +65,7 @@ namespace Infrastructure
 
             Mappings = new IntegrationMappingsRepository(_context);
             IntegrationSettings = new IntegrationSettingsRepository(_context);
-
+            Providers = new ProviderRepository(_context);
         }
 
         public async Task BeginTransactionAsync(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)

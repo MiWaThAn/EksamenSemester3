@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260506083610_InitialCreate")]
+    [Migration("20260513131241_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -234,8 +234,6 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.HasIndex("ResponsibleEmployeeId");
-
                     b.ToTable("Projects");
                 });
 
@@ -243,9 +241,6 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ActivityId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
@@ -289,8 +284,6 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ActivityId");
-
                     b.HasIndex("EmployeeId");
 
                     b.HasIndex("ProjectActivityId");
@@ -316,12 +309,16 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("EntityType")
-                        .HasColumnType("int");
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ExternalId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("IntegrationSettingId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -329,8 +326,9 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("LocalId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Provider")
-                        .HasColumnType("int");
+                    b.Property<string>("ObjectVersion")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -342,6 +340,9 @@ namespace Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IntegrationSettingId", "ExternalId", "EntityType")
+                        .IsUnique();
 
                     b.ToTable("Mappings");
                 });
@@ -372,8 +373,8 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Provider")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ProviderId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -388,7 +389,122 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("CompanyId");
 
+                    b.HasIndex("ProviderId");
+
                     b.ToTable("IntegrationSettings");
+                });
+
+            modelBuilder.Entity("Domain.Entity.Mapping.Provider", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Datasource")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Providers");
+                });
+
+            modelBuilder.Entity("Domain.Entity.Mapping.ProviderUrl", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("ProviderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProviderId");
+
+                    b.ToTable("ProviderUrls");
+                });
+
+            modelBuilder.Entity("Domain.Entity.Mapping.SelectedEntityType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("IntegrationSettingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IntegrationSettingId");
+
+                    b.ToTable("SelectedEntityTypes");
                 });
 
             modelBuilder.Entity("Domain.Entity.Person.Account", b =>
@@ -422,9 +538,6 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("LastSync")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
@@ -436,9 +549,19 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "PhoneNumber", "Domain.Entity.Person.Account.PhoneNumber#PhoneNumber", b1 =>
+                        {
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+                        });
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Username")
+                        .IsUnique();
 
                     b.ToTable("Accounts");
                 });
@@ -452,11 +575,19 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("AccountId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("CVRNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -474,27 +605,12 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.ComplexProperty(typeof(Dictionary<string, object>), "CVRNumber", "Domain.Entity.Person.Company.CVRNumber#CvrNumber", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-                        });
-
-                    b.ComplexProperty(typeof(Dictionary<string, object>), "Email", "Domain.Entity.Person.Company.Email#EmailAddress", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-                        });
-
                     b.HasKey("Id");
 
                     b.HasIndex("AccountId")
+                        .IsUnique();
+
+                    b.HasIndex("CVRNumber")
                         .IsUnique();
 
                     b.ToTable("Companies");
@@ -519,10 +635,6 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
@@ -534,8 +646,13 @@ namespace Infrastructure.Migrations
 
                     b.ComplexProperty(typeof(Dictionary<string, object>), "Email", "Domain.Entity.Person.Customer.Email#EmailAddress", b1 =>
                         {
-                            b1.IsRequired();
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+                        });
 
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "PhoneNumber", "Domain.Entity.Person.Customer.PhoneNumber#PhoneNumber", b1 =>
+                        {
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
@@ -633,13 +750,11 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entity.Item.Activities.Activity", b =>
                 {
-                    b.HasOne("Domain.Entity.Person.Company", "Company")
+                    b.HasOne("Domain.Entity.Person.Company", null)
                         .WithMany("Activities")
                         .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Company");
                 });
 
             modelBuilder.Entity("Domain.Entity.Item.Activities.ProjectActivity", b =>
@@ -650,38 +765,32 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entity.Item.Project", "Project")
+                    b.HasOne("Domain.Entity.Item.Project", null)
                         .WithMany("Activities")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entity.Person.Employee", "Employee")
+                    b.HasOne("Domain.Entity.Person.Employee", null)
                         .WithMany()
                         .HasForeignKey("ResponsibleEmployeeId")
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Activity");
-
-                    b.Navigation("Employee");
-
-                    b.Navigation("Project");
                 });
 
             modelBuilder.Entity("Domain.Entity.Item.Expense", b =>
                 {
-                    b.HasOne("Domain.Entity.Person.Company", "Company")
+                    b.HasOne("Domain.Entity.Person.Company", null)
                         .WithMany("Expenses")
                         .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Company");
                 });
 
             modelBuilder.Entity("Domain.Entity.Item.Project", b =>
                 {
-                    b.HasOne("Domain.Entity.Person.Company", "Company")
+                    b.HasOne("Domain.Entity.Person.Company", null)
                         .WithMany("Projects")
                         .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -691,25 +800,12 @@ namespace Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("CustomerId");
 
-                    b.HasOne("Domain.Entity.Person.Employee", "ResponsibleEmployee")
-                        .WithMany()
-                        .HasForeignKey("ResponsibleEmployeeId");
-
-                    b.Navigation("Company");
-
                     b.Navigation("Customer");
-
-                    b.Navigation("ResponsibleEmployee");
                 });
 
             modelBuilder.Entity("Domain.Entity.Item.Registrations.Registration", b =>
                 {
-                    b.HasOne("Domain.Entity.Item.Activities.Activity", "Activity")
-                        .WithMany()
-                        .HasForeignKey("ActivityId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("Domain.Entity.Person.Employee", "Employee")
+                    b.HasOne("Domain.Entity.Person.Employee", null)
                         .WithMany("Registrations")
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -717,19 +813,25 @@ namespace Infrastructure.Migrations
 
                     b.HasOne("Domain.Entity.Item.Activities.ProjectActivity", null)
                         .WithMany("Registrations")
-                        .HasForeignKey("ProjectActivityId");
+                        .HasForeignKey("ProjectActivityId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("Domain.Entity.Item.Project", "Project")
+                    b.HasOne("Domain.Entity.Item.Project", null)
                         .WithMany("Registrations")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+                });
 
-                    b.Navigation("Activity");
+            modelBuilder.Entity("Domain.Entity.Mapping.IntegrationMapping", b =>
+                {
+                    b.HasOne("Domain.Entity.Mapping.IntegrationSetting", "IntegrationSetting")
+                        .WithMany("Mappings")
+                        .HasForeignKey("IntegrationSettingId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
-                    b.Navigation("Employee");
-
-                    b.Navigation("Project");
+                    b.Navigation("IntegrationSetting");
                 });
 
             modelBuilder.Entity("Domain.Entity.Mapping.IntegrationSetting", b =>
@@ -737,6 +839,32 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entity.Person.Company", null)
                         .WithMany("Settings")
                         .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entity.Mapping.Provider", "Provider")
+                        .WithMany()
+                        .HasForeignKey("ProviderId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Provider");
+                });
+
+            modelBuilder.Entity("Domain.Entity.Mapping.ProviderUrl", b =>
+                {
+                    b.HasOne("Domain.Entity.Mapping.Provider", null)
+                        .WithMany("Urls")
+                        .HasForeignKey("ProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Entity.Mapping.SelectedEntityType", b =>
+                {
+                    b.HasOne("Domain.Entity.Mapping.IntegrationSetting", null)
+                        .WithMany("EntityTypes")
+                        .HasForeignKey("IntegrationSettingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -771,13 +899,11 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entity.Item.Registrations.ExpenseRegistration", b =>
                 {
-                    b.HasOne("Domain.Entity.Item.Expense", "Expense")
+                    b.HasOne("Domain.Entity.Item.Expense", null)
                         .WithMany()
                         .HasForeignKey("ExpenseId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-
-                    b.Navigation("Expense");
                 });
 
             modelBuilder.Entity("Domain.Entity.Item.Activities.ProjectActivity", b =>
@@ -790,6 +916,18 @@ namespace Infrastructure.Migrations
                     b.Navigation("Activities");
 
                     b.Navigation("Registrations");
+                });
+
+            modelBuilder.Entity("Domain.Entity.Mapping.IntegrationSetting", b =>
+                {
+                    b.Navigation("EntityTypes");
+
+                    b.Navigation("Mappings");
+                });
+
+            modelBuilder.Entity("Domain.Entity.Mapping.Provider", b =>
+                {
+                    b.Navigation("Urls");
                 });
 
             modelBuilder.Entity("Domain.Entity.Person.Account", b =>

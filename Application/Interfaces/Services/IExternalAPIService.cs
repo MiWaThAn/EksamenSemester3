@@ -12,10 +12,9 @@ namespace Application.Interfaces.Services
 
 
 
-            Task<IEnumerable<CustomerDTO>> GetCustomersAsync();
-            Task<IEnumerable<ProjectDTO>> GetProjectsAsync();
-            Task<IEnumerable<EmployeeDTO>> GetEmployeesAsync();
+            
+           // Task<IEnumerable<EmployeeDTO>> GetEmployeesAsync();
         }
-    }
+    
 
 }

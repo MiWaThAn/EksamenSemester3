@@ -15,7 +15,7 @@ namespace Domain.Entity.Mapping
         public IntegrationSetting IntegrationSetting { get; internal set; }
         // Hvilken type entitet mapper vi? (f.eks. "Employee", "Project")
         // Dette hjælper med at undgå sammenstød hvis to forskellige typer har samme GUID
-        public IntegrationEntityType IntegrationEntityType { get; internal set; }
+        public IntegrationEntityType EntityType { get; internal set; }
 
         public string ExternalId { get; internal set; }
        
@@ -29,7 +29,7 @@ namespace Domain.Entity.Mapping
         internal IntegrationMapping(Guid localId, IntegrationEntityType integrationEntityType, string externalId,IntegrationSetting setting, string objectVersion)
         {
             LocalId = localId;
-            IntegrationEntityType = integrationEntityType;
+            EntityType = integrationEntityType;
             ExternalId = externalId;
             IntegrationSettingId = setting.Id;
             ObjectVersion = objectVersion;

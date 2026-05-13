@@ -13,8 +13,8 @@ namespace Domain.Entity.Mapping
         public Guid CompanyId { get; private set; }
         public Provider Provider { get; private set; }
         public Guid ProviderId { get; private set; } // F.eks. "Economic" eller "Dinero"
-        private readonly List<SelectedEntityType> SelectedEntityTypes = new();
-        public IReadOnlyCollection<SelectedEntityType> EntityTypes => SelectedEntityTypes.AsReadOnly();
+        private readonly List<SelectedEntityType> _entityTypes = new();
+        public IReadOnlyCollection<SelectedEntityType> EntityTypes => _entityTypes.AsReadOnly();
 
         public string Key { get; private set; }      // F.eks. "AgreementGrantToken"
         public string EncryptedValue { get; private set; }    // Selve token-strengen
@@ -33,10 +33,10 @@ namespace Domain.Entity.Mapping
             Guard.AgainstNullOrEmpty(encryptedValue, nameof(encryptedValue));
             Guard.AgainstNullOrEmpty(key, nameof(key));
             Guard.AgainstNull(selectedEntityTypes, nameof(selectedEntityTypes));
-            
+
             var unsupported = selectedEntityTypes
-                .Where(e => !provider.Urls.ContainsKey(e))
-                .ToList();
+            .Where(e => !provider.Urls.Any(u => u.EntityType == e))
+            .ToList();
 
             if (unsupported.Any())
             {
@@ -44,7 +44,7 @@ namespace Domain.Entity.Mapping
                     $"Provider does not support: {string.Join(", ", unsupported)}");
             }
             foreach (var entityType in selectedEntityTypes)
-                SelectedEntityTypes.Add(new SelectedEntityType(entityType));
+                _entityTypes.Add(new SelectedEntityType(entityType));
             CompanyId = companyId;
             ProviderId = providerId;
             Key = key;
@@ -71,14 +71,15 @@ namespace Domain.Entity.Mapping
         public void AddEntityType(IntegrationEntityType entityType, Provider provider)
         {
             Guard.AgainstNull(entityType, nameof(entityType));
+            Guard.AgainstNull(provider, nameof(provider));
 
-            if (!provider.Urls.ContainsKey(entityType))
+            if (!provider.Urls.Any(u => u.EntityType == entityType))
                 throw new Exception($"Provider does not support '{entityType}'.");
 
-            if (SelectedEntityTypes.Any(e => e.EntityType == entityType))
+            if (_entityTypes.Any(e => e.EntityType == entityType))
                 throw new Exception($"'{entityType}' is already activated.");
 
-            SelectedEntityTypes.Add(new SelectedEntityType(entityType));
+            _entityTypes.Add(new SelectedEntityType(entityType));
             UpdatedAt = DateTime.UtcNow;
         }
 
@@ -86,11 +87,11 @@ namespace Domain.Entity.Mapping
         {
             Guard.AgainstNull(entityType, nameof(entityType));
 
-            var existing =SelectedEntityTypes.FirstOrDefault(e => e.EntityType == entityType);
+            var existing =_entityTypes.FirstOrDefault(e => e.EntityType == entityType);
             if (existing == null)
                 throw new Exception($"'{entityType}' is not activated.");
 
-            SelectedEntityTypes.Remove(existing);
+            _entityTypes.Remove(existing);
             UpdatedAt = DateTime.UtcNow;
         }
         public IntegrationMapping CreateMapping(IntegrationMappingBuilder builder)
