@@ -8,9 +8,9 @@
 	<span id="display">00:00:00.0</span>
 </div>
 
-<button type="button">Start</button>
-<button type="button">Stop</button>
-<button type="button">Reset</button>
+<button type="button" @onclick="Start">Start</button>
+<button type="button" @onclick="Stop">Stop</button>
+<button type="button" @onclick="Reset">Reset</button>
 
 
 @code {
@@ -21,7 +21,7 @@
 		if (firstrender)
 		{
 			_module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/stopwatch.js");
-			await _module.InvokeVoidAsync("intializeStopwatch");
+			await _module.InvokeVoidAsync("initializeStopwatch");
 		}
 	}
 	private async Task Start() => await _module!.InvokeVoidAsync("startStopwatch");
