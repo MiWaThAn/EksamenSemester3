@@ -11,9 +11,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Core" Version="1.6.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.7" />
     <Folder Include="Repositories\Item\" />
-    <Folder Include="Repositories\Person\" />
   </ItemGroup>
 
   <ItemGroup>

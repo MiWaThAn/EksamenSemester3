@@ -6,7 +6,7 @@ namespace Domain.Interfaces.Item
 {
     public interface IHashingService
     {
-        string HashPassword(string plainTextPassword);
-        bool VerifyPassword(string hash, string plainTextPassword);
+        string Hash(string plainText);
+        bool Verify(string hash, string plainText);
     }
 }

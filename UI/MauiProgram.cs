@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using UI.Services.Auth;
 
 namespace UI
 {
@@ -13,6 +14,17 @@ namespace UI
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 });
+
+            // Erstat med din Dev Tunnel URL fra før!
+            var apiBaseUrl = "https://din-tunnel-id.euw.devtunnels.ms/";
+
+            builder.Services.AddScoped(sp => new HttpClient
+            {
+                BaseAddress = new Uri(apiBaseUrl)
+            });
+
+            // Registrer din AuthService, som vi lavede tidligere
+            builder.Services.AddScoped<IAuthService, AuthService>();
 
             builder.Services.AddMauiBlazorWebView();
 

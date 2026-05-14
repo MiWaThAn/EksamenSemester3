@@ -16,6 +16,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Data;
+using Application.Interfaces.Repo.Person.Auth;
+using Infrastructure.Repositories.Person.Auth;
 
 namespace Infrastructure
 {
@@ -28,7 +30,10 @@ namespace Infrastructure
         public ICustomerRepository Customers { get; }
         public IEmployeeRepository Employees { get; }
         public ICompanyRepository Companies { get; }
+        //Auth
         public IAccountRepository Accounts { get; }
+        public IRoleRepository Roles { get; }
+        public IPermissionRepository Permissions { get; }
 
         //Item
         public IProjectRepository Projects { get; }
@@ -52,6 +57,8 @@ namespace Infrastructure
             Employees = new EmployeeRepository(_context);
             Companies = new CompanyRepository(_context);
             Accounts = new AccountRepository(_context);
+            Roles = new RoleRepository(_context);
+            Permissions = new PermissionRepository(_context);
 
             Projects = new ProjectRepository(_context);
             ProjectActivities = new ProjectActivityRepository(_context);
@@ -67,21 +74,21 @@ namespace Infrastructure
 
         }
 
-        public async Task BeginTransactionAsync(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        public async Task BeginTransactionAsync(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, CancellationToken cancellationToken = default)
         {
             if (_currentTransaction != null) return;
-            _currentTransaction = await _context.Database.BeginTransactionAsync(isolationLevel);
+            _currentTransaction = await _context.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
         }
         //Save changes to the database
-        public async Task<int> CompleteAsync()
+        public async Task<int> CompleteAsync(CancellationToken cancellationToken = default)
         {
-            return await _context.SaveChangesAsync();
+            return await _context.SaveChangesAsync(cancellationToken);
         }
-        public async Task CommitTransactionAsync()
+        public async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
         {
             if (_currentTransaction != null)
             {
-                await _currentTransaction.CommitAsync();
+                await _currentTransaction.CommitAsync(cancellationToken);
                 await _currentTransaction.DisposeAsync();
                 _currentTransaction = null;
             }

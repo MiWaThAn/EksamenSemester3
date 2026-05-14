@@ -15,12 +15,13 @@ namespace Domain.Interfaces.Person
             EmailAddress emailAddress,
             PhoneNumber phoneNumber,
             string username,
-            string plainTextPassword
-            );
+            string plainTextPassword,
+            CancellationToken ct = default);
         Task<Result<Account>> RegisterEmployeeAccountAsync(
             PhoneNumber phoneNumber,
             string username,
             string plainTextPassword,
-            Employee employee);
+            Employee employee,
+            CancellationToken ct = default);
     }
 }

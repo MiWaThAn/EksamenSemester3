@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Application.Commands.Person.Responses
+namespace Shared.Person.Auth.Responses
 {
-    public class RegisterEmployeeAccountResponse
+    public record RegisterEmployeeAccountResponse : BaseResponse
     {
         public Guid Id { get; set; }
         public bool Success { get; set; }

@@ -8,6 +8,6 @@ namespace Application.Interfaces.Repo.Person
 {
     public interface IEmployeeRepository : IGenericRepository<Employee>
     {
-        Task<Employee?> GetByIdWithDetailsAsync(Guid id); 
+        Task<Employee?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken = default); 
     }
 }

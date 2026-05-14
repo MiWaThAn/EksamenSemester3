@@ -2,11 +2,12 @@
 using Application.Interfaces.Repo.Item.IRegistrationRepo;
 using Application.Interfaces.Repo.Mapping;
 using Application.Interfaces.Repo.Person;
+using Application.Interfaces.Repo.Person.Auth;
 using Domain.Interfaces.Repos;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Data;
+using System.Text;
 
 namespace Application.Interfaces
 {
@@ -17,7 +18,11 @@ namespace Application.Interfaces
         ICustomerRepository Customers { get; }
         IEmployeeRepository Employees { get; }
         ICompanyRepository Companies { get; }
+
+        //Auth
         IAccountRepository Accounts { get; }
+        IRoleRepository Roles { get; }
+        IPermissionRepository Permissions { get; }
 
         //Item
         IProjectRepository Projects { get; }
@@ -37,10 +42,10 @@ namespace Application.Interfaces
 
 
         // Transaction Management
-        Task BeginTransactionAsync(IsolationLevel isolationLevel);
-        Task CommitTransactionAsync();
+        Task BeginTransactionAsync(IsolationLevel isolationLevel, CancellationToken cancellationToken = default);
+        Task CommitTransactionAsync(CancellationToken cancellationToken = default);
         Task RollbackTransactionAsync();
-        Task<int> CompleteAsync();
+        Task<int> CompleteAsync(CancellationToken cancellationToken = default);
 
     }
 }

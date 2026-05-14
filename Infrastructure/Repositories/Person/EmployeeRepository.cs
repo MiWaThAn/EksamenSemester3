@@ -13,12 +13,12 @@ namespace Infrastructure.Repositories.Person
         public EmployeeRepository(AppDbContext context) : base(context)
         {
         }
-        public async Task<Employee?> GetByIdWithDetailsAsync(Guid id)
+        public async Task<Employee?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return await _context.Set<Employee>()
                 .Include(e => e.Registrations)
                 .AsSplitQuery()
-                .FirstOrDefaultAsync(e => e.Id == id);
+                .FirstOrDefaultAsync(e => e.Id == id,cancellationToken);
         }
     }
 }

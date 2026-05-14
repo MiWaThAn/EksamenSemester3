@@ -14,9 +14,9 @@ namespace Domain.Services.Person
         {
             _companyRepository = companyRepository;
         }
-        public async Task<bool> CvrExistsAsync(CvrNumber cvrNumber)
+        public async Task<bool> CvrExistsAsync(CvrNumber cvrNumber, CancellationToken ct = default)
         {
-            var existingCompany = await _companyRepository.GetByCVRAsync(cvrNumber);
+            var existingCompany = await _companyRepository.GetByCVRAsync(cvrNumber,ct);
             return existingCompany == null;
         }
 

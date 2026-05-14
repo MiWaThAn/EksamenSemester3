@@ -10,6 +10,7 @@ using Domain.Entity.Item.Activities;
 using Activity = Domain.Entity.Item.Activities.Activity;
 using Domain.Entity.Item.Registrations;
 using Domain.Entity.Mapping;
+using Domain.Entity.Person.Auth;
 
 namespace Infrastructure.Data
 {
@@ -23,7 +24,10 @@ namespace Infrastructure.Data
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Company> Companies { get; set; }
         public DbSet<Customer> Customers { get; set; }
+        //auth
         public DbSet<Account> Accounts { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<Permission> Permissions { get; set; }
 
         //Item
         public DbSet<Project> Projects { get; set; }

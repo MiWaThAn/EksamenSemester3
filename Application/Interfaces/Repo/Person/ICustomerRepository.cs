@@ -9,6 +9,6 @@ namespace Application.Interfaces.Repo.Person
 {
     public interface ICustomerRepository : IGenericRepository<Customer>
     {
-        Task<Customer?> GetByCompanyIdAsync(Guid companyId);
+        Task<Customer?> GetByCompanyIdAsync(Guid companyId, CancellationToken cancellationToken = default);
     }
 }

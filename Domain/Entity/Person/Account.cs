@@ -1,4 +1,5 @@
 ﻿using Domain.Builders.Person;
+using Domain.Entity.Person.Auth;
 using Domain.Guards;
 using Domain.Interfaces.Person;
 using Domain.ValueObjects;
@@ -29,6 +30,8 @@ namespace Domain.Entity.Person
         public Company? Company { get; internal set; }
         public Guid? EmployeeId { get; internal set; }
         public Employee? Employee { get; internal set; }
+        //Liste der indeholder alle en accounts roller (de giver kontoen primission)
+        public List<Role> Roles { get; private set; } = new();
 
         //Helper methods to quickly check the type of account based on the presence of CompanyId and EmployeeId. This allows for flexible account types and easy role management.
         public bool IsCompanyAccount => CompanyId.HasValue;
@@ -89,18 +92,23 @@ namespace Domain.Entity.Person
             Employee = employee;
             UpdatedAt = DateTime.UtcNow;
         }
-        public async Task<Result<Company>> CreateCompany(CompanyBuilder builder, ICompanyFactory companyFactory)
+        public async Task<Result<Company>> CreateCompany(CompanyBuilder builder, ICompanyFactory companyFactory, CancellationToken ct = default)
         {
             Guard.AgainstNull(builder, nameof(builder));
             Guard.AgainstNull(companyFactory, nameof(companyFactory));
             builder = builder.WithAccount(this);
-            var result = await companyFactory.CreateAsync(builder, this);
+            var result = await companyFactory.CreateAsync(builder, this,ct);
             if(result.IsSuccess)
             {
                 LinkToCompany(result.Value);
             }
             UpdatedAt = DateTime.UtcNow;
             return result;
+        }
+        public void AddRole(Role role)
+        {
+            if (!Roles.Any(r => r.Id == role.Id))
+                Roles.Add(role);
         }
     }
 }
