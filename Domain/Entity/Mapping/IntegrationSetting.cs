@@ -34,17 +34,11 @@ namespace Domain.Entity.Mapping
             Guard.AgainstNullOrEmpty(key, nameof(key));
             Guard.AgainstNull(selectedEntityTypes, nameof(selectedEntityTypes));
 
-            var unsupported = selectedEntityTypes
-            .Where(e => !provider.Urls.Any(u => u.EntityType == e))
-            .ToList();
-
-            if (unsupported.Any())
-            {
-                throw new Exception(
-                    $"Provider does not support: {string.Join(", ", unsupported)}");
-            }
+            provider.ValidateEntityTypes(selectedEntityTypes);  
             foreach (var entityType in selectedEntityTypes)
-                _entityTypes.Add(new SelectedEntityType(entityType));
+            { 
+                _entityTypes.Add(new SelectedEntityType(entityType)); 
+            }
             CompanyId = companyId;
             ProviderId = providerId;
             Key = key;
@@ -56,24 +50,20 @@ namespace Domain.Entity.Mapping
             EncryptedValue = newEncryptedValue;
             UpdatedAt = DateTime.UtcNow;
         }
-        public void UpdateProvider(Guid newProviderId)
-        {
-            Guard.AgainstEmptyGuid(newProviderId, nameof(newProviderId));
-            ProviderId = newProviderId;
-            UpdatedAt = DateTime.UtcNow;
-        }
+        
         public void UpdateKey(string newKey)
         {
             Guard.AgainstNullOrEmpty(newKey, nameof(newKey));
             Key = newKey;
             UpdatedAt = DateTime.UtcNow;
         }
-        public void AddEntityType(IntegrationEntityType entityType, Provider provider)
+        public void AddEntityType(IntegrationEntityType entityType)
         {
+            
             Guard.AgainstNull(entityType, nameof(entityType));
-            Guard.AgainstNull(provider, nameof(provider));
+            Guard.AgainstNull(Provider, nameof(Provider));
 
-            if (!provider.Urls.Any(u => u.EntityType == entityType))
+            if (!Provider.SupportsEntityType(entityType))       
                 throw new Exception($"Provider does not support '{entityType}'.");
 
             if (_entityTypes.Any(e => e.EntityType == entityType))
