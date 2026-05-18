@@ -61,6 +61,7 @@ namespace Infrastructure.Repositories.Person
             .Include(c => c.Settings)
                 .ThenInclude(s => s.EntityTypes)
             .Where(c => !c.IsDeleted)
+            .AsSplitQuery()
             .ToListAsync();
         }
 
