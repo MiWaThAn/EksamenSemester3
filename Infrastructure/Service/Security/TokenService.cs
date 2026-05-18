@@ -33,7 +33,8 @@ namespace Infrastructure.Service.Security
                 new Claim(JwtRegisteredClaimNames.Sub, account.Id.ToString()), //<-- sub er en brugers unikke id
                 new Claim(JwtRegisteredClaimNames.UniqueName, account.Username), //<-- UniqueName giver lidt sig selv
                 new Claim("company_id", account.CompanyId?.ToString() ?? ""),  //<-- og så har vi id'er til info som brugeren er forbundet med
-                new Claim("employee_id", account.EmployeeId?.ToString() ?? "")
+                new Claim("employee_id", account.EmployeeId?.ToString() ?? ""),
+                new Claim("has_pin",(account.HashedPin != null).ToString().ToLower()) //<-- Til logind logik så vi ved om de har en pinkode
             };
             //Så tilføjer vi brugerens permissions til vores claims
             foreach (var permTitle in allPermissions)
@@ -44,7 +45,7 @@ namespace Infrastructure.Service.Security
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(Claims),
-                Expires = DateTime.UtcNow.AddDays(7), //<-- hvornår den skal udløbe
+                Expires = DateTime.UtcNow.AddDays(50), //<-- hvor lang tid den skal være valid
                 SigningCredentials = creds,
                 Issuer = config["Jwt:Issuer"], //<-- Hvem der giver den (os)
                 Audience = config["Jwt:Audience"] //<-- hvem den er beregnet for
@@ -53,8 +54,34 @@ namespace Infrastructure.Service.Security
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
-            //og så retunere vi en crypteret token streng: eyJhbGci...
+            //og så retunere vi en token streng: eyJhbGci...
             return tokenHandler.WriteToken(token);
+        }
+        public bool ValidateToken(string token, IConfiguration config)
+        {
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.UTF8.GetBytes(config["Jwt:Key"]!);
+
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = true,
+                    ValidIssuer = config["Jwt:Issuer"],
+                    ValidateAudience = true,
+                    ValidAudience = config["Jwt:Audience"],
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                }, out SecurityToken validatedToken);
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }

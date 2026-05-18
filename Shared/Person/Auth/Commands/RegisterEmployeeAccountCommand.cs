@@ -6,6 +6,6 @@ using System.Text;
 
 namespace Shared.Person.Auth.Commands
 {
-    public record RegisterEmployeeAccountCommand(Guid EmployeeId, string Password, string Username, string PhoneNumber) : IRequest<RegisterEmployeeAccountResponse>;
+    public record RegisterEmployeeAccountCommand(string EmployeeId, string Password, string Username, string PhoneNumber) : IRequest<RegisterEmployeeAccountResponse>;
 
 }

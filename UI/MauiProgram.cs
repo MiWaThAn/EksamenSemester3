@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.Logging;
 using UI.Services.Auth;
 
 namespace UI
@@ -25,7 +26,13 @@ namespace UI
 
             // Registrer din AuthService, som vi lavede tidligere
             builder.Services.AddScoped<IAuthService, AuthService>();
+            
 
+            builder.Services.AddAuthorizationCore();
+
+   
+            builder.Services.AddScoped<JwtAuthStateProvider>();
+            builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<JwtAuthStateProvider>());
             builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG

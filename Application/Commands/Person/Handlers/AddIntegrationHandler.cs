@@ -22,7 +22,7 @@ namespace Application.Commands.Person.Handlers
         }
         public async Task<AddIntagrationSettingReponse> Handle(AddIntegrationSettingCommand request, CancellationToken cancellationToken)
         {
-            _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+            await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
             var company = await _unitOfWork.Companies.GetByIdAsync(request.CompanyId);
 
             company.CreateIntegrationSetting(new IntegrationSettingBuilder()

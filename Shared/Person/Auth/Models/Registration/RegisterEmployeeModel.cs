@@ -8,14 +8,9 @@ namespace Shared.Person.Auth.Models.Registration
 {
     public class RegisterEmployeeModel : BaseRegistrationModel
     {
-        [Required(ErrorMessage = "Medarbejder Id er påkrævet")]
-        public Guid EmployeeId { get; set; }
-        [Required(ErrorMessage = "Firma Id er påkrævet")]
-        public Guid CompanyId { get; set; }
-        public RegisterEmployeeAccountCommand ToCommand()
-        {
-            return new RegisterEmployeeAccountCommand(EmployeeId, Password, Username, PhoneNumber);
-        }
+        [Required(ErrorMessage = "Medarbejder er påkrævet")]
+        public string EmployeeId { get; set; }
+        public RegisterEmployeeAccountCommand ToCommand()=> new RegisterEmployeeAccountCommand(EmployeeId, Password, Username, PhoneNumber);
 
     }
 }

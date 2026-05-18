@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Shared.Person.Auth.Commands;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
@@ -11,5 +12,6 @@ namespace Shared.Person.Auth.Models.Login
         public string Username { get; set; }
         [Required]
         public string Password { get; set; }
+        public LoginCommand ToCommand => new LoginCommand(Username, Password);
     }
 }

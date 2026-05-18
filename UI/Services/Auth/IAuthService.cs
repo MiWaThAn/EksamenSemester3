@@ -10,10 +10,13 @@ namespace UI.Services.Auth
 {
     public interface IAuthService
     {
-        Task<AuthResponse> RegisterCompany(RegisterCompanyModel model);
-        Task<AuthResponse> RegisterEmployee(RegisterEmployeeModel model);
-        Task<LoginResponse> Login(LoginModel model);
-        Task<LoginResponse> AutoLogin();
+        Task<AuthResponse> RegisterCompany(RegisterCompanyModel model, CancellationToken ct = default);
+        Task<AuthResponse> RegisterEmployee(RegisterEmployeeModel model, CancellationToken ct = default);
+        Task<AuthResponse> RegisterPincode(PincodeModel pin, CancellationToken ct = default);
+        Task<LoginResponse> Login(LoginModel model, CancellationToken ct = default);
+        Task<LoginResponse> LoginWithPin(PincodeModel pin, CancellationToken ct = default);
+        Task<LoginResponse> AutoLogin(CancellationToken ct = default);
         Task Logout();
+        Task<AuthStateStatus> GetRequiredLoginState(CancellationToken ct = default);
     }
 }

@@ -39,7 +39,7 @@ namespace Domain.Entity.Person
 
 
         //Last time the account pinged the server (last activity time)
-        public DateTime LastSync { get; internal set; } 
+        public DateTime LastLogin { get; internal set; } 
 
         public Account() : base()
         {
@@ -74,7 +74,7 @@ namespace Domain.Entity.Person
             Guard.AgainstNullOrEmpty(newUsername, nameof(newUsername));
             UpdatedAt = DateTime.UtcNow;
         }
-        public void UpdatePin(string newHashedPin)
+        public void UpdateHashedPin(string newHashedPin)
         {
             Guard.AgainstNullOrEmpty(newHashedPin, nameof(newHashedPin));
             HashedPin = newHashedPin;
@@ -109,6 +109,11 @@ namespace Domain.Entity.Person
         {
             if (!Roles.Any(r => r.Id == role.Id))
                 Roles.Add(role);
+        }
+        public void UpdateLastLogin(DateTime time)
+        {
+            Guard.AgainstNull(time, nameof(time));
+            LastLogin = time;
         }
     }
 }
