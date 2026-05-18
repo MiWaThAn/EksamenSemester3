@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces.Repo.Mapping;
 using Domain.Entity.Mapping;
+using Domain.Entity.Mapping.ValueObjects;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System;

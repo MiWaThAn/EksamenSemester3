@@ -27,7 +27,7 @@ namespace Domain.Entity.Person
 
         //Medarbejder info
         public string Name { get; internal set; }
-        public EmailAddress Email { get; internal set; }
+        public EmailAddress? Email { get; internal set; }
         //Medarbejder type (formand, lærling osv...)
         public EmployeeType EmployeeType { get; internal set; }
         //bool på om en medarbejder er selvstændig (har tilladelser til selv registrering osv...)

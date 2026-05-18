@@ -2,6 +2,7 @@
 using Application.Interfaces.Repo.Person;
 using Application.Interfaces.Services;
 using Domain.Entity.Person;
+using Domain.Interfaces;
 using Domain.Interfaces.Repos;
 using Infrastructure.Data;
 using Infrastructure.Repositories.Person;

@@ -15,5 +15,6 @@ namespace Domain.Interfaces.Repos
         Task<Company?> GetWithActivitiesAsync(Guid Id, CancellationToken cancellationToken = default);
         Task<Company?> GetWithExpensesAsync(Guid Id, CancellationToken cancellationToken = default);
         Task<Company?> GetWithAllDetailsAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Company?>> GetAllWithIntegrationSettingsAsync();
     }
 }

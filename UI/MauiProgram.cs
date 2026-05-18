@@ -24,7 +24,7 @@ namespace UI
                 BaseAddress = new Uri(apiBaseUrl)
             });
 
-            // Registrer din AuthService, som vi lavede tidligere
+
             builder.Services.AddScoped<IAuthService, AuthService>();
             
 
@@ -33,8 +33,20 @@ namespace UI
    
             builder.Services.AddScoped<JwtAuthStateProvider>();
             builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<JwtAuthStateProvider>());
+            var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
+
+            if (string.IsNullOrEmpty(apiBaseUrl))
+            {
+                // If dev tunnel doesn't work, try localhost instead
+                apiBaseUrl = "https://localhost:7020/";
+            }
+
             builder.Services.AddMauiBlazorWebView();
 
+            builder.Services.AddScoped(sp => new HttpClient
+            {
+                BaseAddress = new Uri(apiBaseUrl)
+            });
 #if DEBUG
     		builder.Services.AddBlazorWebViewDeveloperTools();
     		builder.Logging.AddDebug();

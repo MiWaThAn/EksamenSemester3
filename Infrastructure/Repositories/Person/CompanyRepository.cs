@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Mail;
 using System.Text;
+using Domain.Entity.Mapping;
 
 namespace Infrastructure.Repositories.Person
 {
@@ -51,5 +52,18 @@ namespace Infrastructure.Repositories.Person
         {
             return await _context.Companies.Include(c => c.Expenses).FirstOrDefaultAsync(c => c.Id == Id,cancellationToken);
         }
+        public async Task<IEnumerable<Company?>> GetAllWithIntegrationSettingsAsync()
+        {
+            return await _context.Companies
+            .Include(c => c.Settings)
+                .ThenInclude(s => s.Provider)
+                    .ThenInclude(p => p.Urls)
+            .Include(c => c.Settings)
+                .ThenInclude(s => s.EntityTypes)
+            .Where(c => !c.IsDeleted)
+            .AsSplitQuery()
+            .ToListAsync();
+        }
+
     }
 }

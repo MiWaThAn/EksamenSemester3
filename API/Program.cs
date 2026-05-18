@@ -1,11 +1,20 @@
-using Microsoft.EntityFrameworkCore;
-using Infrastructure.Data;
-
 using API;
+using API.Workers;
+using Application;
+using Application.Adapters;
+using Application.Adapters.Economic;
+using Application.Interfaces.Adapters;
+using Application.Interfaces.Data;
+using Application.Interfaces.Services;
+using Application.Interfaces.Services.Sync;
+using Application.Services;
 using Domain.Entity.Person;
+using Domain.Interfaces;
 using Domain.Interfaces.Person;
 using Domain.Services.Person;
 using Infrastructure;
+using Infrastructure.Data;
+using Infrastructure.Service;
 using Microsoft.AspNetCore.Identity;
 using Application.Workers;
 using Application.Interfaces.Services;
@@ -13,6 +22,7 @@ using Infrastructure.Service.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -50,9 +60,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IExternalAPIService, ExternalAPIService>();
+builder.Services.AddScoped<ISyncService, SyncService>();
+builder.Services.AddScoped<IProviderAdapter, EconomicAdapter>();
+builder.Services.AddScoped<AdapterRegistry>();
+
 //Adds Infrastructure repos and so on.
 var connectionstring = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddInfrastructure(connectionstring);
+builder.Services.AddApplication();
 
 var app = builder.Build();
 

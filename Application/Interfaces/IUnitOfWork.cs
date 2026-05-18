@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text;
 
+
 namespace Application.Interfaces
 {
     public interface IUnitOfWork : IDisposable
@@ -39,7 +40,7 @@ namespace Application.Interfaces
         //Mappings
         IIntegrationMappingRepository Mappings { get; }
         IIntegrationSettingsRepository IntegrationSettings { get; }
-
+        IProviderRepository Providers { get; }
 
         // Transaction Management
         Task BeginTransactionAsync(IsolationLevel isolationLevel, CancellationToken cancellationToken = default);
