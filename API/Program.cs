@@ -10,7 +10,7 @@ using Application;
 using Application.Interfaces.Adapters;
 using Application.Interfaces.Services;
 using Application.Interfaces.Services.Sync;
-using Application.Workers;
+using API.Workers;
 using Application.Interfaces.Services.Sync;
 using Application.Services;
 using Domain.Entity.Person;
