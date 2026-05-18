@@ -10,6 +10,7 @@ namespace Domain.Entity.Mapping
     public class SelectedEntityType : Base
     {
         public Guid IntegrationSettingId { get; private set; }
+        
         public IntegrationEntityType EntityType { get; private set; }  
 
         public SelectedEntityType() { }
@@ -18,6 +19,7 @@ namespace Domain.Entity.Mapping
         {
             Guard.AgainstNull(entityType, nameof(entityType));
             EntityType = entityType;
+  
         }
     }
 }

@@ -18,9 +18,9 @@ namespace Domain.Builders.Person
             Name = name;
             return this;
         }
-        public CustomerBuilder WithEmail(EmailAddress email)
+        public CustomerBuilder WithEmail(EmailAddress? email)
         {
-            Guard.AgainstNull(email, nameof(email));
+            
             Email = email;
             return this;
         }

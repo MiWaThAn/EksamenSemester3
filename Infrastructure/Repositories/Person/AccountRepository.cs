@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
-
+using Domain.Entity.Mapping;
 namespace Infrastructure.Repositories.Person
 {
     internal class AccountRepository : GenericRepository<Account>, IAccountRepository
@@ -32,5 +32,8 @@ namespace Infrastructure.Repositories.Person
         {
             throw new NotImplementedException();
         }
+       
+
+
     }
 }

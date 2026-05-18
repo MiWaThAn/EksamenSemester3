@@ -9,8 +9,8 @@ namespace Domain.Entity.Mapping
     {
         
         public DataSource Datasource { get; private set; }
-        private readonly List<ProviderUrl> _urls = new();
-        public IReadOnlyCollection<ProviderUrl> Urls => _urls.AsReadOnly();
+        private readonly List<ProviderEndpoint> _urls = new();
+        public IReadOnlyCollection<ProviderEndpoint> Urls => _urls.AsReadOnly();
         //settings.Provider.Urls[IntegrationEntityType.Employee] = "https://restapi.e-conomic.com/employees";
 
         public Provider() { }
@@ -34,7 +34,7 @@ namespace Domain.Entity.Mapping
             if (_urls.Any(u => u.EntityType == entityType))
                 throw new Exception($"URL for '{entityType}' already exists.");
 
-            _urls.Add(new ProviderUrl(entityType, url));
+            _urls.Add(new ProviderEndpoint(entityType, url));
         }
 
         public void UpdateUrl(IntegrationEntityType entityType, string url)
@@ -59,7 +59,21 @@ namespace Domain.Entity.Mapping
 
             _urls.Remove(existing);
         }
+        public bool SupportsEntityType(IntegrationEntityType entityType)
+        {
+            return _urls.Any(u => u.EntityType == entityType);
+        }
 
+        public void ValidateEntityTypes(List<IntegrationEntityType> entityTypes)
+        {
+            var unsupported = entityTypes
+                .Where(e => !SupportsEntityType(e))
+                .ToList();
+
+            if (unsupported.Any())
+                throw new Exception(
+                    $"Provider does not support: {string.Join(", ", unsupported)}");
+        }
 
     }
 

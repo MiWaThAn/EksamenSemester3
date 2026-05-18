@@ -54,6 +54,12 @@ namespace Domain.Builders.Item
             CompanyId = company.Id;
             return this;
         }
+        internal ProjectBuilder WithCompanyId(Guid companyId)
+        {
+            Guard.AgainstEmptyGuid(companyId, nameof(companyId));
+            CompanyId = companyId;
+            return this;
+        }
         internal Project Build()
         {
             Guard.AgainstNullOrEmpty(Name, nameof(Name));

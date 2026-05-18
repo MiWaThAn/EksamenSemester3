@@ -47,7 +47,7 @@ namespace Infrastructure.Data
         public DbSet<IntegrationSetting> IntegrationSettings { get; set; }
         public DbSet<Provider> Providers { get; set; }
         public DbSet<SelectedEntityType> SelectedEntityTypes { get; set; }
-        public DbSet<ProviderUrl> ProviderUrls { get; set; }
+        public DbSet<ProviderEndpoint> ProviderUrls { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -143,6 +143,14 @@ namespace Infrastructure.Data
                         v => v.Value,
                         v => new EmailAddress(v)
                     );
+                entity.Navigation(c => c.Settings)
+                .HasField("_settings")
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+                entity.HasMany(c => c.Settings)
+                    .WithOne()
+                    .HasForeignKey(s => s.CompanyId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<Employee>(entity =>
@@ -180,7 +188,7 @@ namespace Infrastructure.Data
                     .UsePropertyAccessMode(PropertyAccessMode.Field);
             });
 
-            modelBuilder.Entity<ProviderUrl>(entity =>
+            modelBuilder.Entity<ProviderEndpoint>(entity =>
             {
                 entity.HasKey(p => p.Id);
 
