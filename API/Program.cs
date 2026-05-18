@@ -5,7 +5,6 @@ using Application.Adapters;
 using Application.Adapters.Economic;
 using Application.Interfaces.Adapters;
 using Application.Interfaces.Data;
-using API.ExternalApiServices;
 using Application;
 using Application.Interfaces.Adapters;
 using Application.Interfaces.Services;
