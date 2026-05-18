@@ -6,15 +6,15 @@ using System.Text;
 
 namespace Domain.Entity.Mapping
 {
-    public class ProviderUrl : Base
+    public class ProviderEndpoint : Base
     {
         public Guid ProviderId { get; private set; }
         public IntegrationEntityType EntityType { get; private set; }
         public string Url { get; private set; }
 
-        private ProviderUrl() { }
+        private ProviderEndpoint() { }
 
-        internal ProviderUrl(IntegrationEntityType entityType, string url)
+        internal ProviderEndpoint(IntegrationEntityType entityType, string url)
         {
             Guard.AgainstNull(entityType, nameof(entityType));
             Guard.AgainstNullOrEmpty(url, nameof(url));

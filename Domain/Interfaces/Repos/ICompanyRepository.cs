@@ -15,5 +15,6 @@ namespace Domain.Interfaces.Repos
         Task<Company?> GetWithActivitiesAsync(Guid Id);
         Task<Company?> GetWithExpensesAsync(Guid Id);
         Task<Company?> GetWithAllDetailsAsync(Guid id);
+        Task<IEnumerable<Company?>> GetAllWithIntegrationSettingsAsync();
     }
 }

@@ -36,9 +36,9 @@ namespace Domain.Builders.Mapping
         
         internal IntegrationMappingBuilder WithSetting(IntegrationSetting setting)
         {
-            Guard.AgainstNull(Setting,nameof(Setting));
+            Guard.AgainstNull(setting,nameof(setting));
             //rules;
-            setting= Setting;
+            Setting= setting;
             return this;
         }
         public IntegrationMappingBuilder WithObjectVersion(string objectVersion)

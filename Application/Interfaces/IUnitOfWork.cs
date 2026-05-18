@@ -40,6 +40,7 @@ namespace Application.Interfaces
         // Transaction Management
         Task BeginTransactionAsync(IsolationLevel isolationLevel);
         Task CommitTransactionAsync();
+        
         Task RollbackTransactionAsync();
 
     }
