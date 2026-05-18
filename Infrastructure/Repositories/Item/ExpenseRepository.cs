@@ -13,9 +13,9 @@ namespace Infrastructure.Repositories.Item
         internal ExpenseRepository(AppDbContext context) : base(context)
         {
         }
-        public async Task<IEnumerable<Expense>> GetByCompanyIdAsync(Guid companyId)
+        public async Task<IEnumerable<Expense>> GetByCompanyIdAsync(Guid companyId, CancellationToken cancellationToken = default)
         {
-            return await _context.Expenses.Where(e => e.CompanyId == companyId).ToListAsync();
+            return await _context.Expenses.Where(e => e.CompanyId == companyId).ToListAsync(cancellationToken);
         }
     }
 }

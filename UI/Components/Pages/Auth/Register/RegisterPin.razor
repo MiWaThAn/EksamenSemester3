@@ -1,0 +1,200 @@
+﻿@page "/auth/register-pin"
+@using Shared.Person.Auth.Models.Login
+@using UI.Services.Auth
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<div class="container max-w-sm mx-auto p-6 flex flex-col justify-between min-h-screen text-center">
+
+    <div class="mt-4">
+        <div class="inline-flex items-center justify-center w-14 h-14 bg-blue-50 text-blue-600 rounded-full mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-800">@_stepTitle</h3>
+        <p class="text-gray-500 text-sm mt-1 px-4">@_stepDescription</p>
+    </div>
+
+    <EditForm Model="@_pinModel" OnValidSubmit="HandleValidPinStepAsync">
+        <DataAnnotationsValidator />
+
+        <div class="my-8">
+            <div class="flex justify-center gap-6">
+                @for (int i = 0; i < 4; i++)
+                {
+                    <div class="w-5 h-5 rounded-full border-2 border-blue-500 transition-all duration-150
+                        @(i < _currentInput.Length ? "bg-blue-600 scale-110 shadow" : "bg-transparent")">
+                    </div>
+                }
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(_errorMessage))
+            {
+                <p class="text-red-500 text-sm mt-4 font-semibold animate-pulse">@_errorMessage</p>
+            }
+            <div class="mt-2 text-red-500 text-sm font-semibold">
+                <ValidationMessage For="@(() => _pinModel.Pincode)" />
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <div class="grid grid-cols-3 gap-4 max-w-xs mx-auto">
+                @for (int i = 1; i <= 9; i++)
+                {
+                    var number = i.ToString();
+                    <button type="button" @onclick="() => AppendNumber(number)" disabled="@_isBusy"
+                            class="w-16 h-16 mx-auto bg-gray-100 active:bg-gray-200 text-gray-800 text-2xl font-semibold rounded-full flex items-center justify-center transition shadow-sm focus:outline-none">
+                        @number
+                    </button>
+                }
+
+                <button type="button" @onclick="Backspace" disabled="@_isBusy"
+                        class="w-16 h-16 mx-auto text-gray-500 active:text-gray-800 text-lg rounded-full flex items-center justify-center focus:outline-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.41-6.41A2 2 0 0110.83 5H20a2 2 0 012 2v10a2 2 0 01-2 2h-9.17a2 2 0 01-1.42-.59L3 12z" />
+                    </svg>
+                </button>
+
+                <button type="button" @onclick='() => AppendNumber("0")' disabled="@_isBusy"
+                        class="w-16 h-16 mx-auto bg-gray-100 active:bg-gray-200 text-gray-800 text-2xl font-semibold rounded-full flex items-center justify-center transition shadow-sm focus:outline-none">
+                    0
+                </button>
+
+                <button type="button" @onclick="ResetFlow" disabled="@_isBusy"
+                        class="w-16 h-16 mx-auto text-sm text-red-500 active:text-red-700 font-semibold rounded-full flex items-center justify-center focus:outline-none">
+                    Reset
+                </button>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string? AccountId { get; set; }
+
+    private PincodeModel _pinModel = new();
+
+    private string _currentInput = string.Empty;
+    private string _firstPinAttempt = string.Empty;
+
+    private bool _isConfirmStep = false;
+    private bool _isBusy = false;
+
+    private string _stepTitle = "Vælg din pinkode";
+    private string _stepDescription = "Indtast en 4-cifret kode, som du vil bruge til lynhurtigt log-ind.";
+    private string? _errorMessage;
+
+    protected override void OnInitialized()
+    {
+        if (string.IsNullOrWhiteSpace(AccountId))
+        {
+            _errorMessage = "Fejl: Konto-ID mangler. Prøv at logge ind igen.";
+            _isBusy = true;
+        }
+    }
+
+    private async Task AppendNumber(string num)
+    {
+        if (_currentInput.Length >= 4 || _isBusy) return;
+
+        _errorMessage = null;
+        _currentInput += num;
+
+        _pinModel.Pincode = _currentInput;
+
+        if (_currentInput.Length == 4)
+        {
+            await Task.Delay(150); 
+
+            await HandleValidPinStepAsync();
+        }
+    }
+
+    private void Backspace()
+    {
+        if (_currentInput.Length > 0 && !_isBusy)
+        {
+            _currentInput = _currentInput[..^1];
+            _pinModel.Pincode = _currentInput;
+            _errorMessage = null;
+        }
+    }
+
+    private async Task HandleValidPinStepAsync()
+    {
+        if (_currentInput.Length != 4) return;
+
+        if (!_isConfirmStep)
+        {
+
+            _firstPinAttempt = _currentInput;
+            _currentInput = string.Empty;
+            _pinModel.Pincode = string.Empty; 
+            _isConfirmStep = true;
+
+            _stepTitle = "Bekræft din pinkode";
+            _stepDescription = "Indtast den samme 4-cifrede kode igen for at bekræfte.";
+        }
+        else
+        {
+
+            if (_currentInput != _firstPinAttempt)
+            {
+                _errorMessage = "Koderne matchede ikke. Start forfra.";
+                await Task.Delay(1200);
+                ResetFlow();
+                return;
+            }
+
+            await SubmitPinCommandAsync();
+        }
+    }
+
+    private async Task SubmitPinCommandAsync()
+    {
+        _isBusy = true;
+        _stepTitle = "Gemmer pinkode...";
+        _stepDescription = "Vent venligst, mens vi sikrer din konto.";
+
+        try
+        {
+
+            var response = await AuthService.RegisterPincode(_pinModel);
+
+            if (response.Success)
+            {
+                if (Application.Current?.MainPage != null)
+                {
+                    await Application.Current.MainPage.DisplayAlert("Succes", "Pinkode oprettet! Du kan nu logge hurtigt ind fremover.", "OK");
+                }
+
+                Navigation.NavigateTo("/dashboard");
+            }
+            else
+            {
+                _errorMessage = response.Message;
+                _isBusy = false;
+            }
+        }
+        catch (Exception)
+        {
+            _errorMessage = "Netværksfejl under lagring af pinkode.";
+            _isBusy = false;
+        }
+    }
+
+    private void ResetFlow()
+    {
+        _currentInput = string.Empty;
+        _firstPinAttempt = string.Empty;
+        _pinModel = new PincodeModel(); 
+        _isConfirmStep = false;
+        _isBusy = false;
+        _stepTitle = "Vælg din pinkode";
+        _stepDescription = "Indtast en 4-cifret kode, som du vil bruge til lynhurtigt log-ind.";
+        _errorMessage = null;
+    }
+}

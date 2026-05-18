@@ -16,11 +16,11 @@ namespace Infrastructure.Repositories.Item
         internal ActivityRepository(AppDbContext context) : base(context)
         {
         }
-        public async Task<IEnumerable<Activity>> GetByCompanyIdAsync(Guid companyId)
+        public async Task<IEnumerable<Activity>> GetByCompanyIdAsync(Guid companyId, CancellationToken cancellationToken = default)
         {
             return await _context.Activities
                 .Where(a => a.CompanyId == companyId)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
         }
     }
 }

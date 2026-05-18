@@ -14,21 +14,21 @@ namespace Infrastructure.Repositories.Item.Registrations
         internal RegistrationRepository(AppDbContext context) : base(context)
         {
         }
-        public async Task<IEnumerable<T>> GetByEmployeeIdAsync(Guid employeeId)
+        public async Task<IEnumerable<T>> GetByEmployeeIdAsync(Guid employeeId, CancellationToken cancellationToken = default)
         {
-            return await _context.Set<T>().Where(x => x.EmployeeId == employeeId).AsNoTracking().AsSplitQuery().ToListAsync();
+            return await _context.Set<T>().Where(x => x.EmployeeId == employeeId).AsNoTracking().AsSplitQuery().ToListAsync(cancellationToken);
         }
-        public async Task<IEnumerable<T>> GetByProjectIdAsync(Guid projectId)
+        public async Task<IEnumerable<T>> GetByProjectIdAsync(Guid projectId, CancellationToken cancellationToken = default)
         {
-            return await _context.Set<T>().Where(x => x.ProjectId == projectId).AsNoTracking().AsSplitQuery().ToListAsync();
+            return await _context.Set<T>().Where(x => x.ProjectId == projectId).AsNoTracking().AsSplitQuery().ToListAsync(cancellationToken);
         }
-        public async Task<IEnumerable<T>> GetByActivityIdAsync(Guid activityId)
+        public async Task<IEnumerable<T>> GetByActivityIdAsync(Guid activityId, CancellationToken cancellationToken = default)
         {
-            return await _context.Set<T>().Where(x => x.ProjectActivityId == activityId).AsNoTracking().AsSplitQuery().ToListAsync();
+            return await _context.Set<T>().Where(x => x.ProjectActivityId == activityId).AsNoTracking().AsSplitQuery().ToListAsync(cancellationToken);
         }
-        public async Task<IEnumerable<T>> GetByStatusAsync(RegistrationStatus status)
+        public async Task<IEnumerable<T>> GetByStatusAsync(RegistrationStatus status, CancellationToken cancellationToken = default)
         {
-            return await _context.Set<T>().Where(x => x.Status == status).AsNoTracking().AsSplitQuery().ToListAsync();
+            return await _context.Set<T>().Where(x => x.Status == status).AsNoTracking().AsSplitQuery().ToListAsync(cancellationToken);
         }
     }
 }

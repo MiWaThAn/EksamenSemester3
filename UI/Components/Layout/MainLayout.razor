@@ -1,5 +1,7 @@
-﻿@inherits LayoutComponentBase
-
+﻿@using UI.Services.Auth
+@inherits LayoutComponentBase
+@inject IAuthService AuthService
+@inject NavigationManager Nav
 <div class="page">
     <div class="sidebar">
         <NavMenu />
@@ -15,3 +17,22 @@
         </article>
     </main>
 </div>
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var status = await AuthService.GetRequiredLoginState();
+
+        if (status == AuthStateStatus.NeedsFullLogin)
+        {
+            Nav.NavigateTo("/login");
+        }
+        else if (status == AuthStateStatus.NeedsPinLogin)
+        {
+            Nav.NavigateTo("/pin-login");
+        }
+        else
+        {
+            await AuthService.AutoLogin();
+        }
+    }
+}

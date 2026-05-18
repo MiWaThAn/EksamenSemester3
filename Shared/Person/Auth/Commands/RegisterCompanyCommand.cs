@@ -1,18 +1,17 @@
-﻿using Application.Commands.Person.Responses;
-using MediatR;
+﻿using MediatR;
+using Shared.Person.Auth.Responses;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Application.Commands.Person
+namespace Shared.Person.Auth.Commands
 {
     public record RegisterCompanyCommand(
-        string Name,
+        string CompanyName,
         string Password,
         string Username,
         string Email,
         string PhoneNumber,
-        string CVRNumber,
-        string Pincode
+        string CVRNumber
         ) : IRequest<RegisterCompanyResponse>;
 }

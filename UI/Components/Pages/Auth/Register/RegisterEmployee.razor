@@ -1,0 +1,137 @@
+﻿@page "/auth/register-employee"
+@using Shared.Person.Auth.Models.Registration
+@using UI.Services.Auth
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<div class="container max-w-md mx-auto p-6">
+    <h3 class="text-2xl font-bold mb-2 text-center">Opret Medarbejderkonto</h3>
+    <p class="text-gray-600 text-sm text-center mb-6">
+        Opretter loginoplysninger til medarbejder-ID:<br />
+        <strong class="text-mono text-gray-800">@EmployeeId</strong>
+    </p>
+
+    <EditForm Model="@_model" OnValidSubmit="HandleRegistrationAsync">
+        <DataAnnotationsValidator />
+
+        @if (!string.IsNullOrWhiteSpace(_errorMessage))
+        {
+            <div class="alert alert-danger bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
+                <span>@_errorMessage</span>
+            </div>
+        }
+
+        <div class="mb-4">
+            <label class="block font-semibold mb-1" for="username">Ønsket brugernavn:</label>
+            <InputText id="username" class="form-control w-full p-2 border rounded"
+                       placeholder="f.eks. jens123"
+                       @bind-Value="_model.Username" />
+            <ValidationMessage For="@(() => _model.Username)" class="text-red-500 text-sm" />
+        </div>
+
+        <div class="mb-4">
+            <label class="block font-semibold mb-1" for="password">Midlertidig adgangskode:</label>
+            <InputText id="password" type="password" class="form-control w-full p-2 border rounded"
+                       placeholder="••••••••"
+                       @bind-Value="_model.Password" />
+            <ValidationMessage For="@(() => _model.Password)" class="text-red-500 text-sm" />
+        </div>
+
+        <div class="mb-6">
+            <label class="block font-semibold mb-1" for="phoneNumber">Telefonnummer:</label>
+            <InputText id="phoneNumber" class="form-control w-full p-2 border rounded"
+                       placeholder="f.eks. +4512345678"
+                       @bind-Value="_model.PhoneNumber" />
+            <ValidationMessage For="@(() => _model.PhoneNumber)" class="text-red-500 text-sm" />
+        </div>
+
+        <div class="flex gap-2">
+            <button type="button" @onclick="GoBack" class="btn bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded w-1/3">
+                Annuller
+            </button>
+
+            @if (_isBusy)
+            {
+                <button class="btn bg-blue-400 text-white font-bold py-2 px-4 rounded w-2/3 cursor-not-allowed flex justify-center items-center" disabled>
+                    <span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>
+                    Opretter...
+                </button>
+            }
+            else
+            {
+                <button type="submit" class="btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-2/3 transition duration-200">
+                    Opret Konto
+                </button>
+            }
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    // Blazor fanger automatisk ?employeeId=XXXX fra URL'en via denne [Parameter]
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string? EmployeeId { get; set; }
+
+    private RegisterEmployeeModel _model = new();
+    private bool _isBusy;
+    private string? _errorMessage;
+
+    protected override void OnInitialized()
+    {
+        // Når siden åbner, propper vi automatisk URL-parameteren over i vores model
+        if (!string.IsNullOrWhiteSpace(EmployeeId))
+        {
+            _model.EmployeeId = EmployeeId;
+        }
+        else
+        {
+            _errorMessage = "Fejl: Intet medarbejder-ID blev sendt med til siden.";
+        }
+    }
+
+    private async Task HandleRegistrationAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_model.EmployeeId))
+        {
+            _errorMessage = "Medarbejder-ID mangler. Gå venligst tilbage til oversigten og prøv igen.";
+            return;
+        }
+
+        _isBusy = true;
+        _errorMessage = null;
+
+        try
+        {
+            var response = await AuthService.RegisterEmployee(_model);
+
+            if (response.Success)
+            {
+                if (Application.Current?.MainPage != null)
+                {
+                    await Application.Current.MainPage.DisplayAlert("Succes", "Kontoen er oprettet! Medarbejderen kan nu logge ind.", "OK");
+                }
+
+                // Naviger tilbage til medarbejderoversigten
+                Navigation.NavigateTo("/employees");
+            }
+            else
+            {
+                _errorMessage = response.Message;
+            }
+        }
+        catch (Exception)
+        {
+            _errorMessage = "Der skete en uventet netværksfejl.";
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/employees");
+    }
+}

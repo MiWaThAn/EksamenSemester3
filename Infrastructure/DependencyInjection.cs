@@ -6,7 +6,7 @@ using Domain.Interfaces;
 using Domain.Interfaces.Repos;
 using Infrastructure.Data;
 using Infrastructure.Repositories.Person;
-using Infrastructure.Service;
+using Infrastructure.Service.Security;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

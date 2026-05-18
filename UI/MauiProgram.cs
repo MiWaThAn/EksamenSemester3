@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.Logging;
+using UI.Services.Auth;
 
 namespace UI
 {
@@ -14,6 +16,23 @@ namespace UI
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 });
 
+            // Erstat med din Dev Tunnel URL fra før!
+            var apiBaseUrl = "https://din-tunnel-id.euw.devtunnels.ms/";
+
+            builder.Services.AddScoped(sp => new HttpClient
+            {
+                BaseAddress = new Uri(apiBaseUrl)
+            });
+
+
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            
+
+            builder.Services.AddAuthorizationCore();
+
+   
+            builder.Services.AddScoped<JwtAuthStateProvider>();
+            builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<JwtAuthStateProvider>());
             var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
 
             if (string.IsNullOrEmpty(apiBaseUrl))

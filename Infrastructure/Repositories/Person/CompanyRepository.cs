@@ -17,11 +17,11 @@ namespace Infrastructure.Repositories.Person
         public CompanyRepository(AppDbContext context) : base(context)
         {
         }
-        public async Task<Company?> GetByCVRAsync(CvrNumber cvrNumber)
+        public async Task<Company?> GetByCVRAsync(CvrNumber cvrNumber, CancellationToken cancellationToken = default)
         {
-            return await _context.Companies.FirstOrDefaultAsync(c => c.CVRNumber == cvrNumber);
+            return await _context.Companies.FirstOrDefaultAsync(c => c.CVRNumber == cvrNumber,cancellationToken);
         }
-        public async Task<Company?> GetWithAllDetailsAsync(Guid id)
+        public async Task<Company?> GetWithAllDetailsAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return await _context.Companies
                 .Include(c => c.Employees)
@@ -29,28 +29,28 @@ namespace Infrastructure.Repositories.Person
                 .Include(c => c.Activities)
                 .Include(c => c.Expenses)
                 .AsSplitQuery()
-                .FirstOrDefaultAsync(c => c.Id == id);
+                .FirstOrDefaultAsync(c => c.Id == id,cancellationToken);
         }
-        public async Task<Company?> GetByEmailAsync(EmailAddress emailAddress)
+        public async Task<Company?> GetByEmailAsync(EmailAddress emailAddress, CancellationToken cancellationToken = default)
         {
-            return await _context.Companies.FirstOrDefaultAsync(c => c.Email == emailAddress);
+            return await _context.Companies.FirstOrDefaultAsync(c => c.Email == emailAddress,cancellationToken);
         }
 
-        public async Task<Company?> GetWithProjectsAsync(Guid Id)
+        public async Task<Company?> GetWithProjectsAsync(Guid Id, CancellationToken cancellationToken = default)
         {
-            return await _context.Companies.Include(c=>c.Projects).FirstOrDefaultAsync(c=>c.Id == Id);
+            return await _context.Companies.Include(c=>c.Projects).FirstOrDefaultAsync(c=>c.Id == Id,cancellationToken);
         }
-        public async Task<Company?> GetWithEmployeesAsync(Guid Id)
+        public async Task<Company?> GetWithEmployeesAsync(Guid Id, CancellationToken cancellationToken = default)
         {
-            return await _context.Companies.Include(c => c.Employees).FirstOrDefaultAsync(c => c.Id == Id);
+            return await _context.Companies.Include(c => c.Employees).FirstOrDefaultAsync(c => c.Id == Id,cancellationToken);
         }
-        public async Task<Company?> GetWithActivitiesAsync(Guid Id)
+        public async Task<Company?> GetWithActivitiesAsync(Guid Id, CancellationToken cancellationToken = default)
         {
-            return await _context.Companies.Include(c => c.Activities).FirstOrDefaultAsync(c => c.Id == Id);
+            return await _context.Companies.Include(c => c.Activities).FirstOrDefaultAsync(c => c.Id == Id,cancellationToken);
         }
-        public async Task<Company?> GetWithExpensesAsync(Guid Id)
+        public async Task<Company?> GetWithExpensesAsync(Guid Id, CancellationToken cancellationToken = default)
         {
-            return await _context.Companies.Include(c => c.Expenses).FirstOrDefaultAsync(c => c.Id == Id);
+            return await _context.Companies.Include(c => c.Expenses).FirstOrDefaultAsync(c => c.Id == Id,cancellationToken);
         }
         public async Task<IEnumerable<Company?>> GetAllWithIntegrationSettingsAsync()
         {

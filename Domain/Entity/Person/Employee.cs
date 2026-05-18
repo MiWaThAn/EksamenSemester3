@@ -86,6 +86,7 @@ namespace Domain.Entity.Person
         {
             if (AccountId != null) throw new InvalidOperationException("Denne medarbejder er allerede tilknyttet en konto.");
             AccountId = account.Id;
+            Account = account;
             UpdatedAt = DateTime.UtcNow;
         }
         public void UpdateEmail(EmailAddress newEmail)

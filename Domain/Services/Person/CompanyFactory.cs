@@ -11,14 +11,14 @@ namespace Domain.Services.Person
     public class CompanyFactory : ICompanyFactory
     {
         private ICompanyValidationService _validationService;
-        public CompanyFactory(ICompanyValidationService validationService)
+        internal CompanyFactory(ICompanyValidationService validationService)
         {
             _validationService = validationService ?? throw new ArgumentNullException(nameof(validationService));
         }
-        public async Task<Result<Company>> CreateAsync(CompanyBuilder builder, Account account)
+        public async Task<Result<Company>> CreateAsync(CompanyBuilder builder, Account account, CancellationToken ct = default)
         {
             if (builder == null) throw new ArgumentNullException(nameof(builder));
-            if(await _validationService.CvrExistsAsync(builder.CVRNumber)) return Result<Company>.Failure($"Et firma med dette CVR nummer {builder.CVRNumber} findes alerede.");
+            if(await _validationService.CvrExistsAsync(builder.CVRNumber,ct)) return Result<Company>.Failure($"Et firma med dette CVR nummer {builder.CVRNumber} findes alerede.");
             return Result<Company>.Success(builder.WithAccount(account).Build());
         }
     }

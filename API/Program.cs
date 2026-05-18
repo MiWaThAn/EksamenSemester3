@@ -16,6 +16,12 @@ using Infrastructure;
 using Infrastructure.Data;
 using Infrastructure.Service;
 using Microsoft.AspNetCore.Identity;
+using Application.Workers;
+using Application.Interfaces.Services;
+using Infrastructure.Service.Security;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,8 +38,28 @@ builder.Services.AddTransient<IAccountFactory, AccountFactory>();
 builder.Services.AddTransient<ICompanyFactory, CompanyFactory>();
 builder.Services.AddTransient<ICompanyValidationService, CompanyValidationService>();
 builder.Services.AddTransient<IAccountValidationService, AccountValidationService>();
+builder.Services.AddTransient<IRegistrationDomainService, RegistrationDomainService>();
 builder.Services.AddHostedService<SyncWithExternalWorker>();
 builder.Services.AddHttpClient();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
+builder.Services.AddAuthorization();
+builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IExternalAPIService, ExternalAPIService>();
 builder.Services.AddScoped<ISyncService, SyncService>();
 builder.Services.AddScoped<IProviderAdapter, EconomicAdapter>();
