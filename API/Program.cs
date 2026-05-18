@@ -1,16 +1,20 @@
 using API;
 using API.ExternalApiServices;
+using Application;
+using Application.Interfaces.Adapters;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.Sync;
+using Application.Workers;
 using Domain.Entity.Person;
 using Domain.Interfaces;
 using Domain.Interfaces.Person;
 using Domain.Services.Person;
 using Infrastructure;
+using Infrastructure.Configuration;
 using Infrastructure.Data;
+using Infrastructure.Service;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Application;
-using Application.Workers;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -29,11 +33,15 @@ builder.Services.AddTransient<IAccountValidationService, AccountValidationServic
 builder.Services.AddHostedService<SyncWithExternalWorker>();
 builder.Services.AddSingleton<IExternalAPIService, EconomicAPIService>();
 builder.Services.AddHttpClient();
-
+builder.Services.AddScoped<IWebhookParser, EconomicWebhookParser>();
+builder.Services.Configure<EconomicOptions>(
+    builder.Configuration.GetSection(EconomicOptions.SectionName));
+builder.Services.AddHttpClient<IEconomicApiClient, EconomicApiClient>();
 //Adds Infrastructure repos and so on.
 var connectionstring = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddInfrastructure(connectionstring);
 builder.Services.AddApplication();
+
 
 var app = builder.Build();
 
