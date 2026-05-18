@@ -1,4 +1,6 @@
-﻿using Domain.Entity.Mapping;
+﻿using Application.Adapters;
+using Domain.Entity.Mapping;
+using Domain.Entity.Mapping.ValueObjects;
 using Domain.Entity.Person;
 using System;
 using System.Collections.Generic;
@@ -13,6 +15,12 @@ namespace Application.Interfaces.Services.Sync
 
 
         public Task SyncAllAsync(Company company);
-        public Task SyncSingleAsync(ProviderEndpoint endpoint, IntegrationSetting setting, SelectedEntityType entityType);
+        public Task SyncSingleAsync(ProviderEndpoint endpoint, IntegrationSetting setting, IntegrationEntityType entityType);
+        
+
+
+
+
+
     }
 }

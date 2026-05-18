@@ -31,7 +31,7 @@ namespace Domain.Builders.Person
             EmployeeType = employeeType;
             return this;
         }
-        public EmployeeBuilder WithEmail(EmailAddress email)
+        public EmployeeBuilder WithEmail(EmailAddress? email)
         {
             Email = email;
             return this;
@@ -42,7 +42,13 @@ namespace Domain.Builders.Person
             CompanyId = company.Id;
             return this;
         }
-        internal Employee Build()
+        public EmployeeBuilder WithCompanyId(Guid companyId)
+        {
+            Guard.AgainstEmptyGuid(companyId, nameof(companyId));
+            CompanyId = companyId;
+            return this;
+        }
+        public Employee Build()
         {
             Guard.AgainstNullOrEmpty(Name, nameof(Name));
             Guard.AgainstEmptyGuid(CompanyId, nameof(CompanyId));

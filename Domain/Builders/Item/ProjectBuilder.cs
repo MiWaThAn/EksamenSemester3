@@ -48,13 +48,19 @@ namespace Domain.Builders.Item
             Description = description;
             return this;
         }
-        internal ProjectBuilder WithCompany(Company company)
+        public ProjectBuilder WithCompany(Company company)
         {
             if (company == null) throw new ArgumentNullException(nameof(company));
             CompanyId = company.Id;
             return this;
         }
-        internal Project Build()
+        public ProjectBuilder WithCompanyId(Guid companyId)
+        {
+            Guard.AgainstEmptyGuid(companyId, nameof(companyId));
+            CompanyId = companyId;
+            return this;
+        }
+        public Project Build()
         {
             Guard.AgainstNullOrEmpty(Name, nameof(Name));
             Guard.AgainstEmptyGuid(CompanyId, nameof(CompanyId));
