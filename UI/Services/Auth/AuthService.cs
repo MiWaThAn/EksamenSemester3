@@ -240,5 +240,17 @@ namespace UI.Services.Auth
                 }
             }
         }
+        public bool UserHasPin(string token)
+        {
+            var claims = _authStateProvider.ParseClaimsFromJwt(token);
+            var hasPinClaim = claims.FirstOrDefault(c => c.Type == "has_pin")?.Value;
+            return hasPinClaim == "true";
+        }
+        public string? GetUserId(string token)
+        {
+            var claims = _authStateProvider.ParseClaimsFromJwt(token);
+            var accountId = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub || c.Type == "sub")?.Value;
+            return accountId;
+        }
     }
 }

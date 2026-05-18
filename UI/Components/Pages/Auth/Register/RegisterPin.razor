@@ -75,7 +75,6 @@
     [SupplyParameterFromQuery]
     public string? AccountId { get; set; }
 
-    // Vi bruger din nye PincodeModel!
     private PincodeModel _pinModel = new();
 
     private string _currentInput = string.Empty;
@@ -104,15 +103,12 @@
         _errorMessage = null;
         _currentInput += num;
 
-        // Opdater værdien i modellen i realtid, så EditForm kan følge med
         _pinModel.Pincode = _currentInput;
 
-        // Når der er tastet 4 cifre, trigger vi automatisk valideringen/trinnet
         if (_currentInput.Length == 4)
         {
-            await Task.Delay(150); // Lille forsinkelse så den sidste prik når at lyse op
+            await Task.Delay(150); 
 
-            // Fortæl EditForm at koden er klar til at blive tjekket mod dine [Required] og [RegularExpression]
             await HandleValidPinStepAsync();
         }
     }
@@ -129,15 +125,14 @@
 
     private async Task HandleValidPinStepAsync()
     {
-        // Hvis EditForm på magisk vis skulle trigge uden 4 tal, afviser vi
         if (_currentInput.Length != 4) return;
 
         if (!_isConfirmStep)
         {
-            // TRIN 1: Første kode gemmes i en midlertidig variabel
+
             _firstPinAttempt = _currentInput;
             _currentInput = string.Empty;
-            _pinModel.Pincode = string.Empty; // Nulstil modellen til bekræftelsestrinnet
+            _pinModel.Pincode = string.Empty; 
             _isConfirmStep = true;
 
             _stepTitle = "Bekræft din pinkode";
@@ -145,7 +140,7 @@
         }
         else
         {
-            // TRIN 2: Tjek om bekræftelsen matcher det første forsøg
+
             if (_currentInput != _firstPinAttempt)
             {
                 _errorMessage = "Koderne matchede ikke. Start forfra.";
@@ -154,7 +149,6 @@
                 return;
             }
 
-            // Koderne matcher og modellen er gyldig! Nu sender vi data til API'et
             await SubmitPinCommandAsync();
         }
     }
@@ -196,7 +190,7 @@
     {
         _currentInput = string.Empty;
         _firstPinAttempt = string.Empty;
-        _pinModel = new PincodeModel(); // Nulstil hele din model
+        _pinModel = new PincodeModel(); 
         _isConfirmStep = false;
         _isBusy = false;
         _stepTitle = "Vælg din pinkode";

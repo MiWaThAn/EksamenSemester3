@@ -82,11 +82,10 @@
         _currentInput += num;
         _pinModel.Pincode = _currentInput;
 
-        // Så snart der er trykket 4 tal, eksekverer vi login med det samme
         if (_currentInput.Length == 4)
         {
             _isBusy = true;
-            await Task.Delay(150); // Lille forsinkelse for det visuelle flow
+            await Task.Delay(150);
             await ExecutePinLoginAsync();
         }
     }
@@ -115,20 +114,16 @@
     {
         try
         {
-            // Kald din AuthService, som automatisk hiver AccountId ud af det eksisterende token
             var response = await AuthService.LoginWithPin(_pinModel);
 
             if (response.Success)
             {
-                // Succes! Send medarbejderen ind på appens dashboard/hovedmenu
                 Navigation.NavigateTo("/dashboard");
             }
             else
             {
-                // Forkert PIN (Fejlbeskeden "Forkert PIN-kode" kommer direkte fra din AuthService)
                 _errorMessage = response.Message;
 
-                // Ryst effekter eller automatisk rydning af input for bedre UX
                 _currentInput = string.Empty;
                 _pinModel.Pincode = string.Empty;
                 _isBusy = false;
@@ -144,7 +139,6 @@
 
     private async Task SwitchToFullLogin()
     {
-        // Hvis de vil skifte bruger eller har glemt koden, rydder vi sessionen og sender dem til fuld login
         await AuthService.Logout();
         Navigation.NavigateTo("/auth/login");
     }

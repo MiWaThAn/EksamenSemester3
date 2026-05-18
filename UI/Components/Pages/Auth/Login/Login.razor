@@ -71,7 +71,6 @@
 </div>
 
 @code {
-    // Bruger din præcise LoginModel fra Shared pakken
     private LoginModel _loginModel = new();
     private bool _isBusy = false;
     private string? _errorMessage;
@@ -83,29 +82,23 @@
 
         try
         {
-            // 1. Send modellen til AuthService, som pakker den ud til en LoginCommand via din .ToCommand property
             var response = await AuthService.Login(_loginModel);
 
             if (response.Success)
             {
-                // 2. Tjek i dit JWT-token via AuthService/AuthStateProvider om brugeren har en PIN-kode tilknyttet
                 var state = await AuthService.GetRequiredLoginState();
 
                 if (state == AuthStateStatus.NeedsPinLogin)
                 {
-                    // Hvis de har en PIN-kode, men den blot skal valideres eller de skal redirectes til PIN-skærmen
                     Navigation.NavigateTo("/auth/pin-login");
                 }
                 else if (response.Token != null && !string.IsNullOrWhiteSpace(response.Token))
                 {
-                    // Du kan trække claims ud her for at se, om det er en helt ny medarbejder uden PIN:
-                    // Hvis medarbejderen logger ind for første gang og mangler at oprette en PIN:
-                    var claims = response.Token.Split('.')[1]; // En simpel eller din AuthStateProviders logik
-
-                    // Eksempel: Hvis dit login returnerer at brugeren mangler at lave sin pinkode,
-                    // sender vi dem direkte til oprettelsessiden med deres AccountId:
-                    // Navigation.NavigateTo($"/auth/register-pin?accountId={BRUGER_ID}");
-
+                    var accountId = AuthService.GetUserId(response.Token);
+                    if (!AuthService.UserHasPin(response.Token) && !string.IsNullOrWhiteSpace(accountId))
+                    {
+                        Navigation.NavigateTo($"/auth/register-pin?accountId={accountId}");
+                    }
                     Navigation.NavigateTo("/dashboard");
                 }
                 else
@@ -115,7 +108,6 @@
             }
             else
             {
-                // Fejlbesked direkte fra dit API (fx "Forkert brugernavn eller adgangskode")
                 _errorMessage = response.Message;
             }
         }

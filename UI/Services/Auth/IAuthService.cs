@@ -18,5 +18,7 @@ namespace UI.Services.Auth
         Task<LoginResponse> AutoLogin(CancellationToken ct = default);
         Task Logout();
         Task<AuthStateStatus> GetRequiredLoginState(CancellationToken ct = default);
+        bool UserHasPin(string token);
+        string? GetUserId(string token);
     }
 }
