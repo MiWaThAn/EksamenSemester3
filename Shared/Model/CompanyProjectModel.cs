@@ -4,7 +4,11 @@ using System.Text;
 
 namespace Shared.Model
 {
-    internal class CompanyProjectModel
+    public class CompanyProjectModel
     {
+        public Guid Id { get; set; }
+        public string ProjectName { get; set; } = string.Empty;
+        public bool IsSelected { get; set; }
+        public int NotificationCount { get; set; }
     }
 }

@@ -5,12 +5,12 @@
 <div class="admin-container">
     <div class="tab-header">
         <div class="tab-item @(activeTab == "employees" ? "active" : "")"
-             @onclick='() => activeTab = "employees"'>
+             @onclick='() => SwitchTab("employees")'>
             Medarbejdere
         </div>
-             
+
         <div class="tab-item @(activeTab == "projects" ? "active" : "")"
-             @onclick='() => activeTab = "projects"'>
+             @onclick='() => SwitchTab("projects")'>
             Projekter
         </div>
     </div>
@@ -20,7 +20,11 @@
         {
             @if (employees == null)
             {
-                <p>Henter medarbejdere...</p>
+                <p style="padding: 20px;">Henter medarbejdere...</p>
+            }
+            else if (!employees.Any())
+            {
+                <p style="padding: 20px;">Ingen medarbejdere fundet.</p>
             }
             else
             {
@@ -41,8 +45,30 @@
         }
         else
         {
-            // foreach projekt vis data... ligesom med employees // TODO
-            <p style="padding: 20px;">Henter projekter...</p>
+            @if (projects == null)
+            {
+                <p style="padding: 20px;">Henter projekter...</p>
+            }
+            else if (!projects.Any())
+            {
+                <p style="padding: 20px;">Ingen projekter fundet.</p>
+            }
+            else
+            {
+                @foreach (var proj in projects)
+                {
+                    <div class="employee-row @(proj.NotificationCount > 0 ? "selected" : "")">
+                        <span>@proj.ProjectName</span>
+                        <div class="mail-container">
+                            <i class="bi bi-envelope-fill"></i>
+                            @if (proj.NotificationCount > 0)
+                            {
+                                <span class="mail-badge">@proj.NotificationCount</span>
+                            }
+                        </div>
+                    </div>
+                }
+            }
         }
     </div>
 
@@ -52,7 +78,8 @@
 @code {
     private string activeTab = "employees";
     private List<CompanyEmployeeModel>? employees;
-    private string testCompanyId = "1F38968B-1A7E-443E-BD2D-1C1066EB821E";
+    private List<CompanyProjectModel>? projects;
+    private string testCompanyId = "1F38968B-1A7E-443E-BD2D-1C1066EB821E"; // TODO: Erstat med dynamisk værdi senere
 
     protected override async Task OnInitializedAsync()
     {
@@ -67,7 +94,20 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Fejl ved hentning: {ex.Message}");
+            Console.WriteLine($"Fejl ved hentning af medarbejdere: {ex.Message}");
+        }
+    }
+
+    // NYT: API-kald til at hente projekter
+    private async Task LoadProjectData()
+    {
+        try
+        {
+            projects = await Http.GetFromJsonAsync<List<CompanyProjectModel>>($"api/project/company/{testCompanyId}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fejl ved hentning af projekter: {ex.Message}");
         }
     }
 
@@ -77,12 +117,13 @@
 
         if (activeTab == "employees")
         {
+            projects = null;
             await LoadEmployeeData();
         }
         else if (activeTab == "projects")
         {
-            // Project api call here later // TODO
             employees = null;
+            await LoadProjectData();
         }
     }
 }
