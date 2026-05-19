@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Logging;
 using UI.Services.Auth;
+using UI.Services.Theme;
 
 namespace UI
 {
@@ -24,8 +25,8 @@ namespace UI
             
 
             builder.Services.AddAuthorizationCore();
-
-   
+            builder.Services.AddSingleton<ThemeService>();
+            builder.Services.AddSingleton<ISecureStorage>(SecureStorage.Default);
             builder.Services.AddScoped<JwtAuthStateProvider>();
             builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<JwtAuthStateProvider>());
             var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];

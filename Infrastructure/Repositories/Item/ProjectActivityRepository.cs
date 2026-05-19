@@ -8,9 +8,9 @@ using System.Text;
 
 namespace Infrastructure.Repositories.Item
 {
-    internal class ProjectActivityRepository : GenericRepository<ProjectActivity>, IProjectActivityRepository
+    public class ProjectActivityRepository : GenericRepository<ProjectActivity>, IProjectActivityRepository
     {
-        internal ProjectActivityRepository(AppDbContext context) : base(context) { }
+        public ProjectActivityRepository(AppDbContext context) : base(context) { }
         public async Task<IEnumerable<ProjectActivity>> GetByEmployeeIdAsync(Guid employeeId, CancellationToken cancellationToken = default)
         {
             return await _context.ProjectActivities.Where(a => a.ResponsibleEmployeeId == employeeId).ToListAsync(cancellationToken);

@@ -7,15 +7,14 @@ using System.Text;
 
 namespace Infrastructure.Data.Seeding
 {
-    public class DataSeeder(AppDbContext context)
+    public static class DataSeeder
     {
-        public async Task SeedAsync()
+        public static async Task SeedAsync(AppDbContext context)
         {
-            await SeedPermsAndRoles();
+            await SeedPermsAndRoles(context);
         }
-        private async Task SeedPermsAndRoles()
+        private static async Task SeedPermsAndRoles(AppDbContext context)
         {
-            // 1. Sørg for at alle Permissions findes
             var allPerms = new List<string> {
             SystemPermissions.ProjectRead,
             SystemPermissions.ProjectWrite,
@@ -29,7 +28,6 @@ namespace Infrastructure.Data.Seeding
             }
             await context.SaveChangesAsync();
 
-            // 2. Sørg for at Admin rollen findes med alle rettigheder
             var adminRole = await context.Roles
                 .Include(r => r.Permissions)
                 .FirstOrDefaultAsync(r => r.Title == SystemRoles.Admin);

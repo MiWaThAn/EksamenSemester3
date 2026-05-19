@@ -37,6 +37,9 @@ namespace Domain.Entity.Person
         public bool IsCompanyAccount => CompanyId.HasValue;
         public bool IsEmployeeAccount => EmployeeId.HasValue;
 
+        //Password Recovery
+        private string? RecorveryToken;
+        private DateTime? RecoveryExpiry;
 
         //Last time the account pinged the server (last activity time)
         public DateTime LastLogin { get; internal set; } 
@@ -114,6 +117,25 @@ namespace Domain.Entity.Person
         {
             Guard.AgainstNull(time, nameof(time));
             LastLogin = time;
+        }
+        public string GeneratePasswordResetToken()
+        {
+            RecorveryToken = Guid.NewGuid().ToString();
+            RecoveryExpiry = DateTime.UtcNow.AddMinutes(30);
+
+            return RecorveryToken;
+        }
+        public void ResetPassword(string token, string newPasswordHash)
+        {
+            if (string.IsNullOrWhiteSpace(RecorveryToken) || RecorveryToken != token)
+                throw new Exception("Invalid reset token.");
+
+            if (DateTime.UtcNow > RecoveryExpiry)
+                throw new Exception("Reset token has expired.");
+
+            HashedPassword = newPasswordHash;
+            RecorveryToken = null;
+            RecoveryExpiry = null;
         }
     }
 }

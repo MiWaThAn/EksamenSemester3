@@ -17,10 +17,12 @@ namespace UI.Services.Auth
     {
         private readonly HttpClient _http;
         private readonly JwtAuthStateProvider _authStateProvider;
-        public AuthService(HttpClient httpClient, JwtAuthStateProvider authStateProvider)
+        private readonly ISecureStorage _secureStorage;
+        public AuthService(HttpClient httpClient, JwtAuthStateProvider authStateProvider,ISecureStorage secureStorage)
         {
             _http = httpClient;
             _authStateProvider = authStateProvider;
+            _secureStorage = secureStorage;
         }
 
         /// <summary>
@@ -65,7 +67,7 @@ namespace UI.Services.Auth
         public async Task<AuthResponse> RegisterPincode(PincodeModel pin, CancellationToken ct = default)
         {
             await EnsureAuthorizationHeaderAsync();
-            var token = await SecureStorage.Default.GetAsync("auth_token");
+            var token = await _secureStorage.GetAsync("auth_token");
             if (string.IsNullOrWhiteSpace(token))
                 return new AuthResponse { Success = false, Message = "Ingen aktiv session fundet." };
 
@@ -82,7 +84,7 @@ namespace UI.Services.Auth
 
                 if (response.IsSuccessStatusCode && result?.Token != null)
                 {
-                    await SecureStorage.Default.SetAsync("auth_token", result.Token);
+                    await _secureStorage.SetAsync("auth_token", result.Token);
                     _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", result.Token);
                     _authStateProvider.NotifyLogin(result.Token);
 
@@ -105,9 +107,9 @@ namespace UI.Services.Auth
                 var result = await response.Content.ReadFromJsonAsync<LoginResponse>(ct);
                 if (response.IsSuccessStatusCode && result?.Token != null)
                 {
-                    await SecureStorage.Default.SetAsync("auth_token", result.Token);
-                    await SecureStorage.Default.SetAsync("last_full_login", DateTime.UtcNow.ToString("O"));
-                    await SecureStorage.Default.SetAsync("last_pin_login", DateTime.UtcNow.ToString("O"));
+                    await _secureStorage.SetAsync("auth_token", result.Token);
+                    await _secureStorage.SetAsync("last_full_login", DateTime.UtcNow.ToString("O"));
+                    await _secureStorage.SetAsync("last_pin_login", DateTime.UtcNow.ToString("O"));
 
                     _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", result.Token);
                     _authStateProvider.NotifyLogin(result.Token);
@@ -122,9 +124,9 @@ namespace UI.Services.Auth
         }
         public async Task Logout()
         {
-            SecureStorage.Default.Remove("auth_token");
-            SecureStorage.Default.Remove("last_full_login");
-            SecureStorage.Default.Remove("last_pin_login");
+            _secureStorage.Remove("auth_token");
+            _secureStorage.Remove("last_full_login");
+            _secureStorage.Remove("last_pin_login");
 
             _http.DefaultRequestHeaders.Authorization = null;
             _authStateProvider.NotifyLogout();
@@ -136,7 +138,7 @@ namespace UI.Services.Auth
         /// </summary>
         public async Task<LoginResponse> AutoLogin(CancellationToken ct = default)
         {
-            var token = await SecureStorage.Default.GetAsync("auth_token");
+            var token = await _secureStorage.GetAsync("auth_token");
             if (string.IsNullOrWhiteSpace(token))
             {
                 return new LoginResponse { Success = false, Message = "Ingen gemt session fundet." };
@@ -166,8 +168,8 @@ namespace UI.Services.Auth
                 var response = await _http.PostAsJsonAsync("api/auth/login-pin", pin.ToPinLoginCommand, ct);
                 if (response.IsSuccessStatusCode)
                 {
-                    await SecureStorage.Default.SetAsync("last_pin_login", DateTime.UtcNow.ToString("O"));
-                    var token = await SecureStorage.Default.GetAsync("auth_token");
+                    await _secureStorage.SetAsync("last_pin_login", DateTime.UtcNow.ToString("O"));
+                    var token = await _secureStorage.GetAsync("auth_token");
 
                     _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                     _authStateProvider.NotifyLogin(token);
@@ -184,11 +186,11 @@ namespace UI.Services.Auth
         public async Task<AuthStateStatus> GetRequiredLoginState(CancellationToken ct = default)
         {
             //hvis der ikke er en token betyder det at ingen session er gemt og at de skal logge ind.
-            var token = await SecureStorage.Default.GetAsync("auth_token");
+            var token = await _secureStorage.GetAsync("auth_token");
             if (string.IsNullOrEmpty(token)) return AuthStateStatus.NeedsFullLogin;
             
             //hvis det er 50 dage siden de sidst logget ind så skal de logge ind
-            var lastFullStr = await SecureStorage.Default.GetAsync("last_full_login");
+            var lastFullStr = await _secureStorage.GetAsync("last_full_login");
             if (DateTime.TryParse(lastFullStr, out var lastFull))
             {
                 if ((DateTime.UtcNow - lastFull).TotalDays >= 50)
@@ -218,7 +220,7 @@ namespace UI.Services.Auth
             var hasPinClaim = claims.FirstOrDefault(c => c.Type == "has_pin")?.Value;
             bool userHasPin = hasPinClaim == "true";
             //og hvis deres sidste login med pin er for 7 dage siden, så skal de logge ind med pin igen
-            var lastPinStr = await SecureStorage.Default.GetAsync("last_pin_login");
+            var lastPinStr = await _secureStorage.GetAsync("last_pin_login");
             DateTime.TryParse(lastPinStr, out var lastPin);
 
             var daysSincePin = (DateTime.UtcNow - lastPin).TotalDays;
@@ -233,7 +235,7 @@ namespace UI.Services.Auth
         {
             if (_http.DefaultRequestHeaders.Authorization == null)
             {
-                var token = await SecureStorage.Default.GetAsync("auth_token");
+                var token = await _secureStorage.GetAsync("auth_token");
                 if (!string.IsNullOrWhiteSpace(token))
                 {
                     _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);

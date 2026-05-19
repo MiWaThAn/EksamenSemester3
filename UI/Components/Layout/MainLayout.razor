@@ -2,7 +2,9 @@
 @inherits LayoutComponentBase
 @inject IAuthService AuthService
 @inject NavigationManager Nav
-<div class="page">
+@inject UI.Services.Theme.ThemeService ThemeService
+@implements IDisposable
+<div class="page" style="background-color: @ThemeService.BackgroundColor; transition: background-color 0.4s ease;">
     <div class="sidebar">
         <NavMenu />
     </div>
@@ -20,19 +22,34 @@
 @code {
     protected override async Task OnInitializedAsync()
     {
+        ThemeService.OnThemeChanged += StateHasChanged;
+        var currentUri = Nav.ToBaseRelativePath(Nav.Uri).ToLower();
+
+        // Hvis vi allerede står på en auth-side, skal vi ikke køre tjekket (forhindrer uendeligt loop)
+        if (currentUri.StartsWith("auth/"))
+        {
+            return;
+        }
+
         var status = await AuthService.GetRequiredLoginState();
 
         if (status == AuthStateStatus.NeedsFullLogin)
         {
-            Nav.NavigateTo("/login");
+            await AuthService.Logout();
+
+            Nav.NavigateTo("/auth/login");
         }
         else if (status == AuthStateStatus.NeedsPinLogin)
         {
-            Nav.NavigateTo("/pin-login");
+            Nav.NavigateTo("/auth/pin-login");
         }
         else
         {
             await AuthService.AutoLogin();
         }
+    }
+    public void Dispose()
+    {
+        ThemeService.OnThemeChanged -= StateHasChanged;
     }
 }

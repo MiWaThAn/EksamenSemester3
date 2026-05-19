@@ -7,7 +7,8 @@ namespace Domain.Entity.Person.Auth
     public class Role : Base
     {
         public string Title {  get; private set; }
-        public List<Permission> Permissions { get; private set; } = new List<Permission>();
+        public List<RolePermission> Permissions { get; private set; } = new List<RolePermission>();
+        public List<Account> Accounts { get; private set; } = new List<Account>();
         public Role() : base()
         { 
         }
@@ -15,13 +16,13 @@ namespace Domain.Entity.Person.Auth
         { 
             Title = title;
         }
-        public void AddPermissions(Permission permissions)
+        public void AddPermissions(Permission permission)
         {
-            Permissions.Add(permissions);
+            Permissions.Add(new RolePermission(permission,this));
         }
-        public void RemovePermissions(Permission permissions)
+        public void RemovePermissions(RolePermission permission)
         {
-            Permissions.Remove(permissions);
+            Permissions.Remove(permission);
         }
     }
 }

@@ -9,9 +9,9 @@ using System.Text;
 
 namespace Infrastructure.Repositories.Item.Registrations
 {
-    internal class RegistrationRepository<T> : GenericRepository<T>, IRegistrationRepository<T> where T : Registration
+    public class RegistrationRepository<T> : GenericRepository<T>, IRegistrationRepository<T> where T : Registration
     {
-        internal RegistrationRepository(AppDbContext context) : base(context)
+        public RegistrationRepository(AppDbContext context) : base(context)
         {
         }
         public async Task<IEnumerable<T>> GetByEmployeeIdAsync(Guid employeeId, CancellationToken cancellationToken = default)

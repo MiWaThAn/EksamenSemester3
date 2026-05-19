@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Infrastructure.Repositories.Person
 {
-    internal class EmployeeRepository : GenericRepository<Employee>, IEmployeeRepository
+    public class EmployeeRepository : GenericRepository<Employee>, IEmployeeRepository
     {
         public EmployeeRepository(AppDbContext context) : base(context)
         {

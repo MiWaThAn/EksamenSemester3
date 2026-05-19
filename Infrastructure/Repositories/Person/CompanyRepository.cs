@@ -12,7 +12,7 @@ using Domain.Entity.Mapping;
 
 namespace Infrastructure.Repositories.Person
 {
-    internal class CompanyRepository : GenericRepository<Company>, ICompanyRepository
+    public class CompanyRepository : GenericRepository<Company>, ICompanyRepository
     {
         public CompanyRepository(AppDbContext context) : base(context)
         {

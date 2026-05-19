@@ -8,9 +8,9 @@ using System.Text;
 
 namespace Infrastructure.Repositories.Item
 {
-    internal class ExpenseRepository : GenericRepository<Expense>, IExpenseRepository
+    public class ExpenseRepository : GenericRepository<Expense>, IExpenseRepository
     {
-        internal ExpenseRepository(AppDbContext context) : base(context)
+        public ExpenseRepository(AppDbContext context) : base(context)
         {
         }
         public async Task<IEnumerable<Expense>> GetByCompanyIdAsync(Guid companyId, CancellationToken cancellationToken = default)

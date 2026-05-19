@@ -3,6 +3,8 @@
 @using UI.Services.Auth
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 
 <div class="container max-w-sm mx-auto p-6 flex flex-col justify-between min-h-screen text-center">
 

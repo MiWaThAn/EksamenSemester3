@@ -9,7 +9,7 @@ using System.Text;
 
 namespace Infrastructure.Repositories
 {
-    internal class GenericRepository<T> : IGenericRepository<T> where T : class
+    public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         protected readonly AppDbContext _context;
 
