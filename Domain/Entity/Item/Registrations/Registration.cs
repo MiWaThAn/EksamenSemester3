@@ -15,7 +15,7 @@ namespace Domain.Entity.Item.Registrations
         public Guid ProjectId { get; protected set; }
         public Guid WorkLogId { get; protected set; }
         public Guid? ProjectActivityId { get; protected set; }
-        public string Description { get; protected set; }
+        public string Description { get; protected set; } = "";
         public RegistrationStatus Status { get; protected set; }
         public bool IsBreak => ProjectActivityId == null;
 
@@ -23,23 +23,25 @@ namespace Domain.Entity.Item.Registrations
         {
 
         }
-        protected Registration(WorkLog workLog, Guid? activityId, string description, RegistrationStatus status) : base()
+        protected Registration(WorkLog workLog, Guid? activityId, string? description, RegistrationStatus status) : base()
         {
             Guard.AgainstNull(workLog, nameof(workLog));
             WorkLogId = workLog.Id;
             EmployeeId = workLog.EmployeeId;
             ProjectId = workLog.ProjectId;
             ProjectActivityId = activityId;
-            Description = description;
+            if(description != null)
+                Description = description;
             Status = status;
         }
         internal virtual void ValidateAgainst(IEnumerable<Registration> existingRegistrations)
         {
         }
-        public void UpdateDescription(string newDescription)
+        public void UpdateDescription(string? newDescription)
         {
-            Guard.AgainstNull(newDescription, nameof(newDescription));
-            Description = newDescription;
+            if (newDescription != null)
+                Description = newDescription;
+            Description = "";
             UpdatedAt = DateTime.UtcNow;
         }
         public void MarkAsApproved()

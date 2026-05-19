@@ -37,7 +37,7 @@ namespace Infrastructure.Repositories.Item
             return await _context.Projects
                 .Where(p => p.ResponsibleEmployeeId == employeeId ||
                             p.WorkLogs.Any(r => r.EmployeeId == employeeId) ||
-                            p.WorkLogs.Any(r => r.ActiveRegistrations.Any(r=>r.EmployeeId == employeeId)) ||
+                            p.WorkLogs.Any(r => r.Registrations.Any(r=>r.EmployeeId == employeeId)) ||
                             p.Activities.Any(a => a.ResponsibleEmployeeId == employeeId) ||
                             p.Activities.Any(a => a.Registrations.Any(r => r.EmployeeId == employeeId)))
                 .ToListAsync(cancellationToken);

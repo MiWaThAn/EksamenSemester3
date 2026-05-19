@@ -25,7 +25,7 @@ namespace Domain.Builders.Item.Registration
             WorkLog = workLog;
             return (TBuilder)this;
         }
-        public TBuilder WithActivity(Activity activity)
+        public TBuilder WithProjectActivity(ProjectActivity activity)
         {
             Guard.AgainstNull(activity, nameof(activity));
             ActivityId = activity.Id;

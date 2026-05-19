@@ -82,7 +82,7 @@ namespace Infrastructure.Data
 
             modelBuilder.Entity<Project>()
                   .Navigation(p => p.WorkLogs)
-                  .HasField("_registrations")
+                  .HasField("_workLogs")
                   .UsePropertyAccessMode(PropertyAccessMode.Field);
 
             modelBuilder.Entity<ProjectActivity>()

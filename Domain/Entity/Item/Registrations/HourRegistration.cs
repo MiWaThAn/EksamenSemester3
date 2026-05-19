@@ -9,15 +9,17 @@ namespace Domain.Entity.Item.Registrations
     {
         public DateTime StartTime { get; internal set; }
         public DateTime? EndTime { get; internal set; }
+        public TimeType Type { get;internal set; }
         public bool IsFinished => EndTime.HasValue;
 
         public HourRegistration()
         {
 
         }
-        internal HourRegistration(WorkLog workLog, Guid? activityId, DateTime startTime, string description, RegistrationStatus status) : base(workLog, activityId, description, status)
+        internal HourRegistration(WorkLog workLog, Guid? activityId, DateTime startTime, string description, RegistrationStatus status, TimeType type) : base(workLog, activityId, description, status)
         {
             StartTime = startTime;
+            Type = type;
         }
         internal override void ValidateAgainst(IEnumerable<Registration> existingRegistrations)
         {
