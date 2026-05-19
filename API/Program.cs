@@ -16,7 +16,6 @@ using Infrastructure;
 using Infrastructure.Data;
 using Infrastructure.Service;
 using Microsoft.AspNetCore.Identity;
-using Application.Workers;
 using Application.Interfaces.Services;
 using Infrastructure.Service.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

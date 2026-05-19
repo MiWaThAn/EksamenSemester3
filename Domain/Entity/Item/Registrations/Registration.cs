@@ -13,20 +13,22 @@ namespace Domain.Entity.Item.Registrations
     {
         public Guid EmployeeId { get; protected set; }
         public Guid ProjectId { get; protected set; }
+        public Guid WorkLogId { get; protected set; }
         public Guid? ProjectActivityId { get; protected set; }
         public string Description { get; protected set; }
         public RegistrationStatus Status { get; protected set; }
+        public bool IsBreak => ProjectActivityId == null;
 
         public Registration() : base()
         {
 
         }
-        protected Registration(Guid employeeId, Guid projectId, Guid? activityId, string description, RegistrationStatus status) : base()
+        protected Registration(WorkLog workLog, Guid? activityId, string description, RegistrationStatus status) : base()
         {
-            Guard.AgainstEmptyGuid(employeeId, nameof(employeeId));
-            Guard.AgainstEmptyGuid(projectId, nameof(projectId));
-            EmployeeId = employeeId;
-            ProjectId = projectId;
+            Guard.AgainstNull(workLog, nameof(workLog));
+            WorkLogId = workLog.Id;
+            EmployeeId = workLog.EmployeeId;
+            ProjectId = workLog.ProjectId;
             ProjectActivityId = activityId;
             Description = description;
             Status = status;
@@ -64,12 +66,6 @@ namespace Domain.Entity.Item.Registrations
         public void UnlinkFromActivity()
         {
             ProjectActivityId = null;
-            UpdatedAt = DateTime.UtcNow;
-        }
-        public void UpdateProject(Guid newProjectId)
-        {
-            Guard.AgainstEmptyGuid(newProjectId, nameof(newProjectId));
-            ProjectId = newProjectId;
             UpdatedAt = DateTime.UtcNow;
         }
     }

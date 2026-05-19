@@ -8,28 +8,30 @@ namespace Domain.Entity.Item.Registrations
     public class HourRegistration : Registration
     {
         public DateTime StartTime { get; internal set; }
-        public DateTime EndTime { get; internal set; }
-        public TimeSpan Duration => EndTime - StartTime;
+        public DateTime? EndTime { get; internal set; }
+        public bool IsFinished => EndTime.HasValue;
 
         public HourRegistration()
         {
 
         }
-        internal HourRegistration(Guid employeeId, Guid projectId, Guid? activityId, DateTime startTime, DateTime endTime, string description, RegistrationStatus status) : base(employeeId, projectId, activityId, description, status)
+        internal HourRegistration(WorkLog workLog, Guid? activityId, DateTime startTime, string description, RegistrationStatus status) : base(workLog, activityId, description, status)
         {
-            Guard.AgainstInvalidTimeRange(startTime, endTime);
             StartTime = startTime;
-            EndTime = endTime;
         }
         internal override void ValidateAgainst(IEnumerable<Registration> existingRegistrations)
         {
+            if (existingRegistrations.Any(r => r.Id == this.Id))
+                throw new ArgumentException("Denne registrering er allerede tilføjet.");
             var otherTimes = existingRegistrations.OfType<HourRegistration>();
-            if (existingRegistrations.ToList().Exists(r => r.Id == this.Id)) throw new ArgumentException("Denne registrering er allerede tilføjet til medarbejderen.");
-            if (otherTimes.Any(r => OverlapsWith(r))) throw new ArgumentException("Overlappende tidsregistrering fundet for denne medarbejder.");
+            if (otherTimes.Any(r => OverlapsWith(r)))
+                throw new ArgumentException("Overlappende tidsregistrering fundet.");
         }
         private bool OverlapsWith(HourRegistration other)
         {
-            return this.StartTime < other.EndTime && this.EndTime > other.StartTime;
+            var thisEnd = this.EndTime ?? DateTime.UtcNow;
+            var otherEnd = other.EndTime ?? DateTime.UtcNow;
+            return this.StartTime < otherEnd && thisEnd > other.StartTime;
         }
         public void UpdateTimeRange(DateTime newStartTime, DateTime newEndTime)
         {
@@ -37,6 +39,11 @@ namespace Domain.Entity.Item.Registrations
             StartTime = newStartTime;
             EndTime = newEndTime;
             UpdatedAt = DateTime.UtcNow;
+        }
+        public void SetEndTime(DateTime endTime)
+        {
+            Guard.AgainstInvalidTimeRange(StartTime, endTime);
+            EndTime = endTime;
         }
     }
 }

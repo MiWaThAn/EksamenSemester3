@@ -1,10 +1,12 @@
 ﻿using Application.Interfaces;
+using Application.Interfaces.Repo.Item.IRegistrationRepo;
 using Application.Interfaces.Repo.Person;
 using Application.Interfaces.Services;
 using Domain.Entity.Person;
 using Domain.Interfaces;
 using Domain.Interfaces.Repos;
 using Infrastructure.Data;
+using Infrastructure.Repositories.Item.Registrations;
 using Infrastructure.Repositories.Person;
 using Infrastructure.Service.Security;
 using Microsoft.AspNetCore.Identity;
@@ -30,6 +32,7 @@ namespace Infrastructure
             services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddScoped<ICompanyRepository, CompanyRepository>();
             services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+            services.AddScoped<IWorkLogRepository, WorkLogRepository>();
             services.AddScoped<IEncryptionService, EncryptionService>();
 
             return services;

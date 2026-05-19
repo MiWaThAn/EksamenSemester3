@@ -16,13 +16,8 @@ namespace UI
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 });
 
-            // Erstat med din Dev Tunnel URL fra før!
-            var apiBaseUrl = "https://din-tunnel-id.euw.devtunnels.ms/";
 
-            builder.Services.AddScoped(sp => new HttpClient
-            {
-                BaseAddress = new Uri(apiBaseUrl)
-            });
+
 
 
             builder.Services.AddScoped<IAuthService, AuthService>();
@@ -40,7 +35,6 @@ namespace UI
                 // If dev tunnel doesn't work, try localhost instead
                 apiBaseUrl = "https://localhost:7020/";
             }
-
             builder.Services.AddMauiBlazorWebView();
 
             builder.Services.AddScoped(sp => new HttpClient

@@ -16,7 +16,7 @@ namespace Infrastructure.Repositories.Person
         public async Task<Employee?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return await _context.Set<Employee>()
-                .Include(e => e.Registrations)
+                .Include(e => e.WorkLogs)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(e => e.Id == id,cancellationToken);
         }

@@ -24,8 +24,8 @@ namespace Domain.Entity.Item
 
         private readonly List<ProjectActivity> _activities = new();
         public IReadOnlyCollection<ProjectActivity> Activities => _activities.Where(a => !a.IsDeleted).ToList().AsReadOnly();
-        private readonly List<Registration> _registrations = new();
-        public IReadOnlyCollection<Registration> Registrations => _registrations.Where(r => !r.IsDeleted).ToList().AsReadOnly();
+        private readonly List<WorkLog> _workLogs = new();
+        public IReadOnlyCollection<WorkLog> WorkLogs => _workLogs.Where(r => !r.IsDeleted).ToList().AsReadOnly();
         
         public Project() : base()
         {
@@ -58,7 +58,7 @@ namespace Domain.Entity.Item
         {
             var activity = _activities.Find(a => a.Id == activityId);
             if (activity == null) throw new ArgumentException("Project activity not found for this project.");
-            _activities.Remove(activity);
+            activity.SoftDelete();
             UpdatedAt = DateTime.UtcNow;
         }
         public void LinkToEmployee(Employee employee)
@@ -72,6 +72,11 @@ namespace Domain.Entity.Item
             Guard.AgainstNull(customer, nameof(customer));
             CustomerId = customer.Id;
             UpdatedAt = DateTime.UtcNow;
+        }
+        public void AddWorkLog(WorkLog workLog)
+        {
+            Guard.AgainstNull(workLog, nameof(workLog));
+            _workLogs.Add(workLog);
         }
         public void AddAddress(Address address)
         {

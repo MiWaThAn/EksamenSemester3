@@ -36,7 +36,8 @@ namespace Infrastructure.Repositories.Item
         {
             return await _context.Projects
                 .Where(p => p.ResponsibleEmployeeId == employeeId ||
-                            p.Registrations.Any(r => r.EmployeeId == employeeId) ||
+                            p.WorkLogs.Any(r => r.EmployeeId == employeeId) ||
+                            p.WorkLogs.Any(r => r.ActiveRegistrations.Any(r=>r.EmployeeId == employeeId)) ||
                             p.Activities.Any(a => a.ResponsibleEmployeeId == employeeId) ||
                             p.Activities.Any(a => a.Registrations.Any(r => r.EmployeeId == employeeId)))
                 .ToListAsync(cancellationToken);
@@ -45,7 +46,7 @@ namespace Infrastructure.Repositories.Item
         {
             return await _context.Projects
                 .Include(p => p.Activities)
-                .Include(p => p.Registrations)
+                .Include(p => p.WorkLogs)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(p => p.Id == projectId,cancellationToken);
         }
