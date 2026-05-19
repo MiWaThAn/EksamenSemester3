@@ -1,8 +1,8 @@
 using API;
 using API.Workers;
 using Application;
-using Application.Adapters;
-using Application.Adapters.Economic;
+using Infrastructure.Adapters.Economic;
+
 using Application.Interfaces.Adapters;
 using Application.Interfaces.Data;
 using Application.Interfaces.Services;
@@ -17,6 +17,7 @@ using Infrastructure.Data;
 using Infrastructure.Service;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Infrastructure.Adapters;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.

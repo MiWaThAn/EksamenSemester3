@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Application.Adapters
+namespace Infrastructure.Adapters
 {
     public class SyncEntity
     {

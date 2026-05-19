@@ -1,4 +1,4 @@
-﻿using Application.DTO.External.Economic;
+﻿using Application.DTO.External;
 using Application.Interfaces.Adapters;
 using Domain.Builders.Item;
 using Domain.Builders.Person;
@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 
-namespace Application.Adapters.Economic
+namespace Infrastructure.Adapters.Economic
 {
     public class EconomicAdapter : IProviderAdapter
     {
@@ -36,7 +36,7 @@ namespace Application.Adapters.Economic
 
             private IEnumerable<SyncEntity> MapEmployees(string json, Guid companyId)
             {
-                var response = JsonSerializer.Deserialize<EconomicEmployeeResponse>(json,
+                var response = JsonSerializer.Deserialize<EmployeeDTOResponse>(json,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 return response!.Items
@@ -58,7 +58,7 @@ namespace Application.Adapters.Economic
 
             private IEnumerable<SyncEntity> MapProjects(string json, Guid companyId)
             {
-                var response = JsonSerializer.Deserialize<EconomicProjectResponse>(json,
+                var response = JsonSerializer.Deserialize<ProjectDTOResponse>(json,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 return response!.Items.Select(dto => new SyncEntity
@@ -76,7 +76,7 @@ namespace Application.Adapters.Economic
 
             private IEnumerable<SyncEntity> MapCustomers(string json, Guid companyId)
             {
-                var response = JsonSerializer.Deserialize<EconomicCustomerResponse>(json,
+                var response = JsonSerializer.Deserialize<CustomerDTOResponse>(json,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 return response!.Items.Select(dto => new SyncEntity
