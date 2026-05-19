@@ -2,6 +2,7 @@
 using Domain.Entity.Person;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Shared.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -20,5 +21,25 @@ namespace Infrastructure.Repositories.Person
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
+
+        public async Task<List<CompanyEmployeeModel>?> GetEmployeesRelatedToProjectAsync(Guid projectId)
+        {
+            return await _context.Employees
+                .Where(e =>
+                    _context.Projects.Any(p => p.Id == projectId && p.ResponsibleEmployeeId == e.Id) ||
+                    e.Registrations.Any(r => r.ProjectId == projectId) ||
+                    _context.Projects.Any(p => p.Id == projectId &&
+                        p.Activities.Any(pa => pa.ResponsibleEmployeeId == e.Id)) ||
+                    e.Registrations.Any(r =>
+                        _context.Projects.Any(p => p.Id == projectId &&
+                            p.Activities.Any(pa => pa.Id == r.ProjectActivityId))))
+                .Select(e => new CompanyEmployeeModel
+                {
+                    Id = e.Id,
+                    FullName = e.Name
+                })
+                .ToListAsync();
+        }
+
     }
 }

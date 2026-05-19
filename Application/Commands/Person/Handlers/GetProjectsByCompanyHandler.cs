@@ -12,17 +12,17 @@ namespace Application.Commands.Person.Handlers
     // Vi retter returtypen her til IEnumerable, så den matcher din Query 1 til 1!
     internal class GetProjectsByCompanyHandler : IRequestHandler<GetProjectsByCompanyQuery, IEnumerable<CompanyProjectModel>>
     {
-        private readonly IUnitOfWork _uow;
+        private readonly IUnitOfWork _unitOfWork;
 
         public GetProjectsByCompanyHandler(IUnitOfWork uow)
         {
-            _uow = uow;
+            _unitOfWork = uow;
         }
 
         public async Task<IEnumerable<CompanyProjectModel>> Handle(GetProjectsByCompanyQuery request, CancellationToken ct)
         {
             // Vi henter firmaet og dets projekter via din Unit of Work
-            var company = await _uow.Companies.GetWithProjectsAsync(request.CompanyId);
+            var company = await _unitOfWork.Companies.GetWithProjectsAsync(request.CompanyId);
 
             if (company == null || company.Projects == null)
                 return Enumerable.Empty<CompanyProjectModel>();

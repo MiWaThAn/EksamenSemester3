@@ -53,7 +53,7 @@
                 else
                 {
                     <div class="p-3 text-center empty-projects-card">
-                        Der er ikke tilknyttet nogle projekter endnu, legend.
+                        Der er ikke tilknyttet nogle projekter endnu.
                     </div>
                 }
             </div>
@@ -81,7 +81,6 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        // OnParametersSet kører, når ruten ændres, så vi genindlæser data rigtigt!
         await LoadEmployeeData();
     }
 
@@ -92,14 +91,12 @@
             isLoading = true;
             errorMessage = null;
 
-            // Vi kalder jeres API-endpoint via jeres Dev Tunnel.
-            // Sørg for at have et endpoint, der f.eks. hedder: api/medarbejder/admin/{id}
-            employeeDetail = await Http.GetFromJsonAsync<DetailedEmployeeModel>($"api/medarbejder/admin/{employeeId}");
+            employeeDetail = await Http.GetFromJsonAsync<DetailedEmployeeModel>($"api/Employee/company/employee/{employeeId}");
         }
         catch (Exception ex)
         {
             var actualException = ex.InnerException ?? ex;
-            errorMessage = $"Hovsa, der gik noget galt i kælderen: {actualException.Message}";
+            errorMessage = $"An error has occured:  {actualException.Message}";
         }
         finally
         {
@@ -109,18 +106,16 @@
 
     private void GoBack()
     {
-        Navigation.NavigateTo("/company-overview-admin"); // Sender dig tilbage til hovedoversigten!
+        Navigation.NavigateTo("/company-overview-admin");
     }
 
     private void NavigateToEdit()
     {
-        // Forberedt til fremtiden, hvis Pschæf vil have en redigerings-skærm!
         Navigation.NavigateTo($"/employee-edit/{employeeId}");
     }
 
     private void GaaTilProjekt(Guid id)
     {
-        // Navigerer direkte videre til den specifikke projektside, hvis man trykker på det!
         Navigation.NavigateTo($"/specific-project-admin/{id}");
     }
 }

@@ -39,6 +39,7 @@ namespace Infrastructure.Repositories.Item
                             p.Registrations.Any(r => r.EmployeeId == employeeId) ||
                             p.Activities.Any(a => a.ResponsibleEmployeeId == employeeId) ||
                             p.Activities.Any(a => a.Registrations.Any(r => r.EmployeeId == employeeId)))
+                           
                 .ToListAsync();
         }
         public async Task<Project?> GetByIdWithDetailsAsync(Guid projectId)

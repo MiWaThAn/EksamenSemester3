@@ -24,5 +24,19 @@ namespace API.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("company/project/{id:guid}")]
+        public async Task<IActionResult> GetDetailedProject(Guid id)
+        {
+            var query = new GetDetailedProjectQuery(id);
+            var result = await _mediator.Send(query);
+
+            if (result == null)
+            {
+                return NotFound($"Kunne ikke finde projektet med ID: {id}, big boss.");
+            }
+
+            return Ok(result);
+        }
     }
 }

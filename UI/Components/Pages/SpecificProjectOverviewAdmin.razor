@@ -1,4 +1,4 @@
-﻿@page "/company-projects/{projectId:guid}"
+﻿@page "/specific-project-admin/{projectId:guid}"
 @using Shared.Model
 @using System.Net.Http.Json
 @inject HttpClient Http
@@ -45,7 +45,7 @@
                     @foreach (var emp in projectDetail.Employees)
                     {
                         <div class="p-3 text-center mb-2 project-item-card shadow-sm"
-                             @onclick="() => GaaTilMedarbejder(emp.Id)">
+                             @onclick="() => GoToEmployee(emp.Id)">
                             @emp.FullName
                         </div>
                     }
@@ -53,7 +53,7 @@
                 else
                 {
                     <div class="p-3 text-center empty-projects-card">
-                        Ingen medarbejdere tilkoblet dette projekt endnu, legend.
+                        Ingen medarbejdere tilkoblet dette projekt endnu.
                     </div>
                 }
             </div>
@@ -68,9 +68,9 @@
 
 @code {
     [Parameter]
-    public Guid projectId { get; set; } // Modtager dit projectId som et rent Guid!
+    public Guid projectId { get; set; }
 
-    private DetailedProjectModel? projectDetail; // Vi skal lige lave denne model bagefter!
+    private DetailedProjectModel? projectDetail; 
     private bool isLoading = true;
     private string? errorMessage;
 
@@ -85,9 +85,7 @@
         {
             isLoading = true;
             errorMessage = null;
-
-            // Vi kalder jeres API efter det specifikke projekt via jeres Dev Tunnel
-            projectDetail = await Http.GetFromJsonAsync<DetailedProjectModel>($"api/projekt/admin/{projectId}");
+            projectDetail = await Http.GetFromJsonAsync<DetailedProjectModel>($"api/Project/company/project/{projectId}");
         }
         catch (Exception ex)
         {
@@ -102,18 +100,16 @@
 
     private void GoBack()
     {
-        Navigation.NavigateTo("/company-overview-admin"); // Tilbage til admin-oversigten
+        Navigation.NavigateTo("/company-overview-admin");
     }
 
     private void NavigateToEdit()
     {
-        // Klar til redigerings-skærmen i fremtiden!
         Navigation.NavigateTo($"/project-edit/{projectId}");
     }
 
-    private void GaaTilMedarbejder(Guid id)
+    private void GoToEmployee(Guid id)
     {
-        // Gør det muligt at klikke på en medarbejder for at hoppe over på DERES detaljeside!
         Navigation.NavigateTo($"/specific-employee-admin/{id}");
     }
 }
