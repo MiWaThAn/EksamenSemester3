@@ -12,8 +12,8 @@ namespace Application.DTO
 
         public string ExternalId { get; set; } = string.Empty;     
         public string ObjectVersion { get; set; } = string.Empty;
-        public IntegrationEntityType? ObjectType { get; set; }
         public T Data { get; set; } = default!;
+        public IntegrationEntityType? ObjectType { get; set; }
         public Guid CompanyId { get; set; }
     }
 }

@@ -76,16 +76,16 @@ namespace Application.Services
             
             var adapter = _adapterRegistry.GetAdapter(setting.Provider.Datasource);
             var dtos = adapter.Map(json, entityType, setting.CompanyId);
-            foreach (var syncEntity in entities)
+            foreach (var syncEntity in dtos)
                 await ProcessAsync(syncEntity, setting, entityType);
             
 
 
         }
         private async Task ProcessAsync(
-            SyncEntity syncEntity,
-            IntegrationSetting setting,
-            IntegrationEntityType entityType)
+    ISyncEntity syncEntity,
+    IntegrationSetting setting,
+    IntegrationEntityType entityType)
         {
             var existing = await _unitOfWork.Mappings
                 .GetByExternalId(syncEntity.ExternalId, entityType);
@@ -96,7 +96,28 @@ namespace Application.Services
                 await handler.UpdateAsync(syncEntity, existing.First());
         }
 
-        
+        public async Task SyncByExternalIdAsync(IntegrationSetting setting,IntegrationEntityType entityType,string externalId)
+        {
+            var endpoint = setting.Provider.Urls
+        .FirstOrDefault(u => u.EntityType == entityType);
+
+            if (endpoint == null)
+                return;
+
+            var url = $"{endpoint.Url}/{externalId}";
+
+            var json = await _externalAPIService.FetchFromAPI(
+                url,
+                setting.Key,
+                setting.EncryptedValue);
+
+            var adapter = _adapterRegistry
+                .GetAdapter(setting.Provider.Datasource);
+            var syncEntity = adapter.Map(json, entityType, setting.CompanyId).FirstOrDefault();
+
+            await ProcessAsync(syncEntity, setting,
+                entityType);
+        }
 
 
 

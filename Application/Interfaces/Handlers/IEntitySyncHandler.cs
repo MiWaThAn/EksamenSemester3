@@ -1,4 +1,5 @@
 ﻿using Application.DTO;
+using Application.Interfaces.Services.Sync;
 using Domain.Entity.Mapping;
 using Domain.Entity.Mapping.ValueObjects;
 using System;
@@ -11,8 +12,8 @@ namespace Application.Interfaces.Handlers
     {
         public bool CanHandle(IntegrationEntityType entityType);
        
-        public Task CreateAsync(SyncEntity syncEntity, IntegrationSetting setting, IntegrationEntityType entityType);
-        public Task UpdateAsync(SyncEntity syncEntity, IntegrationMapping mapping);
+        public Task CreateAsync(ISyncEntity syncEntity, IntegrationSetting setting, IntegrationEntityType entityType);
+        public Task UpdateAsync(ISyncEntity syncEntity, IntegrationMapping mapping);
        
     }
 }

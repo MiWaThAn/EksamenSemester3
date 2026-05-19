@@ -25,7 +25,7 @@ namespace Domain.Entity.Person
             Email = email;
             PhoneNumber = phoneNumber;
         }
-        public void UpdateContactInfo(EmailAddress newEmail, PhoneNumber newPhoneNumber)
+        public void UpdateContactInfo(EmailAddress newEmail, PhoneNumber? newPhoneNumber)
         {
             Guard.AgainstNull(newPhoneNumber, nameof(newPhoneNumber));
             Email = newEmail;

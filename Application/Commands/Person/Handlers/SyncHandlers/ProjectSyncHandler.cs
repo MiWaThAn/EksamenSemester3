@@ -1,6 +1,9 @@
 ﻿using Application.DTO;
+using Application.DTO.External;
 using Application.Interfaces;
 using Application.Interfaces.Handlers;
+using Application.Interfaces.Services.Sync;
+using Domain.Builders.Item;
 using Domain.Builders.Mapping;
 using Domain.Entity.Item;
 using Domain.Entity.Mapping;
@@ -26,14 +29,42 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
             return entityType.Value == "project";
         }
 
-        public async Task CreateAsync(SyncEntity syncEntity, IntegrationSetting setting, IntegrationEntityType entityType)
+
+        private async Task<Project> CreateEntity(ISyncEntity syncEntity)
         {
-            var project = (Project)syncEntity.Entity;
+            var company = await _unitOfWork.Companies.GetByIdAsync(syncEntity.CompanyId);
+
+            var projectSync =
+                (SyncEntity<ProjectDTO>)syncEntity;
+
+            var dto = projectSync.Data;
+
+           var projectBuilder =  new ProjectBuilder()
+            .WithName(dto.Name)
+            .WithIsStatus(dto.IsClosed ? Status.Lukket : Status.Åben)
+            .WithDescription(string.Empty);
+            
+            return company.CreateProject(projectBuilder);
+        }
+
+
+
+        public async Task CreateAsync(
+            ISyncEntity syncEntity,
+            IntegrationSetting setting,
+            IntegrationEntityType entityType)
+        {
+            var project = await CreateEntity(syncEntity);
+
             try
             {
-                await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted);
+                await _unitOfWork.BeginTransactionAsync(
+                    System.Data.IsolationLevel.ReadCommitted);
+
                 await _unitOfWork.Projects.AddAsync(project);
-                setting.CreateMapping(new IntegrationMappingBuilder()
+
+                setting.CreateMapping(
+                    new IntegrationMappingBuilder()
                         .WithLocalId(project)
                         .WithEntityType(entityType)
                         .WithExternalId(syncEntity.ExternalId)
@@ -47,22 +78,36 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
                 throw;
             }
         }
-        public async Task UpdateAsync(SyncEntity syncEntity, IntegrationMapping mapping)
+
+        public async Task UpdateAsync(
+            ISyncEntity syncEntity,
+            IntegrationMapping mapping)
         {
             if (mapping.ObjectVersion == syncEntity.ObjectVersion)
                 return;
-            var project = (Project)syncEntity.Entity;
+
+            var dto =
+                ((SyncEntity<ProjectDTO>)syncEntity).Data;
+
             try
             {
-                var local = await _unitOfWork.Projects.GetByIdAsync(mapping.LocalId);
-                if (local == null) return;
-                await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted);
+                await _unitOfWork.BeginTransactionAsync(
+                    System.Data.IsolationLevel.ReadCommitted);
 
-                local.UpdateProjectName(project.Name);
-                
+                var local = await _unitOfWork.Projects
+                    .GetByIdAsync(mapping.LocalId);
 
+                if (local == null)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return;
+                }
 
-                mapping.UpdateObjectVersion(syncEntity.ObjectVersion);
+                local.UpdateProjectName(dto.Name);
+
+                mapping.UpdateObjectVersion(
+                    syncEntity.ObjectVersion);
+
                 await _unitOfWork.CommitTransactionAsync();
             }
             catch
