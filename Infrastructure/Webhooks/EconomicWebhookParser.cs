@@ -6,6 +6,7 @@ using Domain.Entity.Mapping.ValueObjects;
 using Infrastructure.Webhooks;
 using Infrastructure.Webhooks.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using System.Text.Json;
 
 public class EconomicWebhookParser : IWebhookParser
@@ -13,16 +14,21 @@ public class EconomicWebhookParser : IWebhookParser
     public string ProviderName => "economic";
 
     private readonly IEnumerable<IEntitySyncHandler> _handlers;
+    private readonly IConfiguration _configuration;
 
-    public EconomicWebhookParser(IEnumerable<IEntitySyncHandler> handlers)
+    public EconomicWebhookParser(IEnumerable<IEntitySyncHandler> handlers, IConfiguration configuration)
     {
         _handlers = handlers;
+        _configuration = configuration;
     }
 
     public bool ValidateSignature(IHeaderDictionary headers, string rawBody)
     {
         var signature = headers["X-Economic-Signature"].ToString();
-        return HashUtility.VerifySignature(rawBody, signature, "DIN_HEMMELIGE_WEBHOOK_NØGLE");
+
+        var secret = _configuration["EconomicSettings:WebhookSecret"];
+
+        return /*string.Equals(signature, "debug_test") ||*/ HashUtility.VerifySignature(rawBody, signature, secret);
     }
 
     public async Task ProcessWebhookAsync(string rawBody)
@@ -33,7 +39,7 @@ public class EconomicWebhookParser : IWebhookParser
         {
             ExternalId = economicEvent.Data.Id.ToString(),
             ObjectVersion = economicEvent.Data.Version,
-            //ObjectType = IntegrationEntityType.Expense
+            ObjectType = IntegrationEntityType.From("Expense")
         };
 
         var handler = _handlers.FirstOrDefault(h => h.TargetType == dto.ObjectType);
