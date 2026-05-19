@@ -35,7 +35,7 @@ namespace Application.Interfaces
         //Registrations
         IHourRegistrationRepository HourRegistrations { get; }
         IExpenseRegistrationRepository ExpenseRegistrations { get; }
-
+        IWorkLogRepository WorkLogs { get; }
 
         //Mappings
         IIntegrationMappingRepository Mappings { get; }

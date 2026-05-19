@@ -46,6 +46,7 @@ namespace Infrastructure
         //Registrations
         public IHourRegistrationRepository HourRegistrations { get; }
         public IExpenseRegistrationRepository ExpenseRegistrations { get; }
+        public IWorkLogRepository WorkLogs { get; }
 
         //Mappings
         public IIntegrationMappingRepository Mappings { get; }
@@ -69,6 +70,7 @@ namespace Infrastructure
 
             HourRegistrations = new HourRegistrationRepository(_context);
             ExpenseRegistrations = new ExpenseRegistrationRepository(_context);
+            WorkLogs = new WorkLogRepository(_context);
 
             Mappings = new IntegrationMappingsRepository(_context);
             IntegrationSettings = new IntegrationSettingsRepository(_context);
