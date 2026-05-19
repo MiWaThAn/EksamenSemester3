@@ -1,0 +1,119 @@
+﻿@page "/company-projects/{projectId:guid}"
+@using Shared.Model
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<PageTitle>Admin Projekt Detaljer</PageTitle>
+
+<div class="container mt-4 d-flex justify-content-center">
+    @if (isLoading)
+    {
+        <div class="text-white text-center p-4">
+            <div class="spinner-border text-light mb-3" role="status"></div>
+            <div><strong>Henter projektets detaljer, big boss...</strong></div>
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @errorMessage
+        </div>
+    }
+    else if (projectDetail != null)
+    {
+        <div class="detailed-card-container shadow">
+
+            <div class="detail-header font-weight-bold text-center">
+                @projectDetail.ProjectName
+            </div>
+
+            <div class="detail-info-box shadow-sm mb-4">
+                <div class="p-3 text-center border-bottom">
+                    Status: @(projectDetail.IsSelected ? "Aktivt / Valgt" : "Inaktivt")
+                </div>
+                <div class="p-3 text-center text-muted" style="font-size: 0.9rem;">
+                    Notifikationer: @projectDetail.NotificationCount
+                </div>
+            </div>
+
+            <div class="project-list-section">
+                <div class="text-center font-weight-bold mb-3">Tilknyttede medarbejdere:</div>
+
+                @if (projectDetail.Employees != null && projectDetail.Employees.Any())
+                {
+                    @foreach (var emp in projectDetail.Employees)
+                    {
+                        <div class="p-3 text-center mb-2 project-item-card shadow-sm"
+                             @onclick="() => GaaTilMedarbejder(emp.Id)">
+                            @emp.FullName
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="p-3 text-center empty-projects-card">
+                        Ingen medarbejdere tilkoblet dette projekt endnu, legend.
+                    </div>
+                }
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <button class="btn action-btn shadow-sm" @onclick="GoBack">Tilbage</button>
+                <button class="btn action-btn shadow-sm" @onclick="NavigateToEdit">Rediger</button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Guid projectId { get; set; } // Modtager dit projectId som et rent Guid!
+
+    private DetailedProjectModel? projectDetail; // Vi skal lige lave denne model bagefter!
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadProjectData();
+    }
+
+    private async Task LoadProjectData()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+
+            // Vi kalder jeres API efter det specifikke projekt via jeres Dev Tunnel
+            projectDetail = await Http.GetFromJsonAsync<DetailedProjectModel>($"api/projekt/admin/{projectId}");
+        }
+        catch (Exception ex)
+        {
+            var actualException = ex.InnerException ?? ex;
+            errorMessage = $"Kunne ikke hente projektet: {actualException.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/company-overview-admin"); // Tilbage til admin-oversigten
+    }
+
+    private void NavigateToEdit()
+    {
+        // Klar til redigerings-skærmen i fremtiden!
+        Navigation.NavigateTo($"/project-edit/{projectId}");
+    }
+
+    private void GaaTilMedarbejder(Guid id)
+    {
+        // Gør det muligt at klikke på en medarbejder for at hoppe over på DERES detaljeside!
+        Navigation.NavigateTo($"/specific-employee-admin/{id}");
+    }
+}

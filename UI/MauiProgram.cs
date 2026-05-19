@@ -7,6 +7,7 @@ namespace UI
         public static MauiApp CreateMauiApp()
         {
             var builder = MauiApp.CreateBuilder();
+
             builder
                 .UseMauiApp<App>()
                 .ConfigureFonts(fonts =>
@@ -25,12 +26,36 @@ namespace UI
 
             builder.Services.AddMauiBlazorWebView();
 
-            builder.Services.AddScoped(sp => new HttpClient
+            builder.Services.AddScoped(sp =>
             {
-                BaseAddress = new Uri(apiBaseUrl)
+                HttpMessageHandler handler;
+
+#if ANDROID
+                // Til Android bruger vi den indfødte Java-handler og tvinger den til at godkende certifikatet
+                handler = new Xamarin.Android.Net.AndroidMessageHandler
+                {
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+                };
+#else
+                // Til Windows / browser (hvis du tester der) bruger vi standard handleren
+                handler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+                };
+#endif
+
+                var client = new HttpClient(handler)
+                {
+                    BaseAddress = new Uri("https://rj7mxw9r-7020.euw.devtunnels.ms/")
+                };
+
+                // Sørg for at Microsofts anti-phishing side ikke blokerer Android-appen
+                client.DefaultRequestHeaders.Add("X-Tunnel-Skip-Anti-Phishing-Page", "true");
+
+                return client;
             });
 #if DEBUG
-    		builder.Services.AddBlazorWebViewDeveloperTools();
+            builder.Services.AddBlazorWebViewDeveloperTools();
     		builder.Logging.AddDebug();
 #endif
 
