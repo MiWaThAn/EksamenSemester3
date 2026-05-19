@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Application.DTO
 {
-    public class ExpenseDTO : BaseIntegrationDTO
+    public class ExpenseDTO : SyncEntity
     {
 
     }

@@ -1,14 +1,10 @@
-﻿using Application.DTO.External;
+﻿using Application.DTO;
+using Application.DTO.External;
 using Application.Interfaces.Adapters;
-using Domain.Builders.Item;
-using Domain.Builders.Person;
-using Domain.Entity.Item;
+using Application.Interfaces.Services.Sync;
+
 using Domain.Entity.Mapping.ValueObjects;
-using Domain.Entity.Person;
-using Domain.ValueObjects;
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 using System.Text.Json;
 
 namespace Infrastructure.Adapters.Economic
@@ -19,82 +15,95 @@ namespace Infrastructure.Adapters.Economic
         
             public bool Supports(DataSource datasource) => datasource.Value == "economic";
 
-            public IEnumerable<SyncEntity> Map(
+            public IEnumerable<ISyncEntity> Map(
                 string json,
                 IntegrationEntityType entityType,
                 Guid companyId)
             {
                 return entityType.Value switch
                 {
-                    "employee" => MapEmployees(json, companyId),
-                    "project" => MapProjects(json, companyId),
-                    "customer" => MapCustomers(json, companyId),
+                    "employee" => MapEmployees(json, entityType, companyId),
+                    "project" => MapProjects(json, entityType, companyId),
+                    "customer" => MapCustomers(json, entityType, companyId),
                     _ => throw new Exception(
                         $"Economic adapter does not support '{entityType}'.")
                 };
             }
 
-            private IEnumerable<SyncEntity> MapEmployees(string json, Guid companyId)
-            {
-                var response = JsonSerializer.Deserialize<EmployeeDTOResponse>(json,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        private IEnumerable<SyncEntity<EmployeeDTO>> MapEmployees(string json, IntegrationEntityType entityType, Guid companyId)
+        {
+            var response = JsonSerializer.Deserialize<EmployeeDTOResponse>(
+                json, new JsonSerializerOptions{PropertyNameCaseInsensitive = true});
 
-                return response!.Items
-                    .Where(dto => !dto.IsBarred)
-                    .Select(dto => new SyncEntity
-                    {
-                        ExternalId = dto.Number.ToString(),
-                        ObjectVersion = dto.ObjectVersion,
-                        Entity = new EmployeeBuilder()
-                        .WithName(dto.Name)
-                        .WithCompanyId(companyId)
-                        .WithEmployeeType(EmployeeType.None)  
-                        .WithAutonomy(false)
-                        .WithEmail(dto.Email != null
-                         ? new EmailAddress(dto.Email)
-                        : null).Build()
-                    });
-            }
-
-            private IEnumerable<SyncEntity> MapProjects(string json, Guid companyId)
-            {
-                var response = JsonSerializer.Deserialize<ProjectDTOResponse>(json,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                return response!.Items.Select(dto => new SyncEntity
+            return response!.Items
+                .Where(dto => !dto.IsBarred)
+                .Select(dto => new SyncEntity<EmployeeDTO>
                 {
                     ExternalId = dto.Number.ToString(),
                     ObjectVersion = dto.ObjectVersion,
-                    Entity = new ProjectBuilder()
-                        .WithName(dto.Name)
-                        .WithCompanyId(companyId)
-                        .WithIsStatus(dto.IsClosed ? Status.Lukket : Status.Åben)
-                        .WithDescription(string.Empty)
-                        .Build()
+                    CompanyId = companyId,
+                    ObjectType = entityType,
+                    Data = new EmployeeDTO
+                    {
+                        Name = dto.Name,
+                        Email = dto.Email
+                    }
                 });
-            }
+        }
 
-            private IEnumerable<SyncEntity> MapCustomers(string json, Guid companyId)
-            {
-                var response = JsonSerializer.Deserialize<CustomerDTOResponse>(json,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                return response!.Items.Select(dto => new SyncEntity
+        private IEnumerable<SyncEntity<ProjectDTO>> MapProjects(string json, IntegrationEntityType entityType, Guid companyId)
+        {
+            var response = JsonSerializer.Deserialize<ProjectDTOResponse>(
+                json,
+                new JsonSerializerOptions
                 {
-                    ExternalId = dto.CustomerNumber.ToString(),
-                    ObjectVersion = dto.ObjectVersion,
-                    Entity = new CustomerBuilder()
-                    .WithName(dto.Name)
-                    .WithEmail(dto.Email != null
-                     ? new EmailAddress(dto.Email)
-                     : null).Build()
+                    PropertyNameCaseInsensitive = true
                 });
-            }
+
+            return response!.Items.Select(dto => new SyncEntity<ProjectDTO>
+            {
+                ExternalId = dto.Number.ToString(),
+                ObjectVersion = dto.ObjectVersion,
+                CompanyId = companyId,
+                ObjectType = entityType,
+                Data = new ProjectDTO
+                {
+                    Name = dto.Name,
+                    IsClosed = dto.IsClosed
+                }
+            });
+        }
+        private IEnumerable<SyncEntity<CustomerDTO>> MapCustomers(string json, IntegrationEntityType entityType, Guid companyId)
+        {
+            var response = JsonSerializer.Deserialize<CustomerDTOResponse>(
+                json,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+            return response!.Items.Select(dto => new SyncEntity<CustomerDTO>
+            {
+                ExternalId = dto.CustomerNumber.ToString(),
+                ObjectVersion = dto.ObjectVersion,
+                CompanyId = companyId,
+                ObjectType = entityType,
+                Data = new CustomerDTO
+                {
+                    Name = dto.Name,
+                    Email = dto.Email
+                }
+            });
         }
 
 
 
-
-
-
     }
+}
+
+
+
+
+
+
+    

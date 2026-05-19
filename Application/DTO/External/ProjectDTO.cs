@@ -12,5 +12,6 @@ namespace Application.DTO.External
         public int CustomerNumber { get; set; }
         public int ResponsibleEmployeeNumber { get; set; }
         public string ObjectVersion { get; set; } = string.Empty;
+        
     }
 }

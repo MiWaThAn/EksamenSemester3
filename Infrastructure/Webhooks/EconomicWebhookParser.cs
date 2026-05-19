@@ -35,18 +35,19 @@ public class EconomicWebhookParser : IWebhookParser
     {
         var economicEvent = JsonSerializer.Deserialize<EconomicWebhookEvent>(rawBody);
 
+        
         var dto = new ExpenseDTO
         {
             ExternalId = economicEvent.Data.Id.ToString(),
             ObjectVersion = economicEvent.Data.Version,
-            ObjectType = IntegrationEntityType.From("Expense")
+            ObjectType = IntegrationEntityType.From("expense")
         };
 
         var handler = _handlers.FirstOrDefault(h => h.TargetType == dto.ObjectType);
 
         if (handler != null)
         {
-            var dtosAsList = new List<BaseIntegrationDTO> { dto };
+            var dtosAsList = new List<SyncEntity> { dto };
             await handler.ProcessAndSaveAsync(dtosAsList, economicEvent.CompanyId);
         }
     }

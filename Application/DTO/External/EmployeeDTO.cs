@@ -11,5 +11,6 @@ namespace Application.DTO.External
         public string Email { get; set; }
         public bool IsBarred { get; set; }
         public string ObjectVersion { get; set; } = string.Empty;
+        
     }
 }

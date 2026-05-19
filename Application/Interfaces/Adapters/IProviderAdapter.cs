@@ -1,4 +1,6 @@
-﻿using Application.Adapters;
+﻿
+using Application.DTO;
+using Application.Interfaces.Services.Sync;
 using Domain.Entity.Mapping.ValueObjects;
 using System;
 using System.Collections.Generic;
@@ -9,6 +11,6 @@ namespace Application.Interfaces.Adapters
     public interface IProviderAdapter
     {
         bool Supports(DataSource datasource);
-        IEnumerable<SyncEntity> Map(string json, IntegrationEntityType entityType, Guid companyId);
+        IEnumerable<ISyncEntity> Map(string json, IntegrationEntityType entityType, Guid companyId);
     }
 }

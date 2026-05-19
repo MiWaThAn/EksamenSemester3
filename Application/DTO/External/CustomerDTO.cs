@@ -14,5 +14,6 @@ namespace Application.DTO.External
         public string City { get; set; }
         public string CvrNo { get; set; }
         public string ObjectVersion { get; set; } = string.Empty;
+        
     }
 }
