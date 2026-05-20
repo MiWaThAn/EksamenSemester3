@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Infrastructure.Service.Security
 {
-    internal class HashingService : IHashingService
+    public class HashingService : IHashingService
     {
         private const int WorkFactor = 12;
         public string Hash(string plainText)
