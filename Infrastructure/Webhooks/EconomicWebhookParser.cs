@@ -15,12 +15,12 @@ public class EconomicWebhookParser : IWebhookParser
 {
     public string ProviderName => "economic";
 
-    private readonly IEnumerable<IEntitySyncHandler> _handlers;
+    
     private readonly IConfiguration _configuration;
 
-    public EconomicWebhookParser(IEnumerable<IEntitySyncHandler> handlers, IConfiguration configuration)
+    public EconomicWebhookParser( IConfiguration configuration)
     {
-        _handlers = handlers;
+        
         _configuration = configuration;
     }
 

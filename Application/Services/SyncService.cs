@@ -70,7 +70,7 @@ namespace Application.Services
                 _logger.LogWarning("No URL found for entity type: {entityType}", entityType);
                 return;
             }
-            var json =  await _externalAPIService.FetchFromAPI(url, setting.Key, setting.EncryptedValue);
+            var json =  await _externalAPIService.FetchFromAPI(url, setting.Credential);
             
             
             
@@ -106,17 +106,13 @@ namespace Application.Services
 
             var url = $"{endpoint.Url}/{externalId}";
 
-            var json = await _externalAPIService.FetchFromAPI(
-                url,
-                setting.Key,
-                setting.EncryptedValue);
+            var json = await _externalAPIService.FetchFromAPI(url, setting.Credential);
 
             var adapter = _adapterRegistry
                 .GetAdapter(setting.Provider.Datasource);
             var syncEntity = adapter.Map(json, entityType, setting.CompanyId).FirstOrDefault();
 
-            await ProcessAsync(syncEntity, setting,
-                entityType);
+            await ProcessAsync(syncEntity, setting,entityType);
         }
 
 
