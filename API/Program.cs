@@ -5,8 +5,12 @@ using Application.Adapters;
 using Application.Adapters.Economic;
 using Application.Interfaces.Adapters;
 using Application.Interfaces.Data;
+using Application;
+using Application.Interfaces.Adapters;
 using Application.Interfaces.Services;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.Sync;
+using API.Workers;
 using Application.Interfaces.Services.Sync;
 using Application.Services;
 using Domain.Entity.Person;
@@ -15,6 +19,7 @@ using Domain.Interfaces.Item;
 using Domain.Interfaces.Person;
 using Domain.Services.Person;
 using Infrastructure;
+using Infrastructure.Configuration;
 using Infrastructure.Data;
 using Infrastructure.Data.Seeding;
 using Infrastructure.Service;
@@ -81,6 +86,16 @@ builder.Services.AddAuthorization();
 
 
 builder.Services.AddApplication();
+builder.Services.AddScoped<IWebhookParser, EconomicWebhookParser>();
+builder.Services.Configure<EconomicOptions>(
+    builder.Configuration.GetSection(EconomicOptions.SectionName));
+builder.Services.AddHttpClient<IEconomicApiClient, EconomicApiClient>();
+//Adds Infrastructure repos and so on.
+var connectionstring = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddInfrastructure(connectionstring);
+builder.Services.AddApplication();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

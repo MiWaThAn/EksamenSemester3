@@ -33,8 +33,9 @@ namespace UI
 
             if (string.IsNullOrEmpty(apiBaseUrl))
             {
-                // If dev tunnel doesn't work, try localhost instead
-                apiBaseUrl = "https://localhost:7020/";
+                apiBaseUrl = DeviceInfo.Platform == DevicePlatform.Android
+                    ? "https://10.0.2.2:7020/"
+                    : "https://localhost:7020/";
             }
             builder.Services.AddMauiBlazorWebView();
 
