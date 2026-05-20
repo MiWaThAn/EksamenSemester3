@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces.Adapters;
 using Application.Interfaces.Handlers;
+using Application.Interfaces.Registries;
 using Domain.Entity.Mapping.ValueObjects;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Text;
 
 namespace Application.Registries
 {
-    public class HandlerRegistry
+    public class HandlerRegistry : IHandlerRegistry
     {
         private readonly IEnumerable<IEntitySyncHandler> _handlers;
 

@@ -1,5 +1,4 @@
-﻿using Application.Adapters;
-using Application.Adapters.Economic;
+﻿
 using Application.Interfaces;
 using Application.Interfaces.Adapters;
 using Application.Interfaces.Data;
@@ -15,6 +14,8 @@ using Domain.Entity.Person;
 using Domain.Interfaces;
 using Domain.Interfaces.Item;
 using Domain.Interfaces.Repos;
+using Infrastructure.Adapters;
+using Infrastructure.Adapters.Economic;
 using Infrastructure.Data;
 using Infrastructure.Repositories.Item;
 using Infrastructure.Repositories.Item.Registrations;

@@ -9,6 +9,6 @@ namespace Application.Interfaces.Registries
     public interface IHandlerRegistry
     {
         public IEntitySyncHandler GetHandler(IntegrationEntityType entityType);
-        IEntitySyncHandler GetEntitySyncHandler();
+        
     }
 }
