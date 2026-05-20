@@ -36,19 +36,19 @@ namespace Domain.Builders.Person
             Email = email;
             return this;
         }
-        public EmployeeBuilder WithCompany(Company company)
+        internal EmployeeBuilder WithCompany(Company company)
         {
             if (company == null) throw new ArgumentNullException(nameof(company));
             CompanyId = company.Id;
             return this;
         }
-        public EmployeeBuilder WithCompanyId(Guid companyId)
+        internal EmployeeBuilder WithCompanyId(Guid companyId)
         {
             Guard.AgainstEmptyGuid(companyId, nameof(companyId));
             CompanyId = companyId;
             return this;
         }
-        public Employee Build()
+        internal Employee Build()
         {
             Guard.AgainstNullOrEmpty(Name, nameof(Name));
             Guard.AgainstEmptyGuid(CompanyId, nameof(CompanyId));
