@@ -1,4 +1,6 @@
-﻿@page "/not-found"
+﻿@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@page "/not-found"
 @layout MainLayout
 
 <h3>Not Found</h3>

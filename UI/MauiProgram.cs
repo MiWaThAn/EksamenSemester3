@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.Logging;
+using UI.Services.Auth;
+using UI.Services.Theme;
 
 namespace UI
 {
@@ -14,6 +17,18 @@ namespace UI
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 });
 
+
+
+
+
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            
+
+            builder.Services.AddAuthorizationCore();
+            builder.Services.AddSingleton<ThemeService>();
+            builder.Services.AddSingleton<ISecureStorage>(SecureStorage.Default);
+            builder.Services.AddScoped<JwtAuthStateProvider>();
+            builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<JwtAuthStateProvider>());
             var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
 
             if (string.IsNullOrEmpty(apiBaseUrl))
@@ -22,7 +37,6 @@ namespace UI
                     ? "https://10.0.2.2:7020/"
                     : "https://localhost:7020/";
             }
-
             builder.Services.AddMauiBlazorWebView();
 
             builder.Services.AddScoped(sp => new HttpClient

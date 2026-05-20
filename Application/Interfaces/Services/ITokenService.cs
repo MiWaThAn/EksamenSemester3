@@ -1,0 +1,14 @@
+﻿using Domain.Entity.Person;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Application.Interfaces.Services
+{
+    public interface ITokenService
+    {
+        string GetToken(Account account);
+        bool ValidateToken(string token, IConfiguration config);
+    }
+}

@@ -13,10 +13,10 @@ namespace Domain.Services.Person
         {
             _accountRepository = accountRepository;
         }
-        public async Task<bool> UsernameExistsAsync(string username)
+        public async Task<bool> UsernameExistsAsync(string username, CancellationToken ct = default)
         {
             if (string.IsNullOrEmpty(username)) throw new ArgumentNullException(nameof(username));
-            var account = await _accountRepository.GetByUsernameAsync(username);
+            var account = await _accountRepository.GetByUsernameAsync(username,ct);
             return account == null;
         }
     }

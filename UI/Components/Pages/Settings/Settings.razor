@@ -1,0 +1,26 @@
+﻿@page "/settings"
+@inject UI.Services.Theme.ThemeService ThemeService
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+
+<h3>Udsende Indstillinger</h3>
+
+<div class="mb-3">
+    <label for="bgColorPicker" class="form-label">Vælg Baggrunds Farve:</label>
+    <input type="color" 
+           id="bgColorPicker" 
+           class="form-control form-control-color" 
+           value="@ThemeService.BackgroundColor" 
+           @onchange="HandleColorChange" />
+</div>
+
+@code {
+    private void HandleColorChange(ChangeEventArgs e)
+    {
+        var selectedColor = e.Value?.ToString();
+        if (!string.IsNullOrEmpty(selectedColor))
+        {
+            ThemeService.UpdateBackgroundColor(selectedColor);
+        }
+    }
+}

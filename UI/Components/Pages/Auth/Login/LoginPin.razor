@@ -1,0 +1,145 @@
+﻿@page "/auth/pin-login"
+@using Shared.Person.Auth.Models.Login
+@using UI.Services.Auth
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<div class="container max-w-sm mx-auto p-6 flex flex-col justify-between min-h-screen text-center">
+
+    <div class="mt-8">
+        <div class="inline-flex items-center justify-center w-20 h-20 bg-blue-600 text-white rounded-full mb-4 shadow-md font-bold text-2xl">
+            M
+        </div>
+        <h3 class="text-2xl font-bold text-gray-800">Velkommen tilbage</h3>
+        <p class="text-gray-500 text-sm mt-1">Indtast din 4-cifrede pinkode for at låse appen op.</p>
+    </div>
+
+    <div class="my-6">
+        <div class="flex justify-center gap-6">
+            @for (int i = 0; i < 4; i++)
+            {
+                <div class="w-5 h-5 rounded-full border-2 border-blue-500 transition-all duration-150
+                    @(i < _currentInput.Length ? "bg-blue-600 scale-110 shadow" : "bg-transparent")">
+                </div>
+            }
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(_errorMessage))
+        {
+            <p class="text-red-500 text-sm mt-4 font-semibold animate-pulse">@_errorMessage</p>
+        }
+    </div>
+
+    <div class="mb-6 flex flex-col gap-6">
+
+        <div class="grid grid-cols-3 gap-4 max-w-xs mx-auto">
+            @for (int i = 1; i <= 9; i++)
+            {
+                var number = i.ToString();
+                <button type="button" @onclick="() => AppendNumber(number)" disabled="@_isBusy"
+                        class="w-16 h-16 mx-auto bg-gray-100 active:bg-gray-200 text-gray-800 text-2xl font-semibold rounded-full flex items-center justify-center transition shadow-sm focus:outline-none">
+                    @number
+                </button>
+            }
+
+            <button type="button" @onclick="Backspace" disabled="@_isBusy"
+                    class="w-16 h-16 mx-auto text-gray-500 active:text-gray-800 text-lg rounded-full flex items-center justify-center focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.41-6.41A2 2 0 0110.83 5H20a2 2 0 012 2v10a2 2 0 01-2 2h-9.17a2 2 0 01-1.42-.59L3 12z" />
+                </svg>
+            </button>
+
+            <button type="button" @onclick='() => AppendNumber("0")' disabled="@_isBusy"
+                    class="w-16 h-16 mx-auto bg-gray-100 active:bg-gray-200 text-gray-800 text-2xl font-semibold rounded-full flex items-center justify-center transition shadow-sm focus:outline-none">
+                0
+            </button>
+
+            <button type="button" @onclick="ClearInput" disabled="@_isBusy"
+                    class="w-16 h-16 mx-auto text-sm text-gray-400 active:text-gray-600 font-semibold rounded-full flex items-center justify-center focus:outline-none">
+                Ryd
+            </button>
+        </div>
+
+        <div class="mt-2">
+            <button type="button" @onclick="SwitchToFullLogin" class="text-blue-600 hover:text-blue-800 text-sm font-semibold transition">
+                Log ind med brugernavn og kodeord
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private PincodeModel _pinModel = new();
+    private string _currentInput = string.Empty;
+    private bool _isBusy = false;
+    private string? _errorMessage;
+
+    private async Task AppendNumber(string num)
+    {
+        if (_currentInput.Length >= 4 || _isBusy) return;
+
+        _errorMessage = null;
+        _currentInput += num;
+        _pinModel.Pincode = _currentInput;
+
+        if (_currentInput.Length == 4)
+        {
+            _isBusy = true;
+            await Task.Delay(150);
+            await ExecutePinLoginAsync();
+        }
+    }
+
+    private void Backspace()
+    {
+        if (_currentInput.Length > 0 && !_isBusy)
+        {
+            _currentInput = _currentInput[..^1];
+            _pinModel.Pincode = _currentInput;
+            _errorMessage = null;
+        }
+    }
+
+    private void ClearInput()
+    {
+        if (!_isBusy)
+        {
+            _currentInput = string.Empty;
+            _pinModel.Pincode = string.Empty;
+            _errorMessage = null;
+        }
+    }
+
+    private async Task ExecutePinLoginAsync()
+    {
+        try
+        {
+            var response = await AuthService.LoginWithPin(_pinModel);
+
+            if (response.Success)
+            {
+                Navigation.NavigateTo("/dashboard");
+            }
+            else
+            {
+                _errorMessage = response.Message;
+
+                _currentInput = string.Empty;
+                _pinModel.Pincode = string.Empty;
+                _isBusy = false;
+            }
+        }
+        catch (Exception)
+        {
+            _errorMessage = "Der skete en uventet netværksfejl.";
+            _isBusy = false;
+            _currentInput = string.Empty;
+        }
+    }
+
+    private async Task SwitchToFullLogin()
+    {
+        await AuthService.Logout();
+        Navigation.NavigateTo("/auth/login");
+    }
+}

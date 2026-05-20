@@ -9,6 +9,6 @@ namespace Domain.Interfaces.Person
 {
     public interface IAccountFactory
     {
-        Task<Result<Account>> CreateAsync(AccountBuilder builder);
+        Task<Result<Account>> CreateAsync(AccountBuilder builder, CancellationToken ct = default);
     }
 }

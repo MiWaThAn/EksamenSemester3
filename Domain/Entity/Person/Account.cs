@@ -1,4 +1,5 @@
 ﻿using Domain.Builders.Person;
+using Domain.Entity.Person.Auth;
 using Domain.Guards;
 using Domain.Interfaces.Person;
 using Domain.ValueObjects;
@@ -16,7 +17,7 @@ namespace Domain.Entity.Person
         //Username is unique and used for login, while phone number is optional and can be used for 2FA or account recovery.
         public string Username { get; internal set; }
         public string HashedPassword { get; internal set; }
-        public PhoneNumber? PhoneNumber { get; internal set; }
+        public PhoneNumber PhoneNumber { get; internal set; }
         //HashedPin is used for quick login on mobile devices, it is optional and can be null if the user has not set it up.
         public string? HashedPin { get; internal set; }
 
@@ -29,20 +30,25 @@ namespace Domain.Entity.Person
         public Company? Company { get; internal set; }
         public Guid? EmployeeId { get; internal set; }
         public Employee? Employee { get; internal set; }
+        //Liste der indeholder alle en accounts roller (de giver kontoen primission)
+        public List<Role> Roles { get; private set; } = new();
 
         //Helper methods to quickly check the type of account based on the presence of CompanyId and EmployeeId. This allows for flexible account types and easy role management.
         public bool IsCompanyAccount => CompanyId.HasValue;
         public bool IsEmployeeAccount => EmployeeId.HasValue;
 
+        //Password Recovery
+        private string? RecorveryToken;
+        private DateTime? RecoveryExpiry;
 
         //Last time the account pinged the server (last activity time)
-        public DateTime LastSync { get; internal set; } 
+        public DateTime LastLogin { get; internal set; } 
 
         public Account() : base()
         {
 
         }
-        internal Account(string username, string hashedPassword, PhoneNumber? phoneNumber,string hashedPin,Employee? employee,Company? company) : base()
+        internal Account(string username, string hashedPassword, PhoneNumber phoneNumber,string hashedPin,Employee? employee,Company? company) : base()
         {
             Guard.AgainstNullOrEmpty(hashedPassword, nameof(hashedPassword));
             Guard.AgainstNullOrEmpty(username, nameof(username));
@@ -55,7 +61,7 @@ namespace Domain.Entity.Person
             if (Company != null) LinkToCompany(Company);
             if (Employee != null) LinkToEmployee(Employee);
         }
-        public void UpdatePhoneNumber(PhoneNumber? phoneNumber)
+        public void UpdatePhoneNumber(PhoneNumber phoneNumber)
         {
             PhoneNumber = phoneNumber;
             UpdatedAt = DateTime.UtcNow;
@@ -71,7 +77,7 @@ namespace Domain.Entity.Person
             Guard.AgainstNullOrEmpty(newUsername, nameof(newUsername));
             UpdatedAt = DateTime.UtcNow;
         }
-        public void UpdatePin(string newHashedPin)
+        public void UpdateHashedPin(string newHashedPin)
         {
             Guard.AgainstNullOrEmpty(newHashedPin, nameof(newHashedPin));
             HashedPin = newHashedPin;
@@ -89,18 +95,47 @@ namespace Domain.Entity.Person
             Employee = employee;
             UpdatedAt = DateTime.UtcNow;
         }
-        public async Task<Result<Company>> CreateCompany(CompanyBuilder builder, ICompanyFactory companyFactory)
+        public async Task<Result<Company>> CreateCompany(CompanyBuilder builder, ICompanyFactory companyFactory, CancellationToken ct = default)
         {
             Guard.AgainstNull(builder, nameof(builder));
             Guard.AgainstNull(companyFactory, nameof(companyFactory));
             builder = builder.WithAccount(this);
-            var result = await companyFactory.CreateAsync(builder, this);
+            var result = await companyFactory.CreateAsync(builder, this,ct);
             if(result.IsSuccess)
             {
                 LinkToCompany(result.Value);
             }
             UpdatedAt = DateTime.UtcNow;
             return result;
+        }
+        public void AddRole(Role role)
+        {
+            if (!Roles.Any(r => r.Id == role.Id))
+                Roles.Add(role);
+        }
+        public void UpdateLastLogin(DateTime time)
+        {
+            Guard.AgainstNull(time, nameof(time));
+            LastLogin = time;
+        }
+        public string GeneratePasswordResetToken()
+        {
+            RecorveryToken = Guid.NewGuid().ToString();
+            RecoveryExpiry = DateTime.UtcNow.AddMinutes(30);
+
+            return RecorveryToken;
+        }
+        public void ResetPassword(string token, string newPasswordHash)
+        {
+            if (string.IsNullOrWhiteSpace(RecorveryToken) || RecorveryToken != token)
+                throw new Exception("Invalid reset token.");
+
+            if (DateTime.UtcNow > RecoveryExpiry)
+                throw new Exception("Reset token has expired.");
+
+            HashedPassword = newPasswordHash;
+            RecorveryToken = null;
+            RecoveryExpiry = null;
         }
     }
 }

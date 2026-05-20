@@ -8,13 +8,13 @@ namespace Domain.Interfaces.Repos
 {
     public interface ICompanyRepository : IGenericRepository<Company>
     {
-        Task<Company?> GetByCVRAsync(CvrNumber cvrNumber);
-        Task<Company?> GetByEmailAsync(EmailAddress emailAddress);
-        Task<Company?> GetWithProjectsAsync(Guid Id);
-        Task<Company?> GetWithEmployeesAsync(Guid Id);
-        Task<Company?> GetWithActivitiesAsync(Guid Id);
-        Task<Company?> GetWithExpensesAsync(Guid Id);
-        Task<Company?> GetWithAllDetailsAsync(Guid id);
+        Task<Company?> GetByCVRAsync(CvrNumber cvrNumber, CancellationToken cancellationToken = default);
+        Task<Company?> GetByEmailAsync(EmailAddress emailAddress, CancellationToken cancellationToken = default);
+        Task<Company?> GetWithProjectsAsync(Guid Id, CancellationToken cancellationToken = default);
+        Task<Company?> GetWithEmployeesAsync(Guid Id, CancellationToken cancellationToken = default);
+        Task<Company?> GetWithActivitiesAsync(Guid Id, CancellationToken cancellationToken = default);
+        Task<Company?> GetWithExpensesAsync(Guid Id, CancellationToken cancellationToken = default);
+        Task<Company?> GetWithAllDetailsAsync(Guid id, CancellationToken cancellationToken = default);
         Task<IEnumerable<Company?>> GetAllWithIntegrationSettingsAsync();
     }
 }

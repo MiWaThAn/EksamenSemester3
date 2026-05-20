@@ -16,11 +16,12 @@ namespace Domain.Services.Person
         {
             _validationService = validationService ?? throw new ArgumentNullException(nameof(validationService));
         }
-        public async Task<Result<Account>> CreateAsync(AccountBuilder builder)
+        public async Task<Result<Account>> CreateAsync(AccountBuilder builder, CancellationToken ct = default)
         {
             Guard.AgainstNull(builder, nameof(builder));
-            if(await _validationService.UsernameExistsAsync(builder.Username))return Result<Account>.Failure("Brugernavnet er allerede i brug.");
+            if(await _validationService.UsernameExistsAsync(builder.Username,ct))return Result<Account>.Failure("Brugernavnet er allerede i brug.");
             return Result<Account>.Success(builder.Build());
         }
     }
 }
+

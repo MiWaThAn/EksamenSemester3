@@ -10,19 +10,20 @@ namespace Domain.Builders.Item.Registration
     public class HourRegistrationBuilder : RegistrationBuilder<HourRegistrationBuilder, HourRegistration>
     {
         private DateTime Start;
-        private DateTime End;
-        public HourRegistrationBuilder WithStartAndEnd(DateTime startTime, DateTime endTime)
+        private TimeType TimeType;
+        public HourRegistrationBuilder WithStart(DateTime startTime)
         {
-            Guard.AgainstInvalidTimeRange(startTime, endTime);
             Start = startTime;
-            End = endTime;
+            return this;
+        }
+        public HourRegistrationBuilder WithType(TimeType timeType)
+        {
+            TimeType = timeType;
             return this;
         }
         internal override HourRegistration Build()
         {
-            Guard.AgainstEmptyGuid(EmployeeId, nameof(EmployeeId));
-            Guard.AgainstEmptyGuid(ProjectId, nameof(ProjectId));
-            return new HourRegistration(EmployeeId, ProjectId, ActivityId, Start, End, Description, Status);
+            return new HourRegistration(WorkLog,ActivityId, Start, Description, Status,TimeType);
         }
     }
 }

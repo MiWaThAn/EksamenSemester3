@@ -18,10 +18,8 @@ namespace Domain.Builders.Item.Registration
         }
         internal override ExpenseRegistration Build()
         {
-            Guard.AgainstEmptyGuid(EmployeeId, nameof(EmployeeId));
-            Guard.AgainstEmptyGuid(ProjectId, nameof(ProjectId));
             Guard.AgainstEmptyGuid(ExpenseId, nameof(ExpenseId));
-            return new ExpenseRegistration(EmployeeId, ProjectId, ActivityId, ExpenseId, Description,Status);
+            return new ExpenseRegistration(WorkLog,ActivityId, ExpenseId, Description,Status);
         }
     }
 }
