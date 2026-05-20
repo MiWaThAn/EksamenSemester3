@@ -82,5 +82,16 @@ namespace API.Controllers.Person.Auth
 
             return Ok(result);
         }
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginCommand command, CancellationToken ct)
+        {
+            var result = await mediator.Send(command, ct);
+
+            if (!result.Success)
+            {
+                return Unauthorized(new ProblemDetails { Detail = result.Message });
+            }
+            return Ok(result);
+        }
     }
 }

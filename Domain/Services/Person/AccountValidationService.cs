@@ -17,7 +17,7 @@ namespace Domain.Services.Person
         {
             if (string.IsNullOrEmpty(username)) throw new ArgumentNullException(nameof(username));
             var account = await _accountRepository.GetByUsernameAsync(username,ct);
-            return account == null;
+            return account != null;
         }
     }
 }

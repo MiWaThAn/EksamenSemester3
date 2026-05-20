@@ -11,7 +11,7 @@ namespace Domain.Builders.Person
     public class AccountBuilder
     {
         internal string HashedPassword;
-        internal string HashedPin;
+        internal string? HashedPin;
         internal string Username;
         internal PhoneNumber PhoneNumber;
         internal Company? Company;
@@ -57,7 +57,6 @@ namespace Domain.Builders.Person
             Guard.AgainstNullOrEmpty(Username, nameof(Username));
             Guard.AgainstNull(PhoneNumber, nameof(PhoneNumber));
             Guard.AgainstNullOrEmpty(HashedPassword, nameof(HashedPassword));
-            Guard.AgainstNullOrEmpty(HashedPin, nameof(HashedPin));
             return new Account(Username, HashedPassword, PhoneNumber, HashedPin,Employee,Company);
         }
     }

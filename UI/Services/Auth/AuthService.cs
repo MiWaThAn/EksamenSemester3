@@ -104,22 +104,38 @@ namespace UI.Services.Auth
             try
             {
                 var response = await _http.PostAsJsonAsync("api/auth/login", model.ToCommand, ct);
-                var result = await response.Content.ReadFromJsonAsync<LoginResponse>(ct);
-                if (response.IsSuccessStatusCode && result?.Token != null)
+                if (response.IsSuccessStatusCode)
                 {
-                    await _secureStorage.SetAsync("auth_token", result.Token);
-                    await _secureStorage.SetAsync("last_full_login", DateTime.UtcNow.ToString("O"));
-                    await _secureStorage.SetAsync("last_pin_login", DateTime.UtcNow.ToString("O"));
+                    var result = await response.Content.ReadFromJsonAsync<LoginResponse>(ct);
+                    if (result?.Token != null)
+                    {
+                        await _secureStorage.SetAsync("auth_token", result.Token);
+                        await _secureStorage.SetAsync("last_full_login", DateTime.UtcNow.ToString("O"));
+                        await _secureStorage.SetAsync("last_pin_login", DateTime.UtcNow.ToString("O"));
 
-                    _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", result.Token);
-                    _authStateProvider.NotifyLogin(result.Token);
-                    return result;
+                        _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", result.Token);
+                        _authStateProvider.NotifyLogin(result.Token);
+                        return result;
+                    }
                 }
-                return result ?? new LoginResponse { Message = "Fejl ved login", Success = false };
+                try
+                {
+                    var errorDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>(ct);
+                    return new LoginResponse { Message = errorDetails?.Detail ?? "Forkert brugernavn eller adgangskode.", Success = false };
+                }
+                catch
+                {
+                    return new LoginResponse { Message = "Fejl ved login (Serveren svarede med fejlkode: " + response.StatusCode + ")", Success = false };
+                }
             }
-            catch (Exception)
+            catch (HttpRequestException)
             {
-                return new LoginResponse { Message = "Ingen netværksforbindelse.", Success = false };
+                return new LoginResponse { Message = "Ingen netværksforbindelse til serveren.", Success = false };
+            }
+            catch (Exception ex)
+            {
+                //til fejlfinding under eksamensprojektet
+                return new LoginResponse { Message = $"Uventet fejl: {ex.Message}", Success = false };
             }
         }
         public async Task Logout()
@@ -161,6 +177,10 @@ namespace UI.Services.Auth
                 return new LoginResponse { Success = false, Message = "Kunne ikke validere offline." };
             }
         }
+
+
+
+
         public async Task<LoginResponse> LoginWithPin(PincodeModel pin, CancellationToken ct = default)
         {
             try
@@ -183,6 +203,11 @@ namespace UI.Services.Auth
                 return new LoginResponse { Success = false, Message = "Netværksfejl." };
             }
         }
+
+
+
+
+
         public async Task<AuthStateStatus> GetRequiredLoginState(CancellationToken ct = default)
         {
             //hvis der ikke er en token betyder det at ingen session er gemt og at de skal logge ind.
