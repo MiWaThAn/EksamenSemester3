@@ -15,9 +15,7 @@ namespace Domain.Entity.Mapping
         public Guid ProviderId { get; private set; } // F.eks. "Economic" eller "Dinero"
         private readonly List<SelectedEntityType> _entityTypes = new();
         public IReadOnlyCollection<SelectedEntityType> EntityTypes => _entityTypes.AsReadOnly();
-
-        public string Key { get; private set; }      // F.eks. "AgreementGrantToken"
-        public string EncryptedValue { get; private set; }    // Selve token-strengen
+        public IntegrationCredential? Credential { get; private set; }
         private readonly List<IntegrationMapping> _mappings = new();
         public IReadOnlyCollection<IntegrationMapping> Mappings => _mappings.Where(r => !r.IsDeleted).ToList().AsReadOnly();
 
@@ -41,20 +39,44 @@ namespace Domain.Entity.Mapping
             }
             CompanyId = companyId;
             ProviderId = providerId;
-            Key = key;
-            EncryptedValue = encryptedValue;
+            Credential = new IntegrationCredential(key, encryptedValue);
+            
         }
-        public void UpdateEncryptedValue(string newEncryptedValue)
+        public void AddCredential(string key, string encryptedValue)
         {
-            Guard.AgainstNullOrEmpty(newEncryptedValue, nameof(newEncryptedValue));
-            EncryptedValue = newEncryptedValue;
+            Guard.AgainstNullOrEmpty(key, nameof(key));
+            Guard.AgainstNullOrEmpty(encryptedValue, nameof(encryptedValue));
+
+            if (Credential != null)
+            throw new Exception("Credential already exists.");
+
+            Credential = new IntegrationCredential(key, encryptedValue);
+
             UpdatedAt = DateTime.UtcNow;
         }
-        
-        public void UpdateKey(string newKey)
+        public void UpdateCredential(string key, string encryptedValue)
         {
-            Guard.AgainstNullOrEmpty(newKey, nameof(newKey));
-            Key = newKey;
+            Guard.AgainstNullOrEmpty(key, nameof(key));
+            Guard.AgainstNullOrEmpty(encryptedValue, nameof(encryptedValue));
+
+            if (Credential == null)
+            { 
+                throw new Exception("No credential exists.");
+            }
+
+            Credential = new IntegrationCredential(key, encryptedValue);
+
+            UpdatedAt = DateTime.UtcNow;
+        }
+        public void RemoveCredential()
+        {
+            if (Credential == null)
+            { 
+                return; 
+            }
+
+            Credential = null;
+
             UpdatedAt = DateTime.UtcNow;
         }
         public void AddEntityType(IntegrationEntityType entityType)

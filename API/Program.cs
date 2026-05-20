@@ -1,17 +1,19 @@
 using API;
 using API.Workers;
+using API.Workers;
 using Application;
-using Application.Adapters;
-using Application.Adapters.Economic;
+using Application;
+using Application.Commands.Person.Handlers.SyncHandlers;
+using Application.Interfaces.Adapters;
 using Application.Interfaces.Adapters;
 using Application.Interfaces.Data;
-using Application;
-using Application.Interfaces.Adapters;
+using Application.Interfaces.Handlers;
+using Application.Interfaces.Registries;
 using Application.Interfaces.Services;
 using Application.Interfaces.Services;
 using Application.Interfaces.Services.Sync;
-using API.Workers;
 using Application.Interfaces.Services.Sync;
+using Application.Registries;
 using Application.Services;
 using Domain.Entity.Person;
 using Domain.Interfaces;
@@ -19,6 +21,8 @@ using Domain.Interfaces.Item;
 using Domain.Interfaces.Person;
 using Domain.Services.Person;
 using Infrastructure;
+using Infrastructure.Adapters;
+using Infrastructure.Adapters.Economic;
 using Infrastructure.Configuration;
 using Infrastructure.Data;
 using Infrastructure.Data.Seeding;
@@ -49,13 +53,15 @@ builder.Services.AddTransient<ICompanyFactory, CompanyFactory>();
 //INFRASTRUCTURE
 var connectionstring = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddInfrastructure(connectionstring); //FROM DEPENDENCY INJECTION IN INFRASTRUCTURE
-
+builder.Services.AddScoped<IAdapterRegistry, AdapterRegistry>();
+builder.Services.AddScoped<IProviderAdapter, EconomicAdapter>();
 
 //APPLICATION
 builder.Services.AddScoped<ISyncService, SyncService>();
-
-
-
+builder.Services.AddScoped<IHandlerRegistry, HandlerRegistry>();
+builder.Services.AddScoped<IEntitySyncHandler, CustomerSyncHandler>();
+builder.Services.AddScoped<IEntitySyncHandler, EmployeeSyncHandler>();
+builder.Services.AddScoped<IEntitySyncHandler, ProjectSyncHandler>();
 
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

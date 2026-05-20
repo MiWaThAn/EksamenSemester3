@@ -9,5 +9,5 @@ public class EconomicWebhookEvent
 public class EconomicData
 {
     public int Id { get; set; }
-    public int Version { get; set; }
+    public string Version { get; set; }
 }

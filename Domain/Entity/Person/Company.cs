@@ -132,7 +132,7 @@ namespace Domain.Entity.Person
         public IntegrationSetting CreateIntegrationSetting(IntegrationSettingBuilder builder)
         {
             var setting = builder.WithCompany(this).Build();
-            if(_settings.Exists(s => s.Provider == setting.Provider && s.Key == setting.Key)) throw new ArgumentException("En integrationsindstilling med samme udbyder og nøgle findes allerede for dette firma.");
+            if(_settings.Exists(s => s.Provider == setting.Provider && s.Credential.Key == setting.Credential.Key)) throw new ArgumentException("En integrationsindstilling med samme udbyder og nøgle findes allerede for dette firma.");
             if (_settings.Exists(s => s.Id == setting.Id)) throw new ArgumentException("Denne integrationsindstilling er allerede tilføjet til firmaet.");
             _settings.Add(setting);
             UpdatedAt = DateTime.UtcNow;

@@ -3,10 +3,10 @@ using Domain.Entity.Mapping.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Text;
-
-namespace Application.Adapters
+using Application.Interfaces.Registries;
+namespace Infrastructure.Adapters
 {
-    public class AdapterRegistry
+    public class AdapterRegistry : IAdapterRegistry
     {
 
         private readonly IEnumerable<IProviderAdapter> _adapters;
