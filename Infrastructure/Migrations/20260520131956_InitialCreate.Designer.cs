@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260519141712_InitialCreate")]
+    [Migration("20260520131956_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -423,16 +423,8 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("EncryptedValue")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("ProviderId")
                         .HasColumnType("uniqueidentifier");
@@ -1033,6 +1025,31 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("ProviderId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.OwnsOne("Domain.Entity.Mapping.ValueObjects.IntegrationCredential", "Credential", b1 =>
+                        {
+                            b1.Property<Guid>("IntegrationSettingId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Key")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("CredentialKey");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("CredentialValue");
+
+                            b1.HasKey("IntegrationSettingId");
+
+                            b1.ToTable("IntegrationSettings");
+
+                            b1.WithOwner()
+                                .HasForeignKey("IntegrationSettingId");
+                        });
+
+                    b.Navigation("Credential");
 
                     b.Navigation("Provider");
                 });

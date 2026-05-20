@@ -9,9 +9,13 @@ namespace Domain.Entity.Mapping.ValueObjects
     [ComplexType]
     public class IntegrationCredential
     {
-        public string Key { get; } // F.eks. "AgreementGrantToken"
-        public string Value { get; }  // Selve token-strengen
-        
+        public string Key { get; private set; } // F.eks. "AgreementGrantToken"
+        public string Value { get; private set; }  // Selve token-strengen
+
+        public IntegrationCredential()
+        {
+        }
+
         internal IntegrationCredential(string key, string value)
         {
             Guard.AgainstNullOrEmpty(key, nameof(key));
