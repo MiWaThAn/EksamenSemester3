@@ -13,7 +13,7 @@ namespace Infrastructure.Repositories.Person
         public CustomerRepository(AppDbContext context) : base(context)
         {
         }
-        public async Task<Customer?> GetByCompanyIdAsync(Guid companyId)
+        public async Task<Customer?> GetByCompanyIdAsync(Guid companyId, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }

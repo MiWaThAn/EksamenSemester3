@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Infrastructure.Repositories.Item.Registrations
 {
-    internal class ExpenseRegistrationRepository : RegistrationRepository<ExpenseRegistration>, IExpenseRegistrationRepository
+    public class ExpenseRegistrationRepository : RegistrationRepository<ExpenseRegistration>, IExpenseRegistrationRepository
     {
         public ExpenseRegistrationRepository(AppDbContext context) : base(context)
         {

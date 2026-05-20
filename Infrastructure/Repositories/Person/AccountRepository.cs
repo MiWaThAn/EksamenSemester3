@@ -12,23 +12,23 @@ namespace Infrastructure.Repositories.Person
     internal class AccountRepository : GenericRepository<Account>, IAccountRepository
     {
         public AccountRepository(AppDbContext context) : base(context) { }
-        public async Task<Account?> GetByUsernameAsync(string username)
+        public async Task<Account?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
-        public async Task<Account?> GetByPhoneNumberAsync(string phoneNumber)
+        public async Task<Account?> GetByPhoneNumberAsync(string phoneNumber, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
-        public async Task<Account?> GetWithCompanyAsync(string username)
+        public async Task<Account?> GetWithCompanyAsync(string username, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
-        public async Task<Account?> GetWithEmployeeAsync(string username)
+        public async Task<Account?> GetWithEmployeeAsync(string username, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
-        public async Task<Account?> GetWithEmployeeAndCompany(string username)
+        public async Task<Account?> GetWithEmployeeAndCompany(string username, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }

@@ -1,6 +1,10 @@
-﻿@inherits LayoutComponentBase
-
-<div class="page">
+﻿@using UI.Services.Auth
+@inherits LayoutComponentBase
+@inject IAuthService AuthService
+@inject NavigationManager Nav
+@inject UI.Services.Theme.ThemeService ThemeService
+@implements IDisposable
+<div class="page" style="background-color: @ThemeService.BackgroundColor; transition: background-color 0.4s ease;">
     <div class="sidebar">
         <NavMenu />
     </div>
@@ -15,3 +19,37 @@
         </article>
     </main>
 </div>
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        ThemeService.OnThemeChanged += StateHasChanged;
+        var currentUri = Nav.ToBaseRelativePath(Nav.Uri).ToLower();
+
+        // Hvis vi allerede står på en auth-side, skal vi ikke køre tjekket (forhindrer uendeligt loop)
+        if (currentUri.StartsWith("auth/"))
+        {
+            return;
+        }
+
+        var status = await AuthService.GetRequiredLoginState();
+
+        if (status == AuthStateStatus.NeedsFullLogin)
+        {
+            await AuthService.Logout();
+
+            Nav.NavigateTo("/auth/login");
+        }
+        else if (status == AuthStateStatus.NeedsPinLogin)
+        {
+            Nav.NavigateTo("/auth/pin-login");
+        }
+        else
+        {
+            await AuthService.AutoLogin();
+        }
+    }
+    public void Dispose()
+    {
+        ThemeService.OnThemeChanged -= StateHasChanged;
+    }
+}
