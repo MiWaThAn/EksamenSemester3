@@ -37,7 +37,7 @@ public class EconomicWebhookParser : IWebhookParser
     {
         var economicEvent = JsonSerializer.Deserialize<EconomicWebhookEvent>(rawBody);
 
-        MapEventToEntityType(economicEvent.EventType);
+        //MapEventToEntityType(economicEvent.EventType);
 
         //TODO Der skal tjekkes op på eventtype fra economic, og skal der evt en handler til at styre at hente fra det externalId
         //der er, samt finde vores company evt via deres external company id, så vi kan opdatere den korrekte entity i vores system.
@@ -55,4 +55,4 @@ public class EconomicWebhookParser : IWebhookParser
     }
 
 }
-}
+

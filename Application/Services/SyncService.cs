@@ -82,10 +82,7 @@ namespace Application.Services
 
 
         }
-        private async Task ProcessAsync(
-    ISyncEntity syncEntity,
-    IntegrationSetting setting,
-    IntegrationEntityType entityType)
+        private async Task ProcessAsync(ISyncEntity syncEntity,IntegrationSetting setting,IntegrationEntityType entityType)
         {
             var existing = await _unitOfWork.Mappings
                 .GetByExternalId(syncEntity.ExternalId, entityType);
@@ -96,7 +93,7 @@ namespace Application.Services
                 await handler.UpdateAsync(syncEntity, existing.First());
         }
 
-        public async Task SyncByExternalIdAsync(IntegrationSetting setting,IntegrationEntityType entityType,string externalId)
+        public async Task SyncByExternalIdAsync(IntegrationSetting setting,IntegrationEntityType entityType,string url)
         {
             var endpoint = setting.Provider.Urls
         .FirstOrDefault(u => u.EntityType == entityType);
@@ -104,7 +101,7 @@ namespace Application.Services
             if (endpoint == null)
                 return;
 
-            var url = $"{endpoint.Url}/{externalId}";
+            
 
             var json = await _externalAPIService.FetchFromAPI(url, setting.Credential);
 
