@@ -9,6 +9,6 @@ namespace Application.Interfaces.Repo.Item
 {
     public interface IActivityRepository : IGenericRepository<Activity>
     {
-        Task<IEnumerable<Activity>> GetByCompanyIdAsync(Guid companyId);
+        Task<IEnumerable<Activity>> GetByCompanyIdAsync(Guid companyId, CancellationToken cancellationToken = default);
     }
 }

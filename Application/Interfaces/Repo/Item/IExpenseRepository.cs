@@ -8,6 +8,6 @@ namespace Application.Interfaces.Repo.Item
 {
     public interface IExpenseRepository : IGenericRepository<Expense>
     {
-        Task<IEnumerable<Expense>> GetByCompanyIdAsync(Guid companyId);
+        Task<IEnumerable<Expense>> GetByCompanyIdAsync(Guid companyId, CancellationToken cancellationToken = default);
     }
 }

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Infrastructure.Service
+namespace Infrastructure.Service.Security
 {
     public class EncryptionService : IEncryptionService
     {

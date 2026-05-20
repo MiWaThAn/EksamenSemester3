@@ -9,6 +9,6 @@ namespace Domain.Interfaces.Person
 {
     public interface ICompanyFactory
     {
-        Task<Result<Company>> CreateAsync(CompanyBuilder builder, Account account);
+        Task<Result<Company>> CreateAsync(CompanyBuilder builder, Account account, CancellationToken ct = default);
     }
 }

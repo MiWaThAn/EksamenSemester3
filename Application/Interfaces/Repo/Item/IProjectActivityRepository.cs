@@ -8,7 +8,7 @@ namespace Application.Interfaces.Repo.Item
 {
     public interface IProjectActivityRepository : IGenericRepository<ProjectActivity>
     {
-        Task<IEnumerable<ProjectActivity>> GetByEmployeeIdAsync(Guid employeeId);
-        Task<IEnumerable<ProjectActivity>> GetByProjectIdAsync(Guid projectId);
+        Task<IEnumerable<ProjectActivity>> GetByEmployeeIdAsync(Guid employeeId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProjectActivity>> GetByProjectIdAsync(Guid projectId, CancellationToken cancellationToken = default);
     }
 }

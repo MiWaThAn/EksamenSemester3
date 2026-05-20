@@ -7,6 +7,6 @@ namespace Application.Interfaces.Repo.Mapping
 {
     public interface IIntegrationSettingsRepository
     {
-        Task<IEnumerable<IntegrationSetting>> GetByCompanyId(Guid CompanyId);
+        Task<IEnumerable<IntegrationSetting>> GetByCompanyId(Guid CompanyId, CancellationToken cancellationToken = default);
     }
 }

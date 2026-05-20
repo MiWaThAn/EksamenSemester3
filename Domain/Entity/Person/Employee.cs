@@ -3,6 +3,7 @@ using Domain.Entity.Item;
 using Domain.Entity.Item.Activities;
 using Domain.Entity.Item.Registrations;
 using Domain.Guards;
+using Domain.Services;
 using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
@@ -40,8 +41,8 @@ namespace Domain.Entity.Person
         public Account Account { get; internal set; }
 
         //Medarbejder registreringer
-        private readonly List<Registration> _registrations = new();
-        public IReadOnlyCollection<Registration> Registrations => _registrations.Where(r => !r.IsDeleted).ToList().AsReadOnly();
+        private readonly List<WorkLog> _workLogs = new();
+        public IReadOnlyCollection<WorkLog> WorkLogs => _workLogs.Where(r => !r.IsDeleted).ToList().AsReadOnly();
         public Employee() : base()
         {
 
@@ -55,27 +56,17 @@ namespace Domain.Entity.Person
             Email = email;
             EmployeeType = employeeType;
         }
-        public TEntity CreateRegistration<TBuilder, TEntity>(RegistrationBuilder<TBuilder, TEntity> builder) where TBuilder : RegistrationBuilder<TBuilder, TEntity> where TEntity : Registration
-        {
-            Guard.AgainstNull(builder, nameof(builder));
-            var registration = builder.WithEmployee(this).Build();
-            if (registration.EmployeeId != this.Id) throw new ArgumentException("Denne registrering tilhører ikke medarbejderen");
-            registration.ValidateAgainst(_registrations);
-            _registrations.Add(registration);
-            UpdatedAt = DateTime.UtcNow;
-            return registration;
-        }
-        public void RemoveRegistration(Guid registrationId)
-        {
-            var registration = _registrations.Find(r => r.Id == registrationId);
-            if (registration == null) throw new ArgumentException("Denne registrering blev ikke fundet for denne medarbejder.");
-            registration.SoftDelete();
-            UpdatedAt = DateTime.UtcNow;
-        }
         public void UpdateEmployeeType(EmployeeType newType)
         {
             EmployeeType = newType;
             UpdatedAt = DateTime.UtcNow;
+        }
+        public WorkLog CreateWorkLog(WorkLogBuilder builder)
+        {
+            Guard.AgainstNull(builder, nameof(builder));
+            var worklog = builder.WithEmployee(this).Build();
+            _workLogs.Add(worklog);
+            return worklog;
         }
         public void UpdateAutonomy(bool isAutonomous)
         {
@@ -86,6 +77,7 @@ namespace Domain.Entity.Person
         {
             if (AccountId != null) throw new InvalidOperationException("Denne medarbejder er allerede tilknyttet en konto.");
             AccountId = account.Id;
+            Account = account;
             UpdatedAt = DateTime.UtcNow;
         }
         public void UpdateEmail(EmailAddress newEmail)
