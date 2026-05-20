@@ -90,9 +90,6 @@ builder.Services.AddScoped<IWebhookParser, EconomicWebhookParser>();
 builder.Services.Configure<EconomicOptions>(
     builder.Configuration.GetSection(EconomicOptions.SectionName));
 builder.Services.AddHttpClient<IEconomicApiClient, EconomicApiClient>();
-//Adds Infrastructure repos and so on.
-var connectionstring = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddInfrastructure(connectionstring);
 builder.Services.AddApplication();
 
 
