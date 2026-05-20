@@ -124,7 +124,9 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<AppDbContext>();
-        await DataSeeder.SeedAsync(context);
+        var hashing = services.GetRequiredService<IHashingService>();
+        var registration = services.GetRequiredService<IRegistrationDomainService>();
+        await DataSeeder.SeedAsync(context, registration,hashing);
     }
     catch (Exception ex)
     {

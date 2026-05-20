@@ -28,10 +28,7 @@ namespace Domain.Services.Person
         public async Task<Result<(Company, Account)>> RegisterCompanyAccountAsync(string companyName, CvrNumber cvrNumber, EmailAddress emailAddress, PhoneNumber phoneNumber, string username, string plainTextPassword, CancellationToken ct = default)
         {
             if (await _accountValidationService.UsernameExistsAsync(username,ct)) return Result<(Company, Account)>.Failure("Brugernavn er allerede i brug");
-            //Service is nessary since we need unique cvr numbers to login accounts.
             if (await _companyValidationService.CvrExistsAsync(cvrNumber,ct)) return Result<(Company, Account)>.Failure("Cvr er allerede i brug.");
-            //Encryption service uses master key from app settings and needs a Dcrypt method to be able to use the encrypted tokens when needed. The password hasher is used to hash the password before saving it to the database, and it also needs a VerifyHashedPassword method to verify the password when logging in.
-            // string encryptedGrantToken = _encryptionService.Encrypt(request.AgreementGrantToken); <-- We need to have a seperate intergrate economic command that encrypts the token and store it in the company integration settings.
             string securePassHash = _passwordHasher.Hash(plainTextPassword);
             var companyBuilder = new CompanyBuilder()
                 .WithCVRNumber(cvrNumber)

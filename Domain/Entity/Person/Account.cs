@@ -48,11 +48,10 @@ namespace Domain.Entity.Person
         {
 
         }
-        internal Account(string username, string hashedPassword, PhoneNumber phoneNumber,string hashedPin,Employee? employee,Company? company) : base()
+        internal Account(string username, string hashedPassword, PhoneNumber phoneNumber,string? hashedPin,Employee? employee,Company? company) : base()
         {
             Guard.AgainstNullOrEmpty(hashedPassword, nameof(hashedPassword));
             Guard.AgainstNullOrEmpty(username, nameof(username));
-            Guard.AgainstNullOrEmpty(hashedPin, nameof(hashedPin));
             HashedPassword = hashedPassword;
             Username = username;
             PhoneNumber = phoneNumber;

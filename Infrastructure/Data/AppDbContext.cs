@@ -244,21 +244,33 @@ namespace Infrastructure.Data
                     .WithOne(m => m.IntegrationSetting)
                     .HasForeignKey(m => m.IntegrationSettingId)
                     .OnDelete(DeleteBehavior.NoAction);
-            });
 
-            // Then simplify IntegrationMapping — remove the HasOne since it's now defined from the other side
-            modelBuilder.Entity<IntegrationMapping>(entity =>
-            {
-                entity.HasKey(m => m.Id);
+                entity.OwnsOne(s => s.Credential, credential =>
+                    {
+                        credential.Property(c => c.Key)
+                            .HasColumnName("CredentialKey");
 
-                entity.Property(m => m.EntityType)
-                    .HasConversion(e => e.Value, v => IntegrationEntityType.From(v));
+                        credential.Property(c => c.Value)
+                            .HasColumnName("CredentialValue");
 
-                entity.HasIndex(m => new { m.IntegrationSettingId, m.ExternalId, m.EntityType })
-                    .IsUnique();
+
+
+                    });
+
+                
+                modelBuilder.Entity<IntegrationMapping>(entity =>
+                {
+                    entity.HasKey(m => m.Id);
+
+                    entity.Property(m => m.EntityType)
+                        .HasConversion(e => e.Value, v => IntegrationEntityType.From(v));
+
+                    entity.HasIndex(m => new { m.IntegrationSettingId, m.ExternalId, m.EntityType })
+                        .IsUnique();
+                });
+
             });
 
         }
-
     }
 }
