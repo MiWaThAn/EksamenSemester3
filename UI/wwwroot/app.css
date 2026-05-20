@@ -224,86 +224,117 @@ main {
     width: 100%;
 }
 
-/* Specifikke admin-overskrifter */
-.header-section {
-    text-align: center;
-    color: white;
-    margin-bottom: 20px;
-}
-
-    .header-section h1 {
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-    }
-
-.name-text {
-    font-weight: 600;
-}
-
-.detailed-card-container {
-    background-color: #556B2F; 
-    border-radius: 20px;
-    max-width: 400px;
+/* --- SPECIFIC OVERVIEW FULLSCREEN LOOK --- */
+.specific-admin-bg {
+    background-color: #5b6b4e !important;
+    min-height: 100vh;
     width: 100%;
-    padding: 25px;
+    padding: 40px 20px;
+    color: #ffffff;
     box-sizing: border-box;
 }
 
-.detail-header {
-    color: white;
-    font-size: 1.4rem;
-    margin-bottom: 25px;
-    letter-spacing: 0.5px;
+/* Stor centreret titel til medarbejderens navn */
+.specific-admin-title {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 500;
+    margin-bottom: 40px;
+    color: #ffffff !important;
 }
 
-.detail-info-box {
-    background-color: #E8E8E8; 
-    border-radius: 12px;
+/* Det brede lysegrå stamdatakort */
+.specific-admin-info-box {
+    background-color: #e1e3e0;
+    color: #2b2b2b;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto 30px auto;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     overflow: hidden;
-    border: 1px solid #CCC;
 }
 
-    .detail-info-box div {
-        color: #444;
-    }
-
-.project-list-section {
-    color: white; 
+.specific-admin-info-item {
+    padding: 18px 20px;
+    font-size: 1.25rem;
+    text-align: center;
 }
 
-.project-item-card {
-    background-color: #E8E8E8;
-    border-radius: 10px;
-    border: 1px solid #CCC;
-    color: #000000;
+.specific-admin-divider {
+    border-top: 2px solid #5b6b4e;
+    opacity: 0.15;
+}
+
+/* Sektionsetiket for projekter */
+.specific-admin-label {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+/* Liste-wrapper til projektkortene */
+.specific-admin-list {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto 40px auto;
+}
+
+/* Brede, klikbare projektkort */
+.specific-admin-project-card {
+    background-color: #f4f5f4;
+    color: #2b2b2b;
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+    font-size: 1.25rem;
+    margin-bottom: 15px;
     cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
-    .project-item-card:hover {
-        background-color: #FFF;
-        transform: translateY(-2px);
+    .specific-admin-project-card:hover {
+        background-color: #e1e3e0;
+        transform: translateY(-1px);
     }
 
-.empty-projects-card {
-    background-color: #F8F9FA;
-    border-radius: 10px;
-    border: 1px dashed #CCC;
-    color: #6c757d;
+/* Tom tilstand kort */
+.specific-admin-empty-card {
+    background-color: #f4f5f4;
+    color: #666666;
+    border-radius: 20px;
+    padding: 25px;
+    text-align: center;
+    font-size: 1.25rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
-.action-btn {
-    border-radius: 10px;
-    padding: 10px 30px;
+/* Knap-container og knapper i bunden */
+.specific-admin-btn-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    gap: 20px;
+}
+
+.specific-admin-btn {
+    flex: 1;
+    background-color: #e1e3e0;
+    color: #2b2b2b;
+    border: none;
+    border-radius: 20px;
+    padding: 16px 0;
+    font-size: 1.25rem;
     font-weight: 500;
-    border: 1px solid #CCC;
-    background-color: #E8E8E8;
-    color: #000000;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
-    .action-btn:hover {
-        background-color: #FFF;
-        border-color: #999;
+    .specific-admin-btn:hover {
+        background-color: #d2d5d1;
     }

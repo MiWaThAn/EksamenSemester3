@@ -6,7 +6,7 @@
 
 <PageTitle>Admin Projekt Detaljer</PageTitle>
 
-<div class="container mt-4 d-flex justify-content-center">
+<div class="specific-admin-bg">
     @if (isLoading)
     {
         <div class="text-white text-center p-4">
@@ -22,46 +22,41 @@
     }
     else if (projectDetail != null)
     {
-        <div class="detailed-card-container shadow">
+        <h1 class="specific-admin-title">@projectDetail.ProjectName</h1>
 
-            <div class="detail-header font-weight-bold text-center">
-                @projectDetail.ProjectName
+        <div class="specific-admin-info-box">
+            <div class="specific-admin-info-item">
+                Status: @(projectDetail.IsSelected ? "Aktivt / Valgt" : "Inaktivt")
             </div>
-
-            <div class="detail-info-box shadow-sm mb-4">
-                <div class="p-3 text-center border-bottom">
-                    Status: @(projectDetail.IsSelected ? "Aktivt / Valgt" : "Inaktivt")
-                </div>
-                <div class="p-3 text-center text-muted" style="font-size: 0.9rem;">
-                    Notifikationer: @projectDetail.NotificationCount
-                </div>
+            <div class="specific-admin-divider"></div>
+            <div class="specific-admin-info-item text-muted" style="font-size: 0.9rem;">
+                Notifikationer: @projectDetail.NotificationCount
             </div>
+        </div>
 
-            <div class="project-list-section">
-                <div class="text-center font-weight-bold mb-3">Tilknyttede medarbejdere:</div>
+        <div class="specific-admin-label">Tilknyttede medarbejdere:</div>
 
-                @if (projectDetail.Employees != null && projectDetail.Employees.Any())
+        <div class="specific-admin-list">
+            @if (projectDetail.Employees != null && projectDetail.Employees.Any())
+            {
+                @foreach (var emp in projectDetail.Employees)
                 {
-                    @foreach (var emp in projectDetail.Employees)
-                    {
-                        <div class="p-3 text-center mb-2 project-item-card shadow-sm"
-                             @onclick="() => GoToEmployee(emp.Id)">
-                            @emp.FullName
-                        </div>
-                    }
-                }
-                else
-                {
-                    <div class="p-3 text-center empty-projects-card">
-                        Ingen medarbejdere tilkoblet dette projekt endnu.
+                    <div class="specific-admin-project-card" @onclick="() => GoToEmployee(emp.Id)">
+                        @emp.FullName
                     </div>
                 }
-            </div>
+            }
+            else
+            {
+                <div class="specific-admin-empty-card">
+                    Ingen medarbejdere tilkoblet dette projekt endnu.
+                </div>
+            }
+        </div>
 
-            <div class="d-flex justify-content-between mt-4">
-                <button class="btn action-btn shadow-sm" @onclick="GoBack">Tilbage</button>
-                <button class="btn action-btn shadow-sm" @onclick="NavigateToEdit">Rediger</button>
-            </div>
+        <div class="specific-admin-btn-container">
+            <button class="specific-admin-btn" @onclick="GoBack">Tilbage</button>
+            <button class="specific-admin-btn" @onclick="NavigateToEdit">Rediger</button>
         </div>
     }
 </div>

@@ -4,9 +4,7 @@
 @inject HttpClient Http
 @inject NavigationManager Navigation
 
-<h3>SpecificEmployeeOverviewAdmin</h3>
-
-<div class="container mt-4 d-flex justify-content-center">
+<div class="specific-admin-bg">
     @if (isLoading)
     {
         <div class="text-white text-center p-4">
@@ -22,46 +20,41 @@
     }
     else if (employeeDetail != null)
     {
-        <div class="detailed-card-container shadow">
+        <h1 class="specific-admin-title">@employeeDetail.FullName</h1>
 
-            <div class="detail-header font-weight-bold text-center">
-                @employeeDetail.FullName
+        <div class="specific-admin-info-box">
+            <div class="specific-admin-info-item">
+                Mobil: @employeeDetail.MobileNumber
             </div>
-
-            <div class="detail-info-box shadow-sm mb-4">
-                <div class="p-3 text-center border-bottom">
-                    Mobil: @employeeDetail.MobileNumber
-                </div>
-                <div class="p-3 text-center">
-                    Email: @employeeDetail.Email
-                </div>
+            <div class="specific-admin-divider"></div>
+            <div class="specific-admin-info-item">
+                Email: @employeeDetail.Email
             </div>
+        </div>
 
-            <div class="project-list-section">
-                <div class="text-center font-weight-bold mb-3">Projekter:</div>
+        <div class="specific-admin-label">Projekter:</div>
 
-                @if (employeeDetail.Projects != null && employeeDetail.Projects.Any())
+        <div class="specific-admin-list">
+            @if (employeeDetail.Projects != null && employeeDetail.Projects.Any())
+            {
+                @foreach (var proj in employeeDetail.Projects)
                 {
-                    @foreach (var proj in employeeDetail.Projects)
-                    {
-                        <div class="p-3 text-center mb-2 project-item-card shadow-sm"
-                             @onclick="() => GaaTilProjekt(proj.Id)">
-                            @proj.ProjectName
-                        </div>
-                    }
-                }
-                else
-                {
-                    <div class="p-3 text-center empty-projects-card">
-                        Der er ikke tilknyttet nogle projekter endnu.
+                    <div class="specific-admin-project-card" @onclick="() => GoToProject(proj.Id)">
+                        @proj.ProjectName
                     </div>
                 }
-            </div>
+            }
+            else
+            {
+                <div class="specific-admin-empty-card">
+                    Der er ikke tilknyttet nogle projekter endnu.
+                </div>
+            }
+        </div>
 
-            <div class="d-flex justify-content-between mt-4">
-                <button class="btn action-btn shadow-sm" @onclick="GoBack">Tilbage</button>
-                <button class="btn action-btn shadow-sm" @onclick="NavigateToEdit">Rediger</button>
-            </div>
+        <div class="specific-admin-btn-container">
+            <button class="specific-admin-btn" @onclick="GoBack">Tilbage</button>
+            <button class="specific-admin-btn" @onclick="NavigateToEdit">Rediger</button>
         </div>
     }
 </div>
@@ -114,7 +107,7 @@
         Navigation.NavigateTo($"/employee-edit/{employeeId}");
     }
 
-    private void GaaTilProjekt(Guid id)
+    private void GoToProject(Guid id)
     {
         Navigation.NavigateTo($"/specific-project-admin/{id}");
     }

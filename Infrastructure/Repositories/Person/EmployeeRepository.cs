@@ -41,5 +41,12 @@ namespace Infrastructure.Repositories.Person
                 .ToListAsync();
         }
 
+        public async Task<Employee?> GetByIdWithAccountAsync(Guid employeeId)
+        {
+            return await _context.Employees
+                .Include(e => e.Account)
+                .FirstOrDefaultAsync(e => e.Id == employeeId);
+        }
+
     }
 }
