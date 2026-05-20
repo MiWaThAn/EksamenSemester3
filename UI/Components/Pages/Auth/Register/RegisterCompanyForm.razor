@@ -9,7 +9,7 @@
 
     <EditForm Model="@model" OnValidSubmit="HandleRegistration">
         <DataAnnotationsValidator />
-        
+
         <div class="form-group">
             <label>Virksomhedsnavn</label>
             <InputText @bind-Value="model.CompanyName" class="form-control" />
@@ -21,18 +21,47 @@
             <InputText @bind-Value="model.Password" type="password" class="form-control" />
             <ValidationMessage For="@(() => model.Password)" />
         </div>
-                <div class="form-group">
-            <label>Password</label>
-            <InputText @bind-Value="model.Password" type="password" class="form-control" />
-            <ValidationMessage For="@(() => model.Password)" />
+
+        <div class="form-group">
+            <label>Bekræft Password</label>
+            <InputText @bind-Value="model.ConfirmPassword" type="password" class="form-control" />
+            <ValidationMessage For="@(() => model.ConfirmPassword)" />
         </div>
+
+        <div class="form-group">
+            <label>Email</label>
+            <InputText @bind-Value="model.Email" type="email" class="form-control" />
+            <ValidationMessage For="@(() => model.Email)" />
+        </div>
+
+        <div class="form-group">
+            <label>Telefon Nummer</label>
+            <InputText @bind-Value="model.PhoneNumber" type="tel" class="form-control" />
+            <ValidationMessage For="@(() => model.PhoneNumber)" />
+        </div>
+
+        <div class="form-group">
+            <label>CVR-Nummer</label>
+            <InputText @bind-Value="model.CVRNumber" type="tel" class="form-control" />
+            <ValidationMessage For="@(() => model.CVRNumber)" />
+        </div>
+
+        <div class="form-group">
+            <label>Brugernavn</label>
+            <InputText @bind-Value="model.Username" type="text" class="form-control" />
+            <ValidationMessage For="@(() => model.Username)" />
+        </div>
+
         @if (!string.IsNullOrEmpty(errorMessage))
         {
             <div class="alert alert-danger">@errorMessage</div>
         }
 
         <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
-            @if (isSubmitting) { <span class="spinner-border spinner-border-sm"></span> }
+            @if (isSubmitting)
+            {
+                <span class="spinner-border spinner-border-sm"></span>
+            }
             Registrer
         </button>
     </EditForm>
