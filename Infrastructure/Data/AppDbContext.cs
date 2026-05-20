@@ -16,6 +16,9 @@ using Domain.Entity.Person;
 using System.Diagnostics;
 using Domain.Entity.Item.Activities;
 using Activity = Domain.Entity.Item.Activities.Activity;
+using Domain.Entity.Item.Registrations;
+using Domain.Entity.Mapping;
+using Domain.Entity.Person.Auth;
 
 namespace Infrastructure.Data
 {
@@ -29,7 +32,10 @@ namespace Infrastructure.Data
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Company> Companies { get; set; }
         public DbSet<Customer> Customers { get; set; }
+        //auth
         public DbSet<Account> Accounts { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<Permission> Permissions { get; set; }
 
         //Item
         public DbSet<Project> Projects { get; set; }
@@ -40,6 +46,7 @@ namespace Infrastructure.Data
         //Registrations
         public DbSet<HourRegistration> HourRegistrations { get; set; }
         public DbSet<ExpenseRegistration> ExpenseRegistrations { get; set; }
+        public DbSet<WorkLog> WorkLogs { get; set; }
 
 
         //Mappings
@@ -56,26 +63,26 @@ namespace Infrastructure.Data
             {
                 entity.HasKey(r => r.Id);
 
-                entity.HasOne<Project>()
-                      .WithMany(p => p.Registrations)
-                      .HasForeignKey(r => r.ProjectId)
-                      .OnDelete(DeleteBehavior.NoAction);
 
                 entity.HasOne<ProjectActivity>()
                       .WithMany(pa => pa.Registrations)
                       .HasForeignKey(r => r.ProjectActivityId)
                       .IsRequired(false)
                       .OnDelete(DeleteBehavior.NoAction);
-
-                entity.HasOne<Employee>()
-                      .WithMany(e => e.Registrations)
-                      .HasForeignKey(r => r.EmployeeId)
-                      .OnDelete(DeleteBehavior.NoAction);
             });
+            modelBuilder.Entity<WorkLog>()
+                .HasOne<Project>()
+      .WithMany(p => p.WorkLogs)
+      .HasForeignKey(r => r.ProjectId)
+      .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<WorkLog>().HasOne<Employee>()
+      .WithMany(e => e.WorkLogs)
+      .HasForeignKey(r => r.EmployeeId)
+      .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Project>()
-                  .Navigation(p => p.Registrations)
-                  .HasField("_registrations")
+                  .Navigation(p => p.WorkLogs)
+                  .HasField("_workLogs")
                   .UsePropertyAccessMode(PropertyAccessMode.Field);
 
             modelBuilder.Entity<ProjectActivity>()
@@ -113,10 +120,10 @@ namespace Infrastructure.Data
                 .WithMany()
                 .HasForeignKey(er => er.ExpenseId)
                 .OnDelete(DeleteBehavior.NoAction);
-        
 
-        
-            
+
+
+
             modelBuilder.Entity<Account>()
                 .HasIndex(a => a.Username)
                 .IsUnique();
@@ -201,7 +208,7 @@ namespace Infrastructure.Data
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            
+
 
             modelBuilder.Entity<SelectedEntityType>(entity =>
             {

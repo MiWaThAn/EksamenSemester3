@@ -1,0 +1,123 @@
+﻿@page "/auth/login"
+@using Shared.Person.Auth.Models.Login
+@using UI.Services.Auth
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<div class="container max-w-md mx-auto p-6 flex flex-col justify-center min-h-screen">
+    <div class="bg-white p-8 rounded-xl shadow-md border border-gray-100">
+
+        <div class="text-center mb-8">
+            <h3 class="text-3xl font-bold text-gray-800">Log ind</h3>
+            <p class="text-gray-500 text-sm mt-2">Indtast dit brugernavn og din adgangskode</p>
+        </div>
+
+        <EditForm Model="@_loginModel" OnValidSubmit="HandleLoginAsync">
+            <DataAnnotationsValidator />
+
+            @if (!string.IsNullOrWhiteSpace(_errorMessage))
+            {
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm" role="alert">
+                    <span>@_errorMessage</span>
+                </div>
+            }
+
+            <div class="mb-4">
+                <label class="block font-semibold mb-1 text-gray-700" for="username">Brugernavn</label>
+                <InputText id="username" autocomplete="username"
+                           class="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+                           placeholder="Indtast brugernavn"
+                           @bind-Value="_loginModel.Username" />
+                <div class="text-red-500 text-xs mt-1 font-semibold">
+                    <ValidationMessage For="@(() => _loginModel.Username)" />
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label class="block font-semibold mb-1 text-gray-700" for="password">Adgangskode</label>
+                <InputText id="password" type="password" autocomplete="current-password"
+                           class="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+                           placeholder="••••••••"
+                           @bind-Value="_loginModel.Password" />
+                <div class="text-red-500 text-xs mt-1 font-semibold">
+                    <ValidationMessage For="@(() => _loginModel.Password)" />
+                </div>
+            </div>
+
+            <div class="mt-6">
+                @if (_isBusy)
+                {
+                    <button class="w-full bg-blue-400 text-white font-bold py-3 px-4 rounded cursor-not-allowed flex justify-center items-center" disabled>
+                        <span class="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"></span>
+                        Logger ind...
+                    </button>
+                }
+                else
+                {
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition duration-200 shadow shadow-blue-200">
+                        Log ind
+                    </button>
+                }
+            </div>
+        </EditForm>
+
+        <div class="text-center mt-6">
+            <p class="text-xs text-gray-400">
+                Oplever du problemer? Kontakt venligst din administrator.
+            </p>
+        </div>
+
+    </div>
+</div>
+
+@code {
+    private LoginModel _loginModel = new();
+    private bool _isBusy = false;
+    private string? _errorMessage;
+
+    private async Task HandleLoginAsync()
+    {
+        _isBusy = true;
+        _errorMessage = null;
+
+        try
+        {
+            var response = await AuthService.Login(_loginModel);
+
+            if (response.Success)
+            {
+                var state = await AuthService.GetRequiredLoginState();
+
+                if (state == AuthStateStatus.NeedsPinLogin)
+                {
+                    Navigation.NavigateTo("/auth/pin-login");
+                }
+                else if (response.Token != null && !string.IsNullOrWhiteSpace(response.Token))
+                {
+                    var accountId = AuthService.GetUserId(response.Token);
+                    if (!AuthService.UserHasPin(response.Token) && !string.IsNullOrWhiteSpace(accountId))
+                    {
+                        Navigation.NavigateTo($"/auth/register-pin?accountId={accountId}");
+                    }
+                    Navigation.NavigateTo("/dashboard");
+                }
+                else
+                {
+                    Navigation.NavigateTo("/dashboard");
+                }
+            }
+            else
+            {
+                _errorMessage = response.Message;
+            }
+        }
+        catch (Exception)
+        {
+            _errorMessage = "Der skete en uventet fejl under forsøget på at logge ind.";
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+}

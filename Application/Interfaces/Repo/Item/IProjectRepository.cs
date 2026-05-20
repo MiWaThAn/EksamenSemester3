@@ -8,10 +8,10 @@ namespace Application.Interfaces.Repo.Item
 {
     public interface IProjectRepository : IGenericRepository<Project>
     {
-        Task<IEnumerable<Project>> GetByEmployeeIdAsync(Guid employeeId);
-        Task<IEnumerable<Project>> GetByActivityIdAsync(Guid activityId);
-        Task<IEnumerable<Project>> GetByCompanyIdAsync(Guid companyId);
-        Task<IEnumerable<Project>> GetProjectsRelatedToEmployeeAsync(Guid employeeId);
-        Task<Project?> GetByIdWithDetailsAsync(Guid projectId);
+        Task<IEnumerable<Project>> GetByEmployeeIdAsync(Guid employeeId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Project>> GetByActivityIdAsync(Guid activityId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Project>> GetByCompanyIdAsync(Guid companyId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Project>> GetProjectsRelatedToEmployeeAsync(Guid employeeId, CancellationToken cancellationToken = default);
+        Task<Project?> GetByIdWithDetailsAsync(Guid projectId, CancellationToken cancellationToken = default);
     }
 }

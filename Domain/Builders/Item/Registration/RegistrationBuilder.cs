@@ -14,19 +14,18 @@ namespace Domain.Builders.Item.Registration
 {
     public abstract class RegistrationBuilder<TBuilder, TEntity> where TBuilder : RegistrationBuilder<TBuilder, TEntity>
     {
-        protected Guid EmployeeId;
-        protected Guid ProjectId;
+        protected WorkLog WorkLog;
         protected Guid? ActivityId;
         protected RegistrationStatus Status = RegistrationStatus.Pending;
         protected string RegistrationNumber = string.Empty;
         protected string Description = string.Empty;
-        public TBuilder WithProject(Project project)
+        internal TBuilder WithWorkLog(WorkLog workLog)
         {
-            Guard.AgainstNull(project, nameof(project));
-            ProjectId = project.Id;
+            Guard.AgainstNull(workLog, nameof(workLog));
+            WorkLog = workLog;
             return (TBuilder)this;
         }
-        public TBuilder WithActivity(Activity activity)
+        public TBuilder WithProjectActivity(ProjectActivity activity)
         {
             Guard.AgainstNull(activity, nameof(activity));
             ActivityId = activity.Id;
@@ -36,12 +35,6 @@ namespace Domain.Builders.Item.Registration
         {
             Guard.AgainstNull(description, nameof(description));
             Description = description;
-            return (TBuilder)this;
-        }
-        internal TBuilder WithEmployee(Employee employee)
-        {
-            Guard.AgainstNull(employee, nameof(employee));
-            EmployeeId = employee.Id;
             return (TBuilder)this;
         }
         public TBuilder WithStatus(RegistrationStatus status)

@@ -20,7 +20,6 @@ namespace Domain.ValueObjects
 
             Guard.AgainstNullOrEmpty(value, nameof(value));
 
-            // Eksempel på ekstra validering der nu er indkapslet
             if (!Regex.IsMatch(value, @"^\+?[1-9]\d{1,14}$"))
             {
                 throw new ArgumentException("Ugyldigt telefonnummer format", nameof(value));

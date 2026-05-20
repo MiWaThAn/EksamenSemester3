@@ -23,6 +23,21 @@ namespace Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("AccountRole", b =>
+                {
+                    b.Property<Guid>("AccountsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RolesId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("AccountsId", "RolesId");
+
+                    b.HasIndex("RolesId");
+
+                    b.ToTable("AccountRole");
+                });
+
             modelBuilder.Entity("Domain.Entity.Item.Activities.Activity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -279,19 +294,65 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("Id");
+                    b.Property<Guid>("WorkLogId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.HasIndex("EmployeeId");
+                    b.HasKey("Id");
 
                     b.HasIndex("ProjectActivityId");
 
-                    b.HasIndex("ProjectId");
+                    b.HasIndex("WorkLogId");
 
                     b.ToTable("Registration");
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("Registration");
 
                     b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("Domain.Entity.Item.Registrations.WorkLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ActiveRegistrationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("WorkLogs");
                 });
 
             modelBuilder.Entity("Domain.Entity.Mapping.IntegrationMapping", b =>
@@ -532,10 +593,11 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime>("LastSync")
+                    b.Property<DateTime>("LastLogin")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("PhoneNumber")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("RowVersion")
@@ -557,6 +619,113 @@ namespace Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Accounts");
+                });
+
+            modelBuilder.Entity("Domain.Entity.Person.Auth.Permission", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Permissions");
+                });
+
+            modelBuilder.Entity("Domain.Entity.Person.Auth.Role", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles");
+                });
+
+            modelBuilder.Entity("Domain.Entity.Person.Auth.RolePermission", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("PermissionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("RolePermission");
                 });
 
             modelBuilder.Entity("Domain.Entity.Person.Company", b =>
@@ -726,13 +895,31 @@ namespace Infrastructure.Migrations
                 {
                     b.HasBaseType("Domain.Entity.Item.Registrations.Registration");
 
-                    b.Property<DateTime>("EndTime")
+                    b.Property<DateTime?>("EndTime")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
                     b.HasDiscriminator().HasValue("HourRegistration");
+                });
+
+            modelBuilder.Entity("AccountRole", b =>
+                {
+                    b.HasOne("Domain.Entity.Person.Account", null)
+                        .WithMany()
+                        .HasForeignKey("AccountsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entity.Person.Auth.Role", null)
+                        .WithMany()
+                        .HasForeignKey("RolesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Domain.Entity.Item.Activities.Activity", b =>
@@ -803,8 +990,23 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("ProjectActivityId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("Domain.Entity.Item.Project", null)
+                    b.HasOne("Domain.Entity.Item.Registrations.WorkLog", null)
                         .WithMany("Registrations")
+                        .HasForeignKey("WorkLogId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Entity.Item.Registrations.WorkLog", b =>
+                {
+                    b.HasOne("Domain.Entity.Person.Employee", null)
+                        .WithMany("WorkLogs")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entity.Item.Project", null)
+                        .WithMany("WorkLogs")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
@@ -856,6 +1058,15 @@ namespace Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Domain.Entity.Person.Auth.RolePermission", b =>
+                {
+                    b.HasOne("Domain.Entity.Person.Auth.Role", null)
+                        .WithMany("Permissions")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Domain.Entity.Person.Company", b =>
                 {
                     b.HasOne("Domain.Entity.Person.Account", "Account")
@@ -902,6 +1113,11 @@ namespace Infrastructure.Migrations
                 {
                     b.Navigation("Activities");
 
+                    b.Navigation("WorkLogs");
+                });
+
+            modelBuilder.Entity("Domain.Entity.Item.Registrations.WorkLog", b =>
+                {
                     b.Navigation("Registrations");
                 });
 
@@ -924,6 +1140,11 @@ namespace Infrastructure.Migrations
                     b.Navigation("Employee");
                 });
 
+            modelBuilder.Entity("Domain.Entity.Person.Auth.Role", b =>
+                {
+                    b.Navigation("Permissions");
+                });
+
             modelBuilder.Entity("Domain.Entity.Person.Company", b =>
                 {
                     b.Navigation("Activities");
@@ -939,7 +1160,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entity.Person.Employee", b =>
                 {
-                    b.Navigation("Registrations");
+                    b.Navigation("WorkLogs");
                 });
 #pragma warning restore 612, 618
         }

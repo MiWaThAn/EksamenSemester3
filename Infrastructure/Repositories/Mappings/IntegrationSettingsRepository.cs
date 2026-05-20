@@ -13,9 +13,9 @@ namespace Infrastructure.Repositories.Mappings
         public IntegrationSettingsRepository(AppDbContext context):base(context)
         { }
 
-        public async Task<IEnumerable<IntegrationSetting>> GetByCompanyId(Guid CompanyId)
+        public async Task<IEnumerable<IntegrationSetting>> GetByCompanyId(Guid CompanyId, CancellationToken cancellationToken = default)
         {
-            return await _context.IntegrationSettings.Where(i => i.CompanyId == CompanyId).ToListAsync();
+            return await _context.IntegrationSettings.Where(i => i.CompanyId == CompanyId).ToListAsync(cancellationToken);
         }
     }
 }

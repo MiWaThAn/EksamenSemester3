@@ -9,6 +9,6 @@ namespace Domain.Interfaces.Person
 {
     public interface ICompanyValidationService
     {
-        Task<bool> CvrExistsAsync(CvrNumber CVRNumber);
+        Task<bool> CvrExistsAsync(CvrNumber CVRNumber, CancellationToken ct = default);
     }
 }

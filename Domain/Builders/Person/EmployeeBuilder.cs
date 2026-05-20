@@ -42,7 +42,7 @@ namespace Domain.Builders.Person
             CompanyId = company.Id;
             return this;
         }
-        public EmployeeBuilder WithCompanyId(Guid companyId) // TODO: change back to internal after testing
+        public EmployeeBuilder WithCompanyId(Guid companyId)
         {
             Guard.AgainstEmptyGuid(companyId, nameof(companyId));
             CompanyId = companyId;

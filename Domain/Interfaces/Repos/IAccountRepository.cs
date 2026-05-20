@@ -8,10 +8,10 @@ namespace Domain.Interfaces.Repos
 {
     public interface IAccountRepository : IGenericRepository<Account>
     {
-        Task<Account?> GetByUsernameAsync(string username);
-        Task<Account?> GetByPhoneNumberAsync(string phoneNumber);
-        Task<Account?> GetWithCompanyAsync(string username);
-        Task<Account?> GetWithEmployeeAsync(string username);
-        Task<Account?> GetWithEmployeeAndCompany(string username);
+        Task<Account?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default);
+        Task<Account?> GetByPhoneNumberAsync(string phoneNumber, CancellationToken cancellationToken = default);
+        Task<Account?> GetWithCompanyAsync(string username, CancellationToken cancellationToken = default);
+        Task<Account?> GetWithEmployeeAsync(string username, CancellationToken cancellationToken = default);
+        Task<Account?> GetWithEmployeeAndCompany(string username, CancellationToken cancellationToken = default);
     }
 }
