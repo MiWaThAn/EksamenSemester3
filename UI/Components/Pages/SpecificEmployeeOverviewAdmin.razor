@@ -1,0 +1,114 @@
+﻿@page "/specific-employee-admin/{employeeId:guid}"
+@using Shared.Model
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<div class="specific-admin-bg">
+    @if (isLoading)
+    {
+        <div class="text-white text-center p-4">
+            <div class="spinner-border text-light mb-3" role="status"></div>
+            <div><strong>Henter Henriks information, big boss...</strong></div>
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @errorMessage
+        </div>
+    }
+    else if (employeeDetail != null)
+    {
+        <h1 class="specific-admin-title">@employeeDetail.FullName</h1>
+
+        <div class="specific-admin-info-box">
+            <div class="specific-admin-info-item">
+                Mobil: @employeeDetail.MobileNumber
+            </div>
+            <div class="specific-admin-divider"></div>
+            <div class="specific-admin-info-item">
+                Email: @employeeDetail.Email
+            </div>
+        </div>
+
+        <div class="specific-admin-label">Projekter:</div>
+
+        <div class="specific-admin-list">
+            @if (employeeDetail.Projects != null && employeeDetail.Projects.Any())
+            {
+                @foreach (var proj in employeeDetail.Projects)
+                {
+                    <div class="specific-admin-project-card" @onclick="() => GoToProject(proj.Id)">
+                        @proj.ProjectName
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="specific-admin-empty-card">
+                    Der er ikke tilknyttet nogle projekter endnu.
+                </div>
+            }
+        </div>
+
+        <div class="specific-admin-btn-container">
+            <button class="specific-admin-btn" @onclick="GoBack">Tilbage</button>
+            <button class="specific-admin-btn" @onclick="NavigateToEdit">Rediger</button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Guid employeeId { get; set; }
+
+    private DetailedEmployeeModel? employeeDetail;
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadEmployeeData();
+    }
+
+    private async Task LoadEmployeeData()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+
+            employeeDetail = await Http.GetFromJsonAsync<DetailedEmployeeModel>($"api/Employee/company/employee/{employeeId}");
+        }
+        catch (Exception ex)
+        {
+            var actualException = ex.InnerException ?? ex;
+            errorMessage = $"An error has occured:  {actualException.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/company-overview-admin");
+    }
+
+    private void NavigateToEdit()
+    {
+        Navigation.NavigateTo($"/employee-edit/{employeeId}");
+    }
+
+    private void GoToProject(Guid id)
+    {
+        Navigation.NavigateTo($"/specific-project-admin/{id}");
+    }
+}

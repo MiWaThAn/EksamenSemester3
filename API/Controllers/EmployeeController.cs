@@ -27,6 +27,20 @@ namespace API.Controllers
             return Ok(result); 
         }
 
+        [HttpGet("company/employee/{id:guid}")]
+        public async Task<IActionResult> GetDetailedEmployee(Guid id)
+        {
+            var query = new GetDetailedEmployeeQuery(id);
+            var result = await _mediator.Send(query);
+
+            if (result == null)
+            {
+                return NotFound($"Kunne ikke finde medarbejderen, legend.");
+            }
+
+            return Ok(result);
+        }
+
         // GET: api/employee/{id}
         // Denne rute henter en medarbejder baseret på ID
         [HttpGet("{id}")]

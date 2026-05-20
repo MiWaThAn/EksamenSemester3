@@ -42,13 +42,13 @@ namespace Domain.Builders.Person
             CompanyId = company.Id;
             return this;
         }
-        public EmployeeBuilder WithCompanyId(Guid companyId)
+        internal EmployeeBuilder WithCompanyId(Guid companyId)
         {
             Guard.AgainstEmptyGuid(companyId, nameof(companyId));
             CompanyId = companyId;
             return this;
         }
-        public Employee Build()
+        internal Employee Build()
         {
             Guard.AgainstNullOrEmpty(Name, nameof(Name));
             Guard.AgainstEmptyGuid(CompanyId, nameof(CompanyId));
