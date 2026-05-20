@@ -22,22 +22,16 @@ namespace Infrastructure.Repositories.Person
                 .FirstOrDefaultAsync(e => e.Id == id,cancellationToken);
         }
 
-        public async Task<List<CompanyEmployeeModel>?> GetEmployeesRelatedToProjectAsync(Guid projectId)
+        public async Task<List<Employee>> GetEmployeesRelatedToProjectAsync(Guid projectId)
         {
             return await _context.Employees
-                .Where(e =>
-                    _context.Projects.Any(p => p.Id == projectId && p.ResponsibleEmployeeId == e.Id) ||
-                    e.Registrations.Any(r => r.ProjectId == projectId) ||
-                    _context.Projects.Any(p => p.Id == projectId &&
-                        p.Activities.Any(pa => pa.ResponsibleEmployeeId == e.Id)) ||
-                    e.Registrations.Any(r =>
-                        _context.Projects.Any(p => p.Id == projectId &&
-                            p.Activities.Any(pa => pa.Id == r.ProjectActivityId))))
-                .Select(e => new CompanyEmployeeModel
-                {
-                    Id = e.Id,
-                    FullName = e.Name
-                })
+                .Where(e => _context.Projects.Any(p => p.Id == projectId && (
+                    p.ResponsibleEmployeeId == e.Id ||
+                    p.WorkLogs.Any(wl => wl.EmployeeId == e.Id) ||
+                    p.WorkLogs.Any(wl => wl.Registrations.Any(r => r.EmployeeId == e.Id)) ||
+                    p.Activities.Any(a => a.ResponsibleEmployeeId == e.Id) ||
+                    p.Activities.Any(a => a.Registrations.Any(r => r.EmployeeId == e.Id))
+                )))
                 .ToListAsync();
         }
 

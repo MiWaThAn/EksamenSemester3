@@ -9,8 +9,7 @@ namespace Application.Interfaces.Repo.Person
 {
     public interface IEmployeeRepository : IGenericRepository<Employee>
     {
-        Task<Employee?> GetByIdWithDetailsAsync(Guid id);
-        Task<List<CompanyEmployeeModel>?> GetEmployeesRelatedToProjectAsync(Guid projectId);
+        Task<List<Employee>> GetEmployeesRelatedToProjectAsync(Guid projectId);
         Task<Employee?> GetByIdWithAccountAsync(Guid employeeId);
         Task<Employee?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken = default); 
     }

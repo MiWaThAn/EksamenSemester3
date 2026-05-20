@@ -31,7 +31,11 @@ namespace Application.Commands.Person.Handlers
             {
                 Id = project.Id,
                 ProjectName = project.Name,
-                Employees = relatedEmployees ?? new List<CompanyEmployeeModel>()
+                Employees = relatedEmployees?.Select(e => new CompanyEmployeeModel
+                {
+                    Id = e.Id,
+                    FullName = e.Name
+                }).ToList() ?? new List<CompanyEmployeeModel>()
             };
         }
     }
