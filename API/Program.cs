@@ -3,6 +3,7 @@ using API.Workers;
 using API.Workers;
 using Application;
 using Application;
+using Application.Commands.Notification.Service;
 using Application.Commands.Person.Handlers.SyncHandlers;
 using Application.Interfaces.Adapters;
 using Application.Interfaces.Adapters;
@@ -18,6 +19,7 @@ using Application.Services;
 using Domain.Entity.Person;
 using Domain.Interfaces;
 using Domain.Interfaces.Item;
+using Domain.Interfaces.Notification;
 using Domain.Interfaces.Person;
 using Domain.Services.Person;
 using Infrastructure;
@@ -27,6 +29,7 @@ using Infrastructure.Configuration;
 using Infrastructure.Data;
 using Infrastructure.Data.Seeding;
 using Infrastructure.Service;
+using Infrastructure.Service.Notification.Providers;
 using Infrastructure.Service.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -97,7 +100,8 @@ builder.Services.Configure<EconomicOptions>(
     builder.Configuration.GetSection(EconomicOptions.SectionName));
 builder.Services.AddHttpClient<IEconomicApiClient, EconomicApiClient>();
 builder.Services.AddApplication();
-
+builder.Services.AddTransient<IPushNotificationService, PushNotificationService>();
+builder.Services.AddScoped<IUserNotifierService, UserNotifierService>();
 
 var app = builder.Build();
 

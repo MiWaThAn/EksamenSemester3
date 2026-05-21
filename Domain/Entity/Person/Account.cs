@@ -42,13 +42,15 @@ namespace Domain.Entity.Person
         private DateTime? RecoveryExpiry;
 
         //Last time the account pinged the server (last activity time)
-        public DateTime LastLogin { get; internal set; } 
+        public DateTime LastLogin { get; internal set; }
+        private readonly List<string> _deviceTokens = new();
+        public IReadOnlyCollection<string> DeviceTokens => _deviceTokens.AsReadOnly();
 
         public Account() : base()
         {
 
         }
-        internal Account(string username, string hashedPassword, PhoneNumber phoneNumber,string? hashedPin,Employee? employee,Company? company) : base()
+        internal Account(string username, string hashedPassword, PhoneNumber phoneNumber, string? hashedPin, Employee? employee, Company? company) : base()
         {
             Guard.AgainstNullOrEmpty(hashedPassword, nameof(hashedPassword));
             Guard.AgainstNullOrEmpty(username, nameof(username));
@@ -99,8 +101,8 @@ namespace Domain.Entity.Person
             Guard.AgainstNull(builder, nameof(builder));
             Guard.AgainstNull(companyFactory, nameof(companyFactory));
             builder = builder.WithAccount(this);
-            var result = await companyFactory.CreateAsync(builder, this,ct);
-            if(result.IsSuccess)
+            var result = await companyFactory.CreateAsync(builder, this, ct);
+            if (result.IsSuccess)
             {
                 LinkToCompany(result.Value);
             }
@@ -135,6 +137,14 @@ namespace Domain.Entity.Person
             HashedPassword = newPasswordHash;
             RecorveryToken = null;
             RecoveryExpiry = null;
+        }
+        public void AddDeviceToken(string token)
+        {
+            if (string.IsNullOrWhiteSpace(token)) return;
+            if (!_deviceTokens.Contains(token))
+            {
+                _deviceTokens.Add(token);
+            }
         }
     }
 }
