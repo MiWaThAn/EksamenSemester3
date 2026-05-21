@@ -6,7 +6,7 @@ namespace Application.DTO.External
 {
     public class CustomerDTO
     {
-        public int CustomerNumber { get; set; }
+        public int Number { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Email { get; set; }
         public string Address { get; set; }

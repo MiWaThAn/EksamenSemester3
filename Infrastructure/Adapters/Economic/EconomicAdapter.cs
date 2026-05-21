@@ -26,6 +26,7 @@ namespace Infrastructure.Adapters.Economic
                     "employee" => MapEmployees(json, entityType, companyId),
                     "project" => MapProjects(json, entityType, companyId),
                     "customer" => MapCustomers(json, entityType, companyId),
+                    "projectActivity" => MapProjectActivities(json, entityType, companyId),
                     _ => throw new Exception(
                         $"Economic adapter does not support '{entityType}'.")
                 };
@@ -79,7 +80,7 @@ namespace Infrastructure.Adapters.Economic
 
             return response!.Items.Select(dto => new SyncEntity<CustomerDTO>
             {
-                ExternalId = dto.CustomerNumber.ToString(),
+                ExternalId = dto.Number.ToString(),
                 ObjectVersion = dto.ObjectVersion,
                 CompanyId = companyId,
                 ObjectType = entityType,
@@ -90,7 +91,27 @@ namespace Infrastructure.Adapters.Economic
                 }
             });
         }
-
+        private IEnumerable<SyncEntity<ProjectActivityDTO>> MapProjectActivities(string json, IntegrationEntityType entityType, Guid companyId)
+        {             var response = JsonSerializer.Deserialize<ProjectActivityDTOResponse>(
+                json, _jsonOptions);
+            return response!.Items.Select(dto => new SyncEntity<ProjectActivityDTO>
+            {
+                ExternalId = dto.Number.ToString(),
+                ObjectVersion = dto.ObjectVersion,
+                CompanyId = companyId,
+                ObjectType = entityType,
+                Data = new ProjectActivityDTO
+                {
+                    
+                    ProjectExternalId = dto.ProjectExternalId,
+                    ActivityExternalId = dto.ActivityExternalId,
+                    StartDate = dto.StartDate,
+                    EndDate = dto.EndDate,
+                    ResponsibleEmployeeExternalId = dto.ResponsibleEmployeeExternalId,
+                    Completed = dto.Completed
+                }
+            });
+        }
 
 
     }
