@@ -2,7 +2,15 @@
 using Microsoft.Extensions.Logging;
 using UI.Services.Auth;
 using UI.Services.Theme;
+using Plugin.Firebase.CloudMessaging;
+using Microsoft.Maui.LifecycleEvents;
+using UI.Services.Auth.Registration;
 
+#if IOS
+using Plugin.Firebase.Core.Platforms.iOS;
+#elif ANDROID
+using Plugin.Firebase.Core.Platforms.Android;
+#endif
 namespace UI
 {
     public static class MauiProgram
@@ -19,10 +27,10 @@ namespace UI
 
 
 
-
+            builder.Services.AddScoped<PushRegistrationService>();
 
             builder.Services.AddScoped<IAuthService, AuthService>();
-            
+
 
             builder.Services.AddAuthorizationCore();
             builder.Services.AddSingleton<ThemeService>();
@@ -38,17 +46,32 @@ namespace UI
                     : "https://localhost:7020/";
             }
             builder.Services.AddMauiBlazorWebView();
-
             builder.Services.AddScoped(sp => new HttpClient
             {
                 BaseAddress = new Uri(apiBaseUrl)
             });
+            builder.RegisterFirebaseServices();
 #if DEBUG
-    		builder.Services.AddBlazorWebViewDeveloperTools();
-    		builder.Logging.AddDebug();
+            builder.Services.AddBlazorWebViewDeveloperTools();
+            builder.Logging.AddDebug();
 #endif
 
             return builder.Build();
+        }
+        private static MauiAppBuilder RegisterFirebaseServices(this MauiAppBuilder builder)
+        {
+            builder.ConfigureLifecycleEvents(events => {
+#if IOS
+            events.AddiOS(iOS => iOS.WillFinishLaunching((_,__) => {
+                CrossFirebase.Initialize();
+                return false;
+            }));
+#elif ANDROID
+                events.AddAndroid(android => android.OnCreate((activity, _) =>
+                    CrossFirebase.Initialize(activity, () => Platform.CurrentActivity)));
+#endif
+            });
+            return builder;
         }
     }
 }

@@ -1,9 +1,10 @@
 ﻿
+using Plugin.Firebase.CloudMessaging;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Plugin.Firebase.CloudMessaging;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text;
 
 namespace UI.Services.Auth.Registration
 {
@@ -14,7 +15,7 @@ namespace UI.Services.Auth.Registration
         {
             _httpClient = httpClient;
         }
-        public async Task RegisterDeviceAsync(Guid currentUserId, CancellationToken cancellationToken)
+        public async Task RegisterDeviceAsync(Guid currentUserId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -25,14 +26,30 @@ namespace UI.Services.Auth.Registration
                 }
                 await CrossFirebaseCloudMessaging.Current.CheckIfValidAsync();
                 var deviceToken = await CrossFirebaseCloudMessaging.Current.GetTokenAsync();
-                if (!string.IsNullOrEmpty(deviceToken))
+                var requestPayload = new
                 {
-                    var requestPayload = new
-                    {
-                        UserId = currentUserId,
-                        Token = deviceToken
-                    };
-                    await _httpClient.PostAsJsonAsync("api/notifications/register-token", requestPayload, cancellationToken);
+                    UserId = currentUserId,
+                    Token = deviceToken
+                };
+                var authToken = await SecureStorage.GetAsync("auth_token");
+                if (string.IsNullOrWhiteSpace(authToken))
+                {
+                    Console.WriteLine("Push registration skipped: No auth token found in SecureStorage.");
+                    return;
+                }
+                var request = new HttpRequestMessage(HttpMethod.Post, "api/notifications/register-token");
+                request.Content = JsonContent.Create(requestPayload);
+
+                if (!string.IsNullOrEmpty(authToken))
+                {
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
+                }
+                var response = await _httpClient.SendAsync(request);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"API rejected token registration: {response.StatusCode} - {errorContent}");
                 }
             }
             catch (Exception ex)

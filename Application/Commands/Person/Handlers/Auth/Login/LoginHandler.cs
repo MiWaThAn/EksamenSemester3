@@ -34,7 +34,7 @@ namespace Application.Commands.Person.Handlers.Auth.Login
                     await _unitOfWork.CompleteAsync(ct);
                     await _unitOfWork.CommitTransactionAsync(ct);
                     var token = _tokenService.GetToken(user);
-                    return new LoginResponse { Success = true, Token=token};
+                    return new LoginResponse { Success = true, Token=token,AccountId=user.Id};
                 }
                 return new LoginResponse { Success = false, Message = invalidCredentialsMessage };
             }
