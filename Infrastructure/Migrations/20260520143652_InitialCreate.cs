@@ -238,6 +238,7 @@ namespace Infrastructure.Migrations
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     EmployeeType = table.Column<int>(type: "int", nullable: false),
                     IsAutonomous = table.Column<bool>(type: "bit", nullable: false),
+                    IsLocal = table.Column<bool>(type: "bit", nullable: false),
                     CompanyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AccountId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false),

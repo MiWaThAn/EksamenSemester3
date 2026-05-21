@@ -9,7 +9,7 @@
     {
         <div class="text-white text-center p-4">
             <div class="spinner-border text-light mb-3" role="status"></div>
-            <div><strong>Henter Henriks information, big boss...</strong></div>
+            <div><strong>Henter Medarbejder...</strong></div>
         </div>
     }
     else if (!string.IsNullOrEmpty(errorMessage))
@@ -54,7 +54,18 @@
 
         <div class="specific-admin-btn-container">
             <button class="specific-admin-btn" @onclick="GoBack">Tilbage</button>
-            <button class="specific-admin-btn" @onclick="NavigateToEdit">Rediger</button>
+
+            @if (employeeDetail != null)
+            {
+                @if (employeeDetail.IsLocal)
+                {
+                    <button class="specific-admin-btn" @onclick="NavigateToEdit">Rediger Oplysninger</button>
+                }
+                else
+                {
+                    <button class="specific-admin-btn"><span class="text-muted"><i>Denne medarbejder er synkroniseret udefra og kan ikke redigeres.</i></span></button>
+                }
+            }
         </div>
     }
 </div>

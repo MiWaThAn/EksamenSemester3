@@ -64,5 +64,32 @@ namespace API.Controllers
             EmployeeDTO result = await _mediator.Send(command);
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
+
+        // PUT: api/employee/company/employee/{id}
+        // Opdaterer medarbejderens oplysninger
+        [HttpPut("company/employee/{id:guid}")]
+        public async Task<IActionResult> UpdateEmployee(Guid id, [FromBody] DetailedEmployeeModel model)
+        {
+            if (model == null || id != model.Id)
+            {
+                return BadRequest("Data-mismatch eller manglende body, big boss.");
+            }
+
+            var command = new UpdateEmployeeDetailsCommand(
+                model.Id,
+                model.FullName,
+                model.Email,
+                model.MobileNumber
+            );
+
+            var isSuccess = await _mediator.Send(command);
+
+            if (!isSuccess)
+            {
+                return NotFound("Kunne ikke opdatere medarbejderen i databasen.");
+            }
+
+            return NoContent();
+        }
     }
 }

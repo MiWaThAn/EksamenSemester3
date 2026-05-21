@@ -1,0 +1,156 @@
+﻿@page "/employee-edit/{employeeId:guid}"
+@using Shared.Model
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<PageTitle>Rediger Medarbejder</PageTitle>
+
+<div class="specific-admin-bg">
+    @if (isLoading)
+    {
+        <div class="text-white text-center p-4">
+            <div class="spinner-border text-light mb-3" role="status"></div>
+            <div><strong>Henter medarbejderens oplysninger, big boss...</strong></div>
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @errorMessage
+        </div>
+    }
+    else if (editModel != null)
+    {
+        <h1 class="specific-admin-title">Rediger Oplysninger</h1>
+
+        <div class="specific-admin-info-box" style="padding: 10px 0;">
+
+            <div class="specific-admin-input-group">
+                <label class="specific-admin-input-label">Navn</label>
+                <input type="text" class="specific-admin-input" @bind="editModel.FullName" />
+            </div>
+
+            <div class="specific-admin-divider"></div>
+
+            <div class="specific-admin-input-group">
+                <label class="specific-admin-input-label">Mobilnummer</label>
+                <input type="text" class="specific-admin-input" @bind="editModel.MobileNumber" />
+            </div>
+
+            <div class="specific-admin-divider"></div>
+
+            <div class="specific-admin-input-group">
+                <label class="specific-admin-input-label">E-mail</label>
+                <input type="email" class="specific-admin-input" @bind="editModel.Email" />
+            </div>
+
+        </div>
+
+        <div class="specific-admin-btn-container">
+            <button class="specific-admin-btn" @onclick="Cancel">Annuller</button>
+            <button class="specific-admin-btn" style="background-color: #5b6b4e; color: white;" @onclick="SaveChanges">Gem ændringer</button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Guid employeeId { get; set; }
+
+    private DetailedEmployeeModel? editModel;
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadEmployeeData();
+    }
+
+    private async Task LoadEmployeeData()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+
+            editModel = await Http.GetFromJsonAsync<DetailedEmployeeModel>($"api/Employee/company/employee/{employeeId}");
+
+            if (editModel != null && !editModel.IsLocal)
+            {
+                errorMessage = "Adgang nægtet: Eksterne medarbejderkonti kan ikke redigeres lokalt.";
+                editModel = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            var actualException = ex.InnerException ?? ex;
+            errorMessage = $"Kunne ikke hente medarbejder: {actualException.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task SaveChanges()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+
+            // frontend validering
+            if (string.IsNullOrWhiteSpace(editModel.Email))
+            {
+                errorMessage = "Email må ikke være tom.";
+                isLoading = false;
+                return;
+            }
+
+            if (!editModel.Email.Contains("@") || !editModel.Email.Contains("."))
+            {
+                errorMessage = "Ugyldigt email-format.";
+                isLoading = false;
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(editModel.MobileNumber))
+            {
+                errorMessage = "Mobilnummer må ikke være tomt.";
+                isLoading = false;
+                return;
+            }
+
+            if (!System.Text.RegularExpressions.Regex.IsMatch(editModel.MobileNumber, @"^\d{8}$"))
+            {
+                errorMessage = "Telefonnummeret skal være præcis 8 cifre uden landekode (f.eks. 12345678).";
+                isLoading = false;
+                return;
+            }
+
+            var response = await Http.PutAsJsonAsync($"api/Employee/company/employee/{employeeId}", editModel);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo($"/specific-employee-admin/{employeeId}");
+            }
+            else
+            {
+                errorMessage = $"Fejl under gemning: {response.ReasonPhrase}";
+                isLoading = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            var actualException = ex.InnerException ?? ex;
+            errorMessage = $"Der skete en fejl: {actualException.Message}";
+            isLoading = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo($"/specific-employee-admin/{employeeId}");
+    }
+}

@@ -60,7 +60,7 @@ namespace UI
 
                 var client = new HttpClient(handler)
                 {
-                    BaseAddress = new Uri("https://rj7mxw9r-7020.euw.devtunnels.ms/")
+                    BaseAddress = new Uri(apiBaseUrl)
                 };
 
                 // Sørg for at Microsofts anti-phishing side ikke blokerer Android-appen
