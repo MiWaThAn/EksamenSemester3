@@ -40,6 +40,9 @@ namespace Domain.Entity.Person
         public Guid? AccountId { get; internal set; }
         public Account Account { get; internal set; }
 
+        // hvis true så kan man redigere medarbejder lokalt
+        public bool IsLocal { get; internal set; } = false;
+
         //Medarbejder registreringer
         private readonly List<WorkLog> _workLogs = new();
         public IReadOnlyCollection<WorkLog> WorkLogs => _workLogs.Where(r => !r.IsDeleted).ToList().AsReadOnly();
@@ -49,7 +52,7 @@ namespace Domain.Entity.Person
         }
         internal Employee(string name, Guid companyId, EmployeeType employeeType, EmailAddress email, bool isAutonomous) : base()
         {
-            Guard.AgainstNullOrEmpty(name, nameof(name));;
+            Guard.AgainstNullOrEmpty(name, nameof(name)); ;
             Name = name;
             CompanyId = companyId;
             IsAutonomous = isAutonomous;

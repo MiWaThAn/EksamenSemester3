@@ -10,10 +10,10 @@ namespace Application.DTO
     public class SyncEntity<T> :ISyncEntity
     {
 
-        public string ExternalId { get; set; } = string.Empty;     
-        public string ObjectVersion { get; set; } = string.Empty;
-        public T Data { get; set; } = default!;
-        public IntegrationEntityType? ObjectType { get; set; }
-        public Guid CompanyId { get; set; }
+        public string ExternalId { get; init; } = string.Empty;     
+        public string ObjectVersion { get; init; } = string.Empty;
+        public T Data { get; init; } = default!;
+        public IntegrationEntityType? ObjectType { get; init; }
+        public Guid CompanyId { get; init; }
     }
 }

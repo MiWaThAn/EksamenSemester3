@@ -15,6 +15,7 @@ namespace Infrastructure.Adapters.Economic
         
             public bool Supports(DataSource datasource) => datasource.Value == "economic";
 
+
             public IEnumerable<ISyncEntity> Map(
                 string json,
                 IntegrationEntityType entityType,
@@ -29,12 +30,14 @@ namespace Infrastructure.Adapters.Economic
                         $"Economic adapter does not support '{entityType}'.")
                 };
             }
-
+        private static readonly JsonSerializerOptions _jsonOptions = new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
         private IEnumerable<SyncEntity<EmployeeDTO>> MapEmployees(string json, IntegrationEntityType entityType, Guid companyId)
         {
             var response = JsonSerializer.Deserialize<EmployeeDTOResponse>(
-                json, new JsonSerializerOptions{PropertyNameCaseInsensitive = true});
-
+                json, _jsonOptions);
             return response!.Items
                 .Where(dto => !dto.IsBarred)
                 .Select(dto => new SyncEntity<EmployeeDTO>
@@ -54,11 +57,7 @@ namespace Infrastructure.Adapters.Economic
         private IEnumerable<SyncEntity<ProjectDTO>> MapProjects(string json, IntegrationEntityType entityType, Guid companyId)
         {
             var response = JsonSerializer.Deserialize<ProjectDTOResponse>(
-                json,
-                new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                json, _jsonOptions);
 
             return response!.Items.Select(dto => new SyncEntity<ProjectDTO>
             {
@@ -76,11 +75,7 @@ namespace Infrastructure.Adapters.Economic
         private IEnumerable<SyncEntity<CustomerDTO>> MapCustomers(string json, IntegrationEntityType entityType, Guid companyId)
         {
             var response = JsonSerializer.Deserialize<CustomerDTOResponse>(
-                json,
-                new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                json, _jsonOptions);
 
             return response!.Items.Select(dto => new SyncEntity<CustomerDTO>
             {

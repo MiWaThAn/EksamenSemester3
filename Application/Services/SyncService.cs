@@ -93,23 +93,31 @@ namespace Application.Services
                 await handler.UpdateAsync(syncEntity, existing.First());
         }
 
-        public async Task SyncByExternalIdAsync(IntegrationSetting setting,IntegrationEntityType entityType,string url)
+        public async Task SyncSingleByUrl(IntegrationSetting setting,IntegrationEntityType entityType,string url,string externalId)  
         {
-            var endpoint = setting.Provider.Urls
-        .FirstOrDefault(u => u.EntityType == entityType);
-
-            if (endpoint == null)
-                return;
-
-            
-
             var json = await _externalAPIService.FetchFromAPI(url, setting.Credential);
-
-            var adapter = _adapterRegistry
-                .GetAdapter(setting.Provider.Datasource);
+            var adapter = _adapterRegistry.GetAdapter(setting.Provider.Datasource);
             var syncEntity = adapter.Map(json, entityType, setting.CompanyId).FirstOrDefault();
 
-            await ProcessAsync(syncEntity, setting,entityType);
+            if (syncEntity == null) return;
+
+            var handler = _handlerRegistry.GetHandler(entityType);
+
+            
+            var existingMappings = await _unitOfWork.Mappings
+                .GetByExternalId(externalId, entityType);
+
+            var mapping = existingMappings.FirstOrDefault();
+            if (mapping == null)
+            {
+                
+                await handler.CreateAsync(syncEntity, setting, entityType);
+            }
+            else
+            {
+                
+                await handler.UpdateAsync(syncEntity, mapping);
+            }
         }
 
 

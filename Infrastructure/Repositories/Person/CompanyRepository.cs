@@ -21,6 +21,16 @@ namespace Infrastructure.Repositories.Person
         {
             return await _context.Companies.FirstOrDefaultAsync(c => c.CVRNumber == cvrNumber,cancellationToken);
         }
+        public async Task<Company?> GetByCVRWithSettingsAsync(CvrNumber cvrNumber)
+        {
+            return await _context.Companies
+                .Include(c => c.Settings)
+                    .ThenInclude(s => s.Provider)
+                        .ThenInclude(p => p.Urls)
+                .Include(c => c.Settings)
+                    .ThenInclude(s => s.EntityTypes)
+                .FirstOrDefaultAsync(c => c.CVRNumber == cvrNumber && !c.IsDeleted);
+        }
         public async Task<Company?> GetWithAllDetailsAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return await _context.Companies

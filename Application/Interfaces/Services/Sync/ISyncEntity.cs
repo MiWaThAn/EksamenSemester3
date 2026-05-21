@@ -10,7 +10,7 @@ namespace Application.Interfaces.Services.Sync
         string ExternalId { get; }
 
         string ObjectVersion { get; }
-        public IntegrationEntityType? ObjectType { get; set; }
-        public Guid CompanyId { get; set; }
+        public IntegrationEntityType? ObjectType { get; }
+        public Guid CompanyId { get; }
     }
 }

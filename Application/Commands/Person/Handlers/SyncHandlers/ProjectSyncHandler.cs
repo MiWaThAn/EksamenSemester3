@@ -54,14 +54,14 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
             IntegrationSetting setting,
             IntegrationEntityType entityType)
         {
-            var project = await CreateEntity(syncEntity);
 
             try
             {
                 await _unitOfWork.BeginTransactionAsync(
                     System.Data.IsolationLevel.ReadCommitted);
+            var project = await CreateEntity(syncEntity);
 
-                await _unitOfWork.Projects.AddAsync(project);
+                
 
                 setting.CreateMapping(
                     new IntegrationMappingBuilder()
@@ -104,7 +104,11 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
                 }
 
                 local.UpdateProjectName(dto.Name);
-
+                if (mapping.ExternalId != syncEntity.ExternalId)
+                {
+                    mapping.UpdateExternalId(syncEntity.ExternalId);
+                }
+               
                 mapping.UpdateObjectVersion(
                     syncEntity.ObjectVersion);
 
