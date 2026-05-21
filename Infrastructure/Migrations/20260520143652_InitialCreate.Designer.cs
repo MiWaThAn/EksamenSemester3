@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260520131956_InitialCreate")]
+    [Migration("20260520143652_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -848,6 +848,9 @@ namespace Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsLocal")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
