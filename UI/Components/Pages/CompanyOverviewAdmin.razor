@@ -19,16 +19,16 @@
     </div>
 
     <div class="list-wrapper shadow-box">
-        @if (!string.IsNullOrWhiteSpace(tekniskFejl))
+        @if (!string.IsNullOrWhiteSpace(errorString))
         {
             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm" role="alert">
-                <span>@tekniskFejl</span>
+                <span>@errorString</span>
             </div>
         }
 
         @if (activeTab == "employees")
         {
-            @if (employees == null && string.IsNullOrWhiteSpace(tekniskFejl))
+            @if (employees == null && string.IsNullOrWhiteSpace(errorString))
             {
                 <p style="padding: 20px;">Henter medarbejdere...</p>
             }
@@ -56,7 +56,7 @@
         }
         else
         {
-            @if (projects == null && string.IsNullOrWhiteSpace(tekniskFejl))
+            @if (projects == null && string.IsNullOrWhiteSpace(errorString))
             {
                 <p style="padding: 20px;">Henter projekter...</p>
             }
@@ -91,7 +91,7 @@
     private string activeTab = "employees";
     private List<CompanyEmployeeModel>? employees;
     private List<CompanyProjectModel>? projects;
-    private string? tekniskFejl;
+    private string? errorString;
 
     private string? loggedInUserId;
     private string? dynamicCompanyId;
@@ -100,13 +100,13 @@
     {
         try
         {
-            tekniskFejl = null;
+            errorString = null;
 
             var token = await SecureStorage.GetAsync("auth_token");
 
             if (string.IsNullOrWhiteSpace(token))
             {
-                tekniskFejl = "Ingen aktiv session fundet. Prøv at logge ind igen.";
+                errorString = "Ingen aktiv session fundet. Prøv at logge ind igen.";
                 return;
             }
 
@@ -114,7 +114,7 @@
 
             if (string.IsNullOrEmpty(loggedInUserId))
             {
-                tekniskFejl = "Kunne ikke finde dit bruger-ID i sessionen.";
+                errorString = "Kunne ikke finde dit bruger-ID i sessionen.";
                 return;
             }
 
@@ -127,7 +127,7 @@
 
             if (string.IsNullOrEmpty(dynamicCompanyId))
             {
-                tekniskFejl = "Kunne ikke identificere din virksomhed ud fra din konto. Prøv igen.";
+                errorString = "Kunne ikke identificere din virksomhed ud fra din konto. Prøv igen.";
                 return;
             }
 
@@ -136,8 +136,8 @@
         catch (Exception ex)
         {
             var denReelleFejl = ex.InnerException ?? ex;
-            tekniskFejl = $"Fejl under initialisering: {denReelleFejl.Message}";
-            Console.WriteLine(tekniskFejl);
+            errorString = $"Fejl under initialisering: {denReelleFejl.Message}";
+            Console.WriteLine(errorString);
         }
     }
 
@@ -146,14 +146,14 @@
         if (string.IsNullOrEmpty(dynamicCompanyId)) return;
         try
         {
-            tekniskFejl = null;
+            errorString = null;
             employees = await Http.GetFromJsonAsync<List<CompanyEmployeeModel>>($"api/employee/company/{dynamicCompanyId}");
         }
         catch (Exception ex)
         {
             var denReelleFejl = ex.InnerException ?? ex;
-            tekniskFejl = $"Fejl ved hentning af medarbejdere: {denReelleFejl.Message}";
-            Console.WriteLine(tekniskFejl);
+            errorString = $"Fejl ved hentning af medarbejdere: {denReelleFejl.Message}";
+            Console.WriteLine(errorString);
         }
     }
 
@@ -162,14 +162,14 @@
         if (string.IsNullOrEmpty(dynamicCompanyId)) return;
         try
         {
-            tekniskFejl = null;
+            errorString = null;
             projects = await Http.GetFromJsonAsync<List<CompanyProjectModel>>($"api/project/company/{dynamicCompanyId}");
         }
         catch (Exception ex)
         {
             var denReelleFejl = ex.InnerException ?? ex;
-            tekniskFejl = $"Fejl ved hentning af projekter: {denReelleFejl.Message}";
-            Console.WriteLine(tekniskFejl);
+            errorString = $"Fejl ved hentning af projekter: {denReelleFejl.Message}";
+            Console.WriteLine(errorString);
         }
     }
 
