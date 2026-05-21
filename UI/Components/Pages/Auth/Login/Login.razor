@@ -3,18 +3,86 @@
 @using UI.Services.Auth
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
+@inject HttpClient Http
 
 <div class="container max-w-md mx-auto p-6 flex flex-col justify-center min-h-screen">
     <div class="bg-white p-8 rounded-xl shadow-md border border-gray-100">
 
-        <div class="text-center mb-8">
-            <h3 class="text-3xl font-bold text-gray-800">Log ind</h3>
-            <p class="text-gray-500 text-sm mt-2">Indtast dit brugernavn og din adgangskode</p>
-        </div>
+        @if (!_showForgotPassword)
+        {
+            <div class="text-center mb-8">
+                <h3 class="text-3xl font-bold text-gray-800">Log ind</h3>
+                <p class="text-gray-500 text-sm mt-2">Indtast dit brugernavn og din adgangskode</p>
+            </div>
 
-        <EditForm Model="@_loginModel" OnValidSubmit="HandleLoginAsync">
-            <DataAnnotationsValidator />
+            <EditForm Model="@_loginModel" OnValidSubmit="HandleLoginAsync">
+                <DataAnnotationsValidator />
 
+                @if (!string.IsNullOrWhiteSpace(_errorMessage))
+                {
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm" role="alert">
+                        <span>@_errorMessage</span>
+                    </div>
+                }
+
+                <div class="mb-4">
+                    <label class="block font-semibold mb-1 text-gray-700" for="username">Brugernavn</label>
+                    <InputText id="username" autocomplete="username"
+                               class="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+                               placeholder="Indtast brugernavn"
+                               @bind-Value="_loginModel.Username" />
+                    <div class="text-red-500 text-xs mt-1 font-semibold">
+                        <ValidationMessage For="@(() => _loginModel.Username)" />
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block font-semibold mb-1 text-gray-700" for="password">Adgangskode</label>
+                    <InputText id="password" type="password" autocomplete="current-password"
+                               class="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+                               placeholder="••••••••"
+                               @bind-Value="_loginModel.Password" />
+                    <div class="text-red-500 text-xs mt-1 font-semibold">
+                        <ValidationMessage For="@(() => _loginModel.Password)" />
+                    </div>
+                </div>
+
+                <div class="text-right mb-6">
+                    <button type="button" @onclick="() => _showForgotPassword = true" class="text-sm text-blue-600 hover:underline font-semibold">
+                        Glemt adgangskode?
+                    </button>
+                </div>
+
+                <div class="mt-6">
+                    @if (_isBusy)
+                    {
+                        <button class="w-full bg-blue-400 text-white font-bold py-3 px-4 rounded cursor-not-allowed flex justify-center items-center" disabled>
+                            <span class="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"></span>
+                            Logger ind...
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition duration-200 shadow shadow-blue-200">
+                            Log ind
+                        </button>
+                    }
+                </div>
+            </EditForm>
+        }
+        else
+        {
+            <div class="text-center mb-8">
+                <h3 class="text-3xl font-bold text-gray-800">Nulstil kodeord</h3>
+                <p class="text-gray-500 text-sm mt-2">Indtast din e-mail, så sender vi dig et nulstillingslink, big boss!</p>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(_successMessage))
+            {
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-sm" role="alert">
+                    <span>@_successMessage</span>
+                </div>
+            }
             @if (!string.IsNullOrWhiteSpace(_errorMessage))
             {
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm" role="alert">
@@ -22,44 +90,30 @@
                 </div>
             }
 
-            <div class="mb-4">
-                <label class="block font-semibold mb-1 text-gray-700" for="username">Brugernavn</label>
-                <InputText id="username" autocomplete="username"
-                           class="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
-                           placeholder="Indtast brugernavn"
-                           @bind-Value="_loginModel.Username" />
-                <div class="text-red-500 text-xs mt-1 font-semibold">
-                    <ValidationMessage For="@(() => _loginModel.Username)" />
-                </div>
-            </div>
-
             <div class="mb-6">
-                <label class="block font-semibold mb-1 text-gray-700" for="password">Adgangskode</label>
-                <InputText id="password" type="password" autocomplete="current-password"
-                           class="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
-                           placeholder="••••••••"
-                           @bind-Value="_loginModel.Password" />
-                <div class="text-red-500 text-xs mt-1 font-semibold">
-                    <ValidationMessage For="@(() => _loginModel.Password)" />
-                </div>
+                <label class="block font-semibold mb-1 text-gray-700">E-mail adresse</label>
+                <input type="email" class="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+                       placeholder="boss@virksomhed.dk" @bind="_forgotPasswordEmail" />
             </div>
 
-            <div class="mt-6">
+            <div class="flex flex-col gap-3">
                 @if (_isBusy)
                 {
-                    <button class="w-full bg-blue-400 text-white font-bold py-3 px-4 rounded cursor-not-allowed flex justify-center items-center" disabled>
-                        <span class="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"></span>
-                        Logger ind...
+                    <button class="w-full bg-blue-400 text-white font-bold py-3 px-4 rounded cursor-not-allowed text-center" disabled>
+                        Sender anmodning...
                     </button>
                 }
                 else
                 {
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition duration-200 shadow shadow-blue-200">
-                        Log ind
+                    <button @onclick="HandleForgotPasswordAsync" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition duration-200">
+                        Send nulstillingslink
                     </button>
                 }
+                <button @onclick="() => { _showForgotPassword = false; _errorMessage = null; _successMessage = null; }" class="text-sm text-gray-500 hover:underline text-center mt-2">
+                    Tilbage til login
+                </button>
             </div>
-        </EditForm>
+        }
 
         <div class="text-center mt-6">
             <p class="text-xs text-gray-400">
@@ -74,6 +128,11 @@
     private LoginModel _loginModel = new();
     private bool _isBusy = false;
     private string? _errorMessage;
+    private string? _successMessage;
+
+    // Nye states til glemt password, legend!
+    private bool _showForgotPassword = false;
+    private string _forgotPasswordEmail = string.Empty;
 
     private async Task HandleLoginAsync()
     {
@@ -114,6 +173,43 @@
         catch (Exception)
         {
             _errorMessage = "Der skete en uventet fejl under forsøget på at logge ind.";
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    private async Task HandleForgotPasswordAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_forgotPasswordEmail) || !_forgotPasswordEmail.Contains("@"))
+        {
+            _errorMessage = "Indtast venligst en gyldig e-mail adresse, big boss.";
+            return;
+        }
+
+        _isBusy = true;
+        _errorMessage = null;
+        _successMessage = null;
+
+        try
+        {
+            // Vi skyder anmodningen afsted til vores nye backend endpoint
+            var response = await Http.PostAsJsonAsync("api/account/forgot-password", new { Email = _forgotPasswordEmail });
+
+            if (response.IsSuccessStatusCode)
+            {
+                _successMessage = "Hvis e-mailen findes i vores system, har vi sendt et nulstillingslink afsted! Tjek jeres konsol/mail, legend!";
+                _forgotPasswordEmail = string.Empty;
+            }
+            else
+            {
+                _errorMessage = "Der skete en fejl under afsendelsen. Prøv igen.";
+            }
+        }
+        catch (Exception)
+        {
+            _errorMessage = "Kunne ikke oprette forbindelse til serveren.";
         }
         finally
         {

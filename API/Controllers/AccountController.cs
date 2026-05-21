@@ -1,4 +1,5 @@
-﻿using Application.Commands.Person.Queries; 
+﻿using Application.Commands.Account;
+using Application.Commands.Person.Queries; 
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,5 +30,28 @@ namespace API.Controllers
 
             return Ok(new { CompanyId = companyId });
         }
+
+        // POST: api/account/forgot-password
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
+        {
+            await _mediator.Send(command);
+            return Ok(); // Vi returnerer altid 200 OK af sikkerhedsmæssige årsager
+        }
+
+        // POST: api/account/reset-password
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            if (!result)
+            {
+                return BadRequest("Ugyldig eller udløbet token, legend.");
+            }
+
+            return Ok();
+        }
+
     }
 }
