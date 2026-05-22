@@ -9,7 +9,7 @@ namespace Application.Commands.Notification
     public class NotifyUserCommandHandler
     {
         private readonly IPushNotificationService _pushService;
-        private readonly IUnitOfWork _unitOfWork; // To get the user's saved device token
+        private readonly IUnitOfWork _unitOfWork;
 
         public NotifyUserCommandHandler(IPushNotificationService pushService, IUnitOfWork unitOfWork)
         {
@@ -20,7 +20,7 @@ namespace Application.Commands.Notification
         public async Task Handle(NotifyUserCommand request, CancellationToken cancellationToken)
         {
             var user = await _unitOfWork.Accounts.GetByIdAsync(request.AccountId);
-            foreach(string token in user.DeviceTokens)
+            foreach(string token in user.DeviceTokens.Select(t=>t.Value))
             {
                 await _pushService.SendAsync(request.Title, request.Message, token, cancellationToken);
             }

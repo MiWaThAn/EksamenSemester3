@@ -45,6 +45,34 @@ namespace UI
                     ? "https://10.0.2.2:7020/"
                     : "https://localhost:7020/";
             }
+            builder.Services.AddScoped(sp =>
+            {
+                HttpMessageHandler handler;
+
+#if ANDROID
+                // Til Android bruger vi den indfødte Java-handler og tvinger den til at godkende certifikatet
+                handler = new Xamarin.Android.Net.AndroidMessageHandler
+                {
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+                };
+#else
+                // Til Windows / browser (hvis du tester der) bruger vi standard handleren
+                handler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+                };
+#endif
+
+                var client = new HttpClient(handler)
+                {
+                    BaseAddress = new Uri(apiBaseUrl)
+                };
+
+                // Sørg for at Microsofts anti-phishing side ikke blokerer Android-appen
+                client.DefaultRequestHeaders.Add("X-Tunnel-Skip-Anti-Phishing-Page", "true");
+
+                return client;
+            });
             builder.Services.AddMauiBlazorWebView();
             builder.Services.AddScoped(sp => new HttpClient
             {

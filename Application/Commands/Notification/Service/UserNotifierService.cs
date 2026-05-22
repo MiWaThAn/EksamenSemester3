@@ -27,7 +27,7 @@ namespace Application.Commands.Notification.Service
             }
             foreach (var token in user.DeviceTokens)
             {
-                await _pushService.SendAsync(title, body, token, cancellationToken);
+                await _pushService.SendAsync(title, body, token.Value, cancellationToken);
             }
         }
     }

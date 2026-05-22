@@ -16,6 +16,7 @@ namespace Domain.Builders.Item.Registration
     {
         protected WorkLog WorkLog;
         protected Guid? ActivityId;
+        protected Guid ProjectId;
         protected RegistrationStatus Status = RegistrationStatus.Pending;
         protected string RegistrationNumber = string.Empty;
         protected string Description = string.Empty;
@@ -29,6 +30,22 @@ namespace Domain.Builders.Item.Registration
         {
             Guard.AgainstNull(activity, nameof(activity));
             ActivityId = activity.Id;
+            return (TBuilder)this;
+        }
+        internal TBuilder WithProjectActivity(Guid? activityId)
+        {
+            ActivityId = activityId;
+            return (TBuilder)this;
+        }
+        public TBuilder WithProject(Project project)
+        {
+            Guard.AgainstNull(project, nameof(project));
+            ProjectId = project.Id;
+            return (TBuilder)this;
+        }
+        internal TBuilder WithProject(Guid projectid)
+        {
+            ProjectId = projectid;
             return (TBuilder)this;
         }
         public TBuilder WithDescription(string description)

@@ -43,8 +43,8 @@ namespace Domain.Entity.Person
 
         //Last time the account pinged the server (last activity time)
         public DateTime LastLogin { get; internal set; }
-        private readonly List<string> _deviceTokens = new();
-        public IReadOnlyCollection<string> DeviceTokens => _deviceTokens.AsReadOnly();
+        private readonly List<DeviceToken> _deviceTokens = new();
+        public IReadOnlyCollection<DeviceToken> DeviceTokens => _deviceTokens.AsReadOnly();
 
         public Account() : base()
         {
@@ -59,8 +59,8 @@ namespace Domain.Entity.Person
             PhoneNumber = phoneNumber;
             UpdatedAt = DateTime.UtcNow;
             HashedPin = hashedPin;
-            if (Company != null) LinkToCompany(Company);
-            if (Employee != null) LinkToEmployee(Employee);
+            if (company != null) LinkToCompany(company);
+            if (employee != null) LinkToEmployee(employee);
         }
         public void UpdatePhoneNumber(PhoneNumber phoneNumber)
         {
@@ -141,9 +141,9 @@ namespace Domain.Entity.Person
         public void AddDeviceToken(string token)
         {
             if (string.IsNullOrWhiteSpace(token)) return;
-            if (!_deviceTokens.Contains(token))
+            if (!_deviceTokens.Select(t=>t.Value).Contains(token))
             {
-                _deviceTokens.Add(token);
+                _deviceTokens.Add(new DeviceToken(this, token));
             }
         }
     }

@@ -43,6 +43,9 @@ namespace Domain.Entity.Person
         //Medarbejder registreringer
         private readonly List<WorkLog> _workLogs = new();
         public IReadOnlyCollection<WorkLog> WorkLogs => _workLogs.Where(r => !r.IsDeleted).ToList().AsReadOnly();
+
+        private readonly List<ProjectAssignment> _assignments = new();
+        public IReadOnlyCollection<ProjectAssignment> Assignments => _assignments.AsReadOnly();
         public Employee() : base()
         {
 

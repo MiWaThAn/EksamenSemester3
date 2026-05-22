@@ -23,12 +23,13 @@ namespace Domain.Entity.Item.Registrations
         {
 
         }
-        protected Registration(WorkLog workLog, Guid? activityId, string? description, RegistrationStatus status) : base()
+        protected Registration(Guid projectId,WorkLog workLog, Guid? activityId, string? description, RegistrationStatus status) : base()
         {
+            Guard.AgainstNull(projectId, nameof(projectId));
             Guard.AgainstNull(workLog, nameof(workLog));
-            WorkLogId = workLog.Id;
             EmployeeId = workLog.EmployeeId;
-            ProjectId = workLog.ProjectId;
+            WorkLogId = workLog.Id;
+            ProjectId = projectId;
             ProjectActivityId = activityId;
             if(description != null)
                 Description = description;
