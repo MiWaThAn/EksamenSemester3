@@ -13,5 +13,6 @@ namespace Domain.Interfaces.Repos
         Task<Account?> GetWithCompanyAsync(string username, CancellationToken cancellationToken = default);
         Task<Account?> GetWithEmployeeAsync(string username, CancellationToken cancellationToken = default);
         Task<Account?> GetWithEmployeeAndCompany(string username, CancellationToken cancellationToken = default);
+        Task<Account?> GetByEmployeeEmailAsync(string email, CancellationToken cancellationToken = default);
     }
 }

@@ -2,5 +2,5 @@
 
 namespace Application.Commands.Account
 {
-    public record ResetPasswordCommand(string Token, string NewPassword) : IRequest<bool>;
+    public record ResetPasswordCommand(string Email, string Token, string NewPassword) : IRequest<bool>;
 }

@@ -1,5 +1,6 @@
 ﻿@page "/auth/login"
 @using Shared.Person.Auth.Models.Login
+@using Shared.Model
 @using UI.Services.Auth
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
@@ -48,7 +49,7 @@
                 </div>
 
                 <div class="text-right mb-6">
-                    <button type="button" @onclick="() => _showForgotPassword = true" class="text-sm text-blue-600 hover:underline font-semibold">
+                    <button type="button" @onclick="PrepareForgotPassword" class="text-sm text-blue-600 hover:underline font-semibold">
                         Glemt adgangskode?
                     </button>
                 </div>
@@ -70,19 +71,13 @@
                 </div>
             </EditForm>
         }
-        else
+        @if (_showForgotPassword && !_isEmailSent)
         {
             <div class="text-center mb-8">
                 <h3 class="text-3xl font-bold text-gray-800">Nulstil kodeord</h3>
-                <p class="text-gray-500 text-sm mt-2">Indtast din e-mail, så sender vi dig et nulstillingslink, big boss!</p>
+                <p class="text-gray-500 text-sm mt-2">Indtast din e-mail, så sender vi dig en sikkerhedstoken</p>
             </div>
 
-            @if (!string.IsNullOrWhiteSpace(_successMessage))
-            {
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-sm" role="alert">
-                    <span>@_successMessage</span>
-                </div>
-            }
             @if (!string.IsNullOrWhiteSpace(_errorMessage))
             {
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm" role="alert">
@@ -106,13 +101,52 @@
                 else
                 {
                     <button @onclick="HandleForgotPasswordAsync" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition duration-200">
-                        Send nulstillingslink
+                        Anmod om token
                     </button>
                 }
-                <button @onclick="() => { _showForgotPassword = false; _errorMessage = null; _successMessage = null; }" class="text-sm text-gray-500 hover:underline text-center mt-2">
+                <button @onclick="ResetToLogin" class="text-sm text-gray-500 hover:underline text-center mt-2">
                     Tilbage til login
                 </button>
             </div>
+        }
+        @if (_showForgotPassword && _isEmailSent)
+        {
+            <div class="text-center mb-8">
+                <h3 class="text-3xl font-bold text-gray-800">Indtast Token</h3>
+                <p class="text-sm mt-2 text-green-600 font-semibold bg-green-50 p-3 rounded border border-green-200">
+                    Hvis du indsatte en valid email, vil du modtage en e-mail med en token om et øjeblik.
+                </p>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(_errorMessage))
+            {
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm" role="alert">
+                    <span>@_errorMessage</span>
+                </div>
+            }
+
+            <EditForm Model="@_resetPasswordModel" OnValidSubmit="HandleResetPasswordAsync">
+                <DataAnnotationsValidator />
+
+                <div class="mb-4">
+                    <label class="block font-semibold mb-1 text-gray-700">Sikkerhedstoken fra mail:</label>
+                    <InputText @bind-Value="_resetPasswordModel.Token" class="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none transition" placeholder="Indsæt token her..." />
+                </div>
+
+                <div class="mb-4">
+                    <label class="block font-semibold mb-1 text-gray-700">Nyt Kodeord:</label>
+                    <InputText @bind-Value="_resetPasswordModel.NewPassword" type="password" class="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none transition" placeholder="••••••••" />
+                </div>
+
+                <div class="flex flex-col gap-3 mt-6">
+                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded transition duration-200">
+                        Opdater kodeord
+                    </button>
+                    <button type="button" @onclick="ResetToLogin" class="text-sm text-gray-500 hover:underline text-center mt-2">
+                        Annuller og gå til login
+                    </button>
+                </div>
+            </EditForm>
         }
 
         <div class="text-center mt-6">
@@ -126,13 +160,30 @@
 
 @code {
     private LoginModel _loginModel = new();
+    private ResetPasswordModel _resetPasswordModel = new();
+
     private bool _isBusy = false;
     private string? _errorMessage;
-    private string? _successMessage;
 
-    // Nye states til glemt password, legend!
     private bool _showForgotPassword = false;
+    private bool _isEmailSent = false;
     private string _forgotPasswordEmail = string.Empty;
+
+    private void PrepareForgotPassword()
+    {
+        _showForgotPassword = true;
+        _isEmailSent = false;
+        _errorMessage = null;
+    }
+
+    private void ResetToLogin()
+    {
+        _showForgotPassword = false;
+        _isEmailSent = false;
+        _errorMessage = null;
+        _forgotPasswordEmail = string.Empty;
+        _resetPasswordModel = new ResetPasswordModel();
+    }
 
     private async Task HandleLoginAsync()
     {
@@ -184,28 +235,18 @@
     {
         if (string.IsNullOrWhiteSpace(_forgotPasswordEmail) || !_forgotPasswordEmail.Contains("@"))
         {
-            _errorMessage = "Indtast venligst en gyldig e-mail adresse, big boss.";
+            _errorMessage = "Indtast venligst en gyldig e-mail adresse.";
             return;
         }
 
         _isBusy = true;
         _errorMessage = null;
-        _successMessage = null;
 
         try
         {
-            // Vi skyder anmodningen afsted til vores nye backend endpoint
             var response = await Http.PostAsJsonAsync("api/account/forgot-password", new { Email = _forgotPasswordEmail });
-
-            if (response.IsSuccessStatusCode)
-            {
-                _successMessage = "Hvis e-mailen findes i vores system, har vi sendt et nulstillingslink afsted! Tjek jeres konsol/mail, legend!";
-                _forgotPasswordEmail = string.Empty;
-            }
-            else
-            {
-                _errorMessage = "Der skete en fejl under afsendelsen. Prøv igen.";
-            }
+            _isEmailSent = true;
+            _resetPasswordModel.Email = _forgotPasswordEmail;
         }
         catch (Exception)
         {
@@ -214,6 +255,30 @@
         finally
         {
             _isBusy = false;
+        }
+    }
+
+    private async Task HandleResetPasswordAsync()
+    {
+        _errorMessage = null;
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/account/reset-password", _resetPasswordModel);
+
+            if (response.IsSuccessStatusCode)
+            {
+                ResetToLogin();
+                _errorMessage = "Dit kodeord blev opdateret! Du kan nu logge ind";
+            }
+            else
+            {
+                _errorMessage = "Ugyldig eller forældet token. Prøv igen";
+            }
+        }
+        catch (Exception)
+        {
+            _errorMessage = "Kunne ikke forbinde til serveren.";
         }
     }
 }

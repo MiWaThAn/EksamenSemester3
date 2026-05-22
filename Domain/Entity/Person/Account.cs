@@ -38,8 +38,8 @@ namespace Domain.Entity.Person
         public bool IsEmployeeAccount => EmployeeId.HasValue;
 
         //Password Recovery
-        private string? RecorveryToken;
-        private DateTime? RecoveryExpiry;
+        public string? RecorveryToken { get; private set; }
+        public DateTime? RecoveryExpiry { get; private set; }
 
         //Last time the account pinged the server (last activity time)
         public DateTime LastLogin { get; internal set; } 

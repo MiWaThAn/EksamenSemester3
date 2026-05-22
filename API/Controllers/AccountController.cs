@@ -17,7 +17,7 @@ namespace API.Controllers
         }
 
         // GET: api/account/company-id/{accountId}
-        // Henter virksomhedens ID direkte fra kontoen, legend!
+        // Henter virksomhedens ID direkte fra kontoen
         [HttpGet("company-id/{accountId:guid}")]
         public async Task<IActionResult> GetCompanyIdFromAccount(Guid accountId)
         {
@@ -36,7 +36,7 @@ namespace API.Controllers
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
         {
             await _mediator.Send(command);
-            return Ok(); // Vi returnerer altid 200 OK af sikkerhedsmæssige årsager
+            return Ok();
         }
 
         // POST: api/account/reset-password

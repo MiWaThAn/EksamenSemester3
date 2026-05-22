@@ -592,6 +592,12 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("RecorveryToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RecoveryExpiry")
+                        .HasColumnType("datetime2");
+
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()

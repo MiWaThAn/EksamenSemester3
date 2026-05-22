@@ -1,6 +1,8 @@
 ﻿using Application.Commands.Account;
 using Application.Interfaces;
+using Application.Interfaces.Services;
 using MediatR;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,36 +12,27 @@ namespace Application.Commands.Account.Handlers
     internal class ForgotPasswordHandler : IRequestHandler<ForgotPasswordCommand>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IPasswordResetEmailService _emailService;
 
-        public ForgotPasswordHandler(IUnitOfWork uow)
+        public ForgotPasswordHandler(IUnitOfWork uow, IPasswordResetEmailService emailservice)
         {
             _unitOfWork = uow;
+            _emailService = emailservice;
         }
 
         public async Task Handle(ForgotPasswordCommand request, CancellationToken ct)
         {
-            // 1. Find medarbejderen på deres e-mail (Brug jeres rigtige repo-metode)
-            var employee = await _unitOfWork.Employees.GetByEmailAsync(request.Email);
+            var account = await _unitOfWork.Accounts.GetByEmployeeEmailAsync(request.Email);
 
-            if (employee == null || employee.Account == null)
-            {
-                return; 
-            }
+            if (account == null) return;
 
-            // 2. Generer token via jeres domænemetode på kontoen
-            var token = employee.Account.GeneratePasswordResetToken();
-
-            // 3. Gem token og udløb i databasen via UOW
+            string token = account.GeneratePasswordResetToken();
             await _unitOfWork.CompleteAsync();
 
-            // 4. Den simulerede e-mail logges i backenden
-            var resetLink = $"https://localhost:7193/auth/reset-password?token={token}";
+            await _emailService.SendPasswordResetEmailAsync(request.Email, token);
 
-            Console.WriteLine("====================================================");
-            Console.WriteLine($"SIMULERET EMAIL SENDT TIL: {request.Email}");
-            Console.WriteLine($"KLIK HER FOR AT NULSTILLE KODEORD, BIG BOSS:");
-            Console.WriteLine(resetLink);
-            Console.WriteLine("====================================================");
+            Console.WriteLine($"Mail sendt til: {account.Username}");
         }
+
     }
 }

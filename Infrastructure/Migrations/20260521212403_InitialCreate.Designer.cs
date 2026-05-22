@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260520143652_InitialCreate")]
+    [Migration("20260521212403_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -594,6 +594,12 @@ namespace Infrastructure.Migrations
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RecorveryToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RecoveryExpiry")
+                        .HasColumnType("datetime2");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()

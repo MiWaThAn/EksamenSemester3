@@ -22,6 +22,8 @@ namespace Infrastructure.Migrations
                     HashedPin = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CompanyId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     EmployeeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    RecorveryToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RecoveryExpiry = table.Column<DateTime>(type: "datetime2", nullable: true),
                     LastLogin = table.Column<DateTime>(type: "datetime2", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
