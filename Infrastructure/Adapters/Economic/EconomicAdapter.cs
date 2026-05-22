@@ -27,6 +27,7 @@ namespace Infrastructure.Adapters.Economic
                     "project" => MapProjects(json, entityType, companyId),
                     "customer" => MapCustomers(json, entityType, companyId),
                     "projectActivity" => MapProjectActivities(json, entityType, companyId),
+                    "activity" => MapActivities(json, entityType, companyId),
                     _ => throw new Exception(
                         $"Economic adapter does not support '{entityType}'.")
                 };
@@ -92,8 +93,8 @@ namespace Infrastructure.Adapters.Economic
             });
         }
         private IEnumerable<SyncEntity<ProjectActivityDTO>> MapProjectActivities(string json, IntegrationEntityType entityType, Guid companyId)
-        {             var response = JsonSerializer.Deserialize<ProjectActivityDTOResponse>(
-                json, _jsonOptions);
+        {             
+            var response = JsonSerializer.Deserialize<ProjectActivityDTOResponse>(json, _jsonOptions);
             return response!.Items.Select(dto => new SyncEntity<ProjectActivityDTO>
             {
                 ExternalId = dto.Number.ToString(),
@@ -112,6 +113,26 @@ namespace Infrastructure.Adapters.Economic
                 }
             });
         }
+        private IEnumerable<SyncEntity<ActivityDTO>> MapActivities(string json, IntegrationEntityType entityType, Guid companyId)
+        {
+            var response = JsonSerializer.Deserialize<ActivityDTOResponse>(json, _jsonOptions);
+            return response!.Items.Select(dto => new SyncEntity<ActivityDTO>
+            {
+                ExternalId = dto.Number.ToString(),
+                ObjectVersion = dto.ObjectVersion,
+                CompanyId = companyId,
+                ObjectType = entityType,
+                Data = new ActivityDTO
+                {
+                    Name = dto.Name,
+                    GroupNumber = dto.GroupNumber,
+                    IsBarred = dto.IsBarred,
+                    HideInSearch = dto.HideInSearch
+                }
+             });
+        }
+
+
 
 
     }
