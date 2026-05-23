@@ -2,7 +2,15 @@
 using Microsoft.Extensions.Logging;
 using UI.Services.Auth;
 using UI.Services.Theme;
+using Plugin.Firebase.CloudMessaging;
+using Microsoft.Maui.LifecycleEvents;
+using UI.Services.Auth.Registration;
 
+#if IOS
+using Plugin.Firebase.Core.Platforms.iOS;
+#elif ANDROID
+using Plugin.Firebase.Core.Platforms.Android;
+#endif
 namespace UI
 {
     public static class MauiProgram
@@ -20,10 +28,10 @@ namespace UI
 
 
 
-
+            builder.Services.AddScoped<PushRegistrationService>();
 
             builder.Services.AddScoped<IAuthService, AuthService>();
-            
+
 
             builder.Services.AddAuthorizationCore();
             builder.Services.AddSingleton<ThemeService>();
@@ -38,6 +46,34 @@ namespace UI
                     ? "https://10.0.2.2:7020/"
                     : "https://localhost:7020/";
             }
+            builder.Services.AddScoped(sp =>
+            {
+                HttpMessageHandler handler;
+
+#if ANDROID
+                // Til Android bruger vi den indfødte Java-handler og tvinger den til at godkende certifikatet
+                handler = new Xamarin.Android.Net.AndroidMessageHandler
+                {
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+                };
+#else
+                // Til Windows / browser (hvis du tester der) bruger vi standard handleren
+                handler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+                };
+#endif
+
+                var client = new HttpClient(handler)
+                {
+                    BaseAddress = new Uri(apiBaseUrl)
+                };
+
+                // Sørg for at Microsofts anti-phishing side ikke blokerer Android-appen
+                client.DefaultRequestHeaders.Add("X-Tunnel-Skip-Anti-Phishing-Page", "true");
+
+                return client;
+            });
             builder.Services.AddMauiBlazorWebView();
 
             builder.Services.AddScoped(sp =>
@@ -67,13 +103,32 @@ namespace UI
                 client.DefaultRequestHeaders.Add("X-Tunnel-Skip-Anti-Phishing-Page", "true");
 
                 return client;
+            builder.Services.AddScoped(sp => new HttpClient
+            {
+                BaseAddress = new Uri(apiBaseUrl)
             });
+            builder.RegisterFirebaseServices();
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
             return builder.Build();
+        }
+        private static MauiAppBuilder RegisterFirebaseServices(this MauiAppBuilder builder)
+        {
+            builder.ConfigureLifecycleEvents(events => {
+#if IOS
+            events.AddiOS(iOS => iOS.WillFinishLaunching((_,__) => {
+                CrossFirebase.Initialize();
+                return false;
+            }));
+#elif ANDROID
+                events.AddAndroid(android => android.OnCreate((activity, _) =>
+                    CrossFirebase.Initialize(activity, () => Platform.CurrentActivity)));
+#endif
+            });
+            return builder;
         }
     }
 }

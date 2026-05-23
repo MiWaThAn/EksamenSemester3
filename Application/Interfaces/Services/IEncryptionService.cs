@@ -6,6 +6,7 @@ namespace Application.Interfaces.Services
 {
     public interface IEncryptionService
     {
-        Task<string> Encrypt(string input);
+        string Encrypt(string input);
+        string Decrypt(string input);
     }
 }

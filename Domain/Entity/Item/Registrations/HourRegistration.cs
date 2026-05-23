@@ -16,7 +16,7 @@ namespace Domain.Entity.Item.Registrations
         {
 
         }
-        internal HourRegistration(WorkLog workLog, Guid? activityId, DateTime startTime, string description, RegistrationStatus status, TimeType type) : base(workLog, activityId, description, status)
+        internal HourRegistration(Guid ProjectId,WorkLog workLog, Guid? activityId, DateTime startTime, string description, RegistrationStatus status, TimeType type) : base(ProjectId, workLog, activityId, description, status)
         {
             StartTime = startTime;
             Type = type;

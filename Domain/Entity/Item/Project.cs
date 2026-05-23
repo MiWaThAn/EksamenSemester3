@@ -24,9 +24,11 @@ namespace Domain.Entity.Item
 
         private readonly List<ProjectActivity> _activities = new();
         public IReadOnlyCollection<ProjectActivity> Activities => _activities.Where(a => !a.IsDeleted).ToList().AsReadOnly();
-        private readonly List<WorkLog> _workLogs = new();
-        public IReadOnlyCollection<WorkLog> WorkLogs => _workLogs.Where(r => !r.IsDeleted).ToList().AsReadOnly();
-        
+        private readonly List<Registration> _registrations = new();
+        public IReadOnlyCollection<Registration> Registrations => _registrations.Where(r => !r.IsDeleted).ToList().AsReadOnly();
+        private readonly List<ProjectAssignment> _assignments = new();
+        public IReadOnlyCollection<ProjectAssignment> Assignments => _assignments.AsReadOnly();
+
         public Project() : base()
         {
         }
@@ -42,6 +44,23 @@ namespace Domain.Entity.Item
             Description = description;
             Status = status;
             Address = address;
+        }
+        public void AssignEmployee(Employee employee)
+        {
+            if (_assignments.Any(a => a.EmployeeId == employee.Id))
+                throw new InvalidOperationException("Medarbejderen er allerede tildelt dette projekt.");
+
+            _assignments.Add(new ProjectAssignment(this, employee));
+            UpdatedAt = DateTime.UtcNow;
+        }
+        public void UnAssignEmployee(Employee employee)
+        {
+            var assignment = _assignments.FirstOrDefault(a => a.EmployeeId == employee.Id);
+            if (assignment == null)
+                throw new InvalidOperationException("Medarbejderen er ikke tildelt dette projekt.");
+
+            _assignments.Remove(assignment);
+            UpdatedAt = DateTime.UtcNow;
         }
         public ProjectActivity CreateProjectActivity(ProjectActivityBuilder builder)
         {
@@ -73,10 +92,10 @@ namespace Domain.Entity.Item
             CustomerId = customer.Id;
             UpdatedAt = DateTime.UtcNow;
         }
-        public void AddWorkLog(WorkLog workLog)
+        public void AddRegistration(Registration registration)
         {
-            Guard.AgainstNull(workLog, nameof(workLog));
-            _workLogs.Add(workLog);
+            Guard.AgainstNull(registration, nameof(registration));
+            _registrations.Add(registration);
         }
         public void AddAddress(Address address)
         {
