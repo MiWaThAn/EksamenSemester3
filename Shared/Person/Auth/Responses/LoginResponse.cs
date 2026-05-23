@@ -8,5 +8,6 @@ namespace Shared.Person.Auth.Responses
     {
         public string? Token { get; set; }
         public string? Username { get; set; }
+        public Guid AccountId { get; set; } = Guid.Empty;
     }
 }

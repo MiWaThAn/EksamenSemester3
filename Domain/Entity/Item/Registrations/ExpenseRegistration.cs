@@ -14,7 +14,7 @@ namespace Domain.Entity.Item.Registrations
         {
 
         }
-        internal ExpenseRegistration(WorkLog workLog, Guid? activityId, Guid expenseId, string description, RegistrationStatus status) : base(workLog, activityId, description, status)
+        internal ExpenseRegistration(Guid ProjectId,WorkLog workLog, Guid? activityId, Guid expenseId, string description, RegistrationStatus status) : base(ProjectId, workLog, activityId, description, status)
         {
             Guard.AgainstEmptyGuid(expenseId, nameof(expenseId));
             ExpenseId = expenseId;

@@ -1,4 +1,4 @@
-﻿@using UI.Services.Auth
+﻿﻿@using UI.Services.Auth
 @inherits LayoutComponentBase
 @inject IAuthService AuthService
 @inject NavigationManager Nav
@@ -24,8 +24,6 @@
     {
         ThemeService.OnThemeChanged += StateHasChanged;
         var currentUri = Nav.ToBaseRelativePath(Nav.Uri).ToLower();
-
-        // Hvis vi allerede står på en auth-side, skal vi ikke køre tjekket (forhindrer uendeligt loop)
         if (currentUri.StartsWith("auth/"))
         {
             return;

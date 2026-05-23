@@ -36,6 +36,7 @@ namespace Infrastructure.Data
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<Permission> Permissions { get; set; }
+        public DbSet<DeviceToken> DeviceTokens { get; set; }
 
         //Item
         public DbSet<Project> Projects { get; set; }
@@ -70,9 +71,9 @@ namespace Infrastructure.Data
                       .IsRequired(false)
                       .OnDelete(DeleteBehavior.NoAction);
             });
-            modelBuilder.Entity<WorkLog>()
+            modelBuilder.Entity<Registration>()
                 .HasOne<Project>()
-      .WithMany(p => p.WorkLogs)
+      .WithMany(p => p.Registrations)
       .HasForeignKey(r => r.ProjectId)
       .OnDelete(DeleteBehavior.NoAction);
             modelBuilder.Entity<WorkLog>().HasOne<Employee>()
@@ -81,8 +82,8 @@ namespace Infrastructure.Data
       .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Project>()
-                  .Navigation(p => p.WorkLogs)
-                  .HasField("_workLogs")
+                  .Navigation(p => p.Registrations)
+                  .HasField("_registrations")
                   .UsePropertyAccessMode(PropertyAccessMode.Field);
 
             modelBuilder.Entity<ProjectActivity>()
@@ -90,7 +91,26 @@ namespace Infrastructure.Data
                   .HasField("_registrations")
                   .UsePropertyAccessMode(PropertyAccessMode.Field);
 
+            modelBuilder.Entity<Project>()
+      .Navigation(p => p.Assignments)
+      .HasField("_assignments")
+      .UsePropertyAccessMode(PropertyAccessMode.Field);
+            modelBuilder.Entity<ProjectAssignment>(entity =>
+            {
+                entity.HasOne<Employee>()
+                      .WithMany(e=>e.Assignments) 
+                      .HasForeignKey(a => a.EmployeeId)
+                      .OnDelete(DeleteBehavior.Cascade);
 
+                entity.HasOne<Project>()
+                      .WithMany(p => p.Assignments)
+                      .HasForeignKey(a => a.ProjectId)
+                      .OnDelete(DeleteBehavior.Restrict); 
+            });
+            modelBuilder.Entity<Employee>()
+      .Navigation(p => p.Assignments)
+      .HasField("_assignments")
+      .UsePropertyAccessMode(PropertyAccessMode.Field);
             modelBuilder.Entity<Company>(entity =>
             {
                 entity.Property(c => c.CVRNumber)
@@ -208,7 +228,10 @@ namespace Infrastructure.Data
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-
+            modelBuilder.Entity<Account>()
+            .Navigation(pa => pa.DeviceTokens)
+            .HasField("_deviceTokens")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
             modelBuilder.Entity<SelectedEntityType>(entity =>
             {

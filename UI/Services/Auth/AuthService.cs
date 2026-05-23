@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
+using UI.Services.Auth.Registration;
 
 namespace UI.Services.Auth
 {
@@ -18,11 +19,13 @@ namespace UI.Services.Auth
         private readonly HttpClient _http;
         private readonly JwtAuthStateProvider _authStateProvider;
         private readonly ISecureStorage _secureStorage;
-        public AuthService(HttpClient httpClient, JwtAuthStateProvider authStateProvider,ISecureStorage secureStorage)
+        private readonly PushRegistrationService _pushRegistrationService;
+        public AuthService(HttpClient httpClient, JwtAuthStateProvider authStateProvider,ISecureStorage secureStorage, PushRegistrationService pushRegistrationService)
         {
             _http = httpClient;
             _authStateProvider = authStateProvider;
             _secureStorage = secureStorage;
+            _pushRegistrationService = pushRegistrationService;
         }
 
         /// <summary>
@@ -115,6 +118,15 @@ namespace UI.Services.Auth
 
                         _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", result.Token);
                         _authStateProvider.NotifyLogin(result.Token);
+                        try
+                        {
+                            if(result.AccountId != Guid.Empty)
+                                await _pushRegistrationService.RegisterDeviceAsync(result.AccountId);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Push-registrering fejlede i baggrunden: {ex.Message}");
+                        }
                         return result;
                     }
                 }
@@ -170,6 +182,19 @@ namespace UI.Services.Auth
 
                 _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 _authStateProvider.NotifyLogin(token);
+                try
+                {
+                    var accountId = GetUserId(token);
+                    if (Guid.TryParse(accountId, out Guid userGuid) && userGuid != Guid.Empty)
+                    {
+                        if (userGuid != Guid.Empty)
+                            await _pushRegistrationService.RegisterDeviceAsync(userGuid,ct);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Push-registrering fejlede i baggrunden: {ex.Message}");
+                }
                 return new LoginResponse { Success = true, Token = token };
             }
             catch (Exception)

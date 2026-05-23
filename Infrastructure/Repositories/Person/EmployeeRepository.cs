@@ -27,11 +27,7 @@ namespace Infrastructure.Repositories.Person
             return await _context.Employees
                 .Where(e => _context.Projects.Any(p => p.Id == projectId && (
                     p.ResponsibleEmployeeId == e.Id ||
-                    p.WorkLogs.Any(wl => wl.EmployeeId == e.Id) ||
-                    p.WorkLogs.Any(wl => wl.Registrations.Any(r => r.EmployeeId == e.Id)) ||
-                    p.Activities.Any(a => a.ResponsibleEmployeeId == e.Id) ||
-                    p.Activities.Any(a => a.Registrations.Any(r => r.EmployeeId == e.Id))
-                )))
+                    p.Assignments.Any(a => a.EmployeeId == e.Id))))
                 .ToListAsync();
         }
 
