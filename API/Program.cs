@@ -82,7 +82,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ClockSkew = TimeSpan.Zero
         };
     });
-
+string base64Key = builder.Configuration["EncryptionSettings:Key"]
+    ?? throw new InvalidOperationException("Encryption key is missing!");
+byte[] encryptionKey = Convert.FromBase64String(base64Key);
+builder.Services.AddSingleton<IEncryptionService>(new EncryptionService(encryptionKey));
 builder.Services.AddAuthorization();
 
 
