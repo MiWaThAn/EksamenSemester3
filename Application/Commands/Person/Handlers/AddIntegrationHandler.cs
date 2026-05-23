@@ -40,7 +40,7 @@ namespace Application.Commands.Person.Handlers
             company.CreateIntegrationSetting(new IntegrationSettingBuilder()
                 .WithProvider(provider)
                 .WithKey(request.Key)
-                .WithEncryptedValue(await _encryption.Encrypt(request.Value))
+                .WithEncryptedValue(_encryption.Encrypt(request.Value))
                 .WithIntegrationEntityTypes(entityTypes));
 
             await _unitOfWork.CommitTransactionAsync();

@@ -23,7 +23,7 @@ namespace Domain.Builders.Item.Registration
         }
         internal override HourRegistration Build()
         {
-            return new HourRegistration(WorkLog,ActivityId, Start, Description, Status,TimeType);
+            return new HourRegistration(ProjectId,WorkLog,ActivityId, Start, Description, Status,TimeType);
         }
     }
 }

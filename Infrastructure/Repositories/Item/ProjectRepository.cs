@@ -35,18 +35,14 @@ namespace Infrastructure.Repositories.Item
         public async Task<IEnumerable<Project>> GetProjectsRelatedToEmployeeAsync(Guid employeeId, CancellationToken cancellationToken = default)
         {
             return await _context.Projects
-                .Where(p => p.ResponsibleEmployeeId == employeeId ||
-                            p.WorkLogs.Any(r => r.EmployeeId == employeeId) ||
-                            p.WorkLogs.Any(r => r.Registrations.Any(r=>r.EmployeeId == employeeId)) ||
-                            p.Activities.Any(a => a.ResponsibleEmployeeId == employeeId) ||
-                            p.Activities.Any(a => a.Registrations.Any(r => r.EmployeeId == employeeId)))
+                .Where(p=>p.Assignments.Any(a=>a.EmployeeId == employeeId))
                 .ToListAsync(cancellationToken);
         }
         public async Task<Project?> GetByIdWithDetailsAsync(Guid projectId, CancellationToken cancellationToken = default)
         {
             return await _context.Projects
                 .Include(p => p.Activities)
-                .Include(p => p.WorkLogs)
+                .Include(p => p.Registrations)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(p => p.Id == projectId,cancellationToken);
         }

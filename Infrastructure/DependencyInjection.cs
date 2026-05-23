@@ -74,7 +74,6 @@ namespace Infrastructure
         //SERVICES
             services.AddScoped<IPasswordHasher<Account>, PasswordHasher<Account>>();
             services.AddScoped<IHashingService, HashingService>();
-            services.AddScoped<IEncryptionService, EncryptionService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IExternalAPIService, ExternalAPIService>();
             services.AddScoped<IProviderAdapter, EconomicAdapter>();

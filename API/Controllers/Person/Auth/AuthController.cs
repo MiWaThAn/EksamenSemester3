@@ -1,8 +1,10 @@
-﻿using Application.Commands.Person;
+﻿using Application.Commands.Notification;
+using Application.Commands.Person;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Shared.Item;
 using Shared.Person.Auth.Commands;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
@@ -92,6 +94,13 @@ namespace API.Controllers.Person.Auth
                 return Unauthorized(new ProblemDetails { Detail = result.Message });
             }
             return Ok(result);
+        }
+        [HttpPost("register-token")]
+        public async Task<IActionResult> RegisterToken([FromBody] RegisterTokenDto request)
+        {
+            // Send a command to the Application layer to save this token to the user's profile
+            await mediator.Send(new RegisterDeviceTokenCommand(request.UserId, request.Token));
+            return Ok();
         }
     }
 }
