@@ -47,7 +47,7 @@ namespace API.Controllers
 
             if (!result)
             {
-                return BadRequest("Ugyldig eller udløbet token, legend.");
+                return BadRequest("Ugyldig eller udløbet token.");
             }
 
             return Ok();
