@@ -42,7 +42,7 @@ namespace Application.Services
            
             foreach (var setting in company.Settings)
             {
-                foreach (var entityType in setting.EntityTypes)
+                foreach (var entityType in setting.EntityTypes.OrderBy(selEn => selEn.EntityType.SyncPriority))
                 {
                     var providerUrl = setting.Provider.Urls
             .FirstOrDefault(u => u.EntityType == entityType.EntityType);

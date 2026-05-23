@@ -1,6 +1,8 @@
 ﻿using Application.Interfaces.Data;
+using Application.Interfaces.Services;
 using Domain.Entity.Mapping;
 using Domain.Entity.Mapping.ValueObjects;
+using Infrastructure.Service.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 using System;
@@ -14,22 +16,24 @@ namespace Infrastructure.Service
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _configuration;
-        public ExternalAPIService(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+        private readonly IEncryptionService _encryptionService;
+        public ExternalAPIService(IHttpClientFactory httpClientFactory, IConfiguration configuration, IEncryptionService encryptionService)
         {
             _httpClientFactory = httpClientFactory;
             _configuration = configuration;
+            _encryptionService = encryptionService;
         }
-
 
 
         public async Task<string> FetchFromAPI(string url, IntegrationCredential credential)
         {
             var client = _httpClientFactory.CreateClient();
 
+            var decryptedValue = await _encryptionService.UnEncrypt(credential.EncryptedValue);
+
             var appSecret = _configuration["ExternalProviders:Economic:X-AppSecretToken"];
             client.DefaultRequestHeaders.Add($"X-AppSecretToken", appSecret);
-            client.DefaultRequestHeaders.Add($"{credential.Key}", credential.Value);
-
+            client.DefaultRequestHeaders.Add($"{credential.Key}", decryptedValue);
 
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var response = await client.GetAsync(url);

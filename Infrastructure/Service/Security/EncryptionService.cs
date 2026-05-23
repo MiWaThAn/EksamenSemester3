@@ -11,5 +11,9 @@ namespace Infrastructure.Service.Security
         {
             throw new NotImplementedException();
         }
+        Task<string> IEncryptionService.UnEncrypt(string input)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

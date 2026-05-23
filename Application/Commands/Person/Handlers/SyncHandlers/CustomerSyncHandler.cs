@@ -72,7 +72,7 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
                      project?.LinkToCustomer(customer);
                 }
 
-                await _unitOfWork.Customers.AddAsync(customer);
+              
 
 
 
@@ -81,8 +81,9 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
                     .WithEntityType(entityType)
                     .WithExternalId(syncEntity.ExternalId)
                     .WithObjectVersion(syncEntity.ObjectVersion));
-
-            await _unitOfWork.CommitTransactionAsync();
+                await _unitOfWork.Customers.AddAsync(customer);
+                await _unitOfWork.CompleteAsync();
+                await _unitOfWork.CommitTransactionAsync();
             }
             catch
             {
@@ -117,6 +118,7 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
 
                 
                 mapping.UpdateObjectVersion(syncEntity.ObjectVersion);
+                await _unitOfWork.CompleteAsync();
                 await _unitOfWork.CommitTransactionAsync();
             }
             catch

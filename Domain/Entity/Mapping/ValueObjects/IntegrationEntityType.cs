@@ -8,14 +8,18 @@ namespace Domain.Entity.Mapping.ValueObjects
     public sealed record IntegrationEntityType
     {
         public string Value { get; }
+        public int SyncPriority { get; init; }
 
-        
-        private IntegrationEntityType(string value) => Value = value;
+        private IntegrationEntityType(string value, int syncPriority)
+        {
+            Value = value;
+            SyncPriority = syncPriority;
+        }
 
-        public static IntegrationEntityType From(string value)
+        public static IntegrationEntityType From(string value, int syncPriority = 0)
         {
             Guard.AgainstNullOrEmpty(value, nameof(value));
-            return new IntegrationEntityType(value.Trim().ToLowerInvariant());
+            return new IntegrationEntityType(value.Trim().ToLowerInvariant(), syncPriority);
         }
 
         public override string ToString() => Value;

@@ -69,7 +69,8 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
                     .WithEntityType(entityType)
                     .WithExternalId(syncEntity.ExternalId)
                     .WithObjectVersion(syncEntity.ObjectVersion));
-
+                await _unitOfWork.Activities.AddAsync(activity);
+                await _unitOfWork.CompleteAsync();
                 await _unitOfWork.CommitTransactionAsync();
 
             }
@@ -111,6 +112,8 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
                     mapping.UpdateExternalId(syncEntity.ExternalId);
                 }
                 mapping.UpdateObjectVersion(syncEntity.ObjectVersion);
+               
+                await _unitOfWork.CompleteAsync();
                 await _unitOfWork.CommitTransactionAsync();
             }
             catch

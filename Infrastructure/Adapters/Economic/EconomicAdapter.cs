@@ -11,27 +11,28 @@ namespace Infrastructure.Adapters.Economic
 {
     public class EconomicAdapter : IProviderAdapter
     {
-        
-        
-            public bool Supports(DataSource datasource) => datasource.Value == "economic";
 
 
-            public IEnumerable<ISyncEntity> Map(
-                string json,
-                IntegrationEntityType entityType,
-                Guid companyId)
+        public bool Supports(DataSource datasource) => datasource.Value == "economic";
+
+
+        public IEnumerable<ISyncEntity> Map(
+            string json,
+            IntegrationEntityType entityType,
+            Guid companyId)
+        {
+            return entityType.Value switch
             {
-                return entityType.Value switch
-                {
-                    "employee" => MapEmployees(json, entityType, companyId),
-                    "project" => MapProjects(json, entityType, companyId),
-                    "customer" => MapCustomers(json, entityType, companyId),
-                    "projectActivity" => MapProjectActivities(json, entityType, companyId),
-                    "activity" => MapActivities(json, entityType, companyId),
-                    _ => throw new Exception(
-                        $"Economic adapter does not support '{entityType}'.")
-                };
-            }
+                "employee" => MapEmployees(json, entityType, companyId),
+                "project" => MapProjects(json, entityType, companyId),
+                "customer" => MapCustomers(json, entityType, companyId),
+                "projectActivity" => MapProjectActivities(json, entityType, companyId),
+                "activity" => MapActivities(json, entityType, companyId),
+                "expense" => MapExpenses(json, entityType, companyId),
+                _ => throw new Exception(
+                    $"Economic adapter does not support '{entityType}'.")
+            };
+        }
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
             PropertyNameCaseInsensitive = true
@@ -93,7 +94,7 @@ namespace Infrastructure.Adapters.Economic
             });
         }
         private IEnumerable<SyncEntity<ProjectActivityDTO>> MapProjectActivities(string json, IntegrationEntityType entityType, Guid companyId)
-        {             
+        {
             var response = JsonSerializer.Deserialize<ProjectActivityDTOResponse>(json, _jsonOptions);
             return response!.Items.Select(dto => new SyncEntity<ProjectActivityDTO>
             {
@@ -103,7 +104,7 @@ namespace Infrastructure.Adapters.Economic
                 ObjectType = entityType,
                 Data = new ProjectActivityDTO
                 {
-                    
+
                     ProjectExternalId = dto.ProjectExternalId,
                     ActivityExternalId = dto.ActivityExternalId,
                     StartDate = dto.StartDate,
@@ -129,12 +130,28 @@ namespace Infrastructure.Adapters.Economic
                     IsBarred = dto.IsBarred,
                     HideInSearch = dto.HideInSearch
                 }
-             });
+            });
         }
 
+        private IEnumerable<SyncEntity<ExpenseDTO>> MapExpenses(string json, IntegrationEntityType entityType, Guid companyId)
+        {
+            var response = JsonSerializer.Deserialize<ExpenseDTOResponse>(json, _jsonOptions);
+            return response!.Items.Select(dto => new SyncEntity<ExpenseDTO>
+            {
+                ExternalId = dto.Number.ToString(),
+                ObjectVersion = dto.ObjectVersion,
+                CompanyId = companyId,
+                ObjectType = entityType,
+                Data = new ExpenseDTO
+                {
+                    Name = dto.Name,
+                    IsBarred = dto.IsBarred,
+                }
+            });
 
 
 
+        }
     }
 }
 

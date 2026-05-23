@@ -64,7 +64,7 @@ builder.Services.AddScoped<IEntitySyncHandler, EmployeeSyncHandler>();
 builder.Services.AddScoped<IEntitySyncHandler, ProjectSyncHandler>();
 builder.Services.AddScoped<IEntitySyncHandler, ProjectActivitySyncHandler>();
 builder.Services.AddScoped<IEntitySyncHandler, ActivitySyncHandler>();
-
+builder.Services.AddScoped<IEntitySyncHandler, ExpenseSyncHandler>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails(); // Giver flottere standard-fejlformater
 
