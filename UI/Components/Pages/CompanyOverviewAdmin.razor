@@ -135,8 +135,8 @@
         }
         catch (Exception ex)
         {
-            var denReelleFejl = ex.InnerException ?? ex;
-            errorString = $"Fejl under initialisering: {denReelleFejl.Message}";
+            var errorHandler = ex.InnerException ?? ex;
+            errorString = $"Fejl under initialisering: {errorHandler.Message}";
             Console.WriteLine(errorString);
         }
     }
@@ -151,8 +151,8 @@
         }
         catch (Exception ex)
         {
-            var denReelleFejl = ex.InnerException ?? ex;
-            errorString = $"Fejl ved hentning af medarbejdere: {denReelleFejl.Message}";
+            var errorHandler = ex.InnerException ?? ex;
+            errorString = $"Fejl ved hentning af medarbejdere: {errorHandler.Message}";
             Console.WriteLine(errorString);
         }
     }
@@ -167,8 +167,8 @@
         }
         catch (Exception ex)
         {
-            var denReelleFejl = ex.InnerException ?? ex;
-            errorString = $"Fejl ved hentning af projekter: {denReelleFejl.Message}";
+            var errorHandler = ex.InnerException ?? ex;
+            errorString = $"Fejl ved hentning af projekter: {errorHandler.Message}";
             Console.WriteLine(errorString);
         }
     }

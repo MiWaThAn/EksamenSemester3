@@ -19,7 +19,6 @@ namespace API.Controllers
         [HttpGet("company/{companyId}")]
         public async Task<IActionResult> GetCompanyProjects(Guid companyId)
         {
-            // Vi sender vores query afsted ind i MediatR-systemet, som automatisk finder vores Handler!
             var result = await _mediator.Send(new GetProjectsByCompanyQuery(companyId));
 
             return Ok(result);
@@ -33,7 +32,7 @@ namespace API.Controllers
 
             if (result == null)
             {
-                return NotFound($"Kunne ikke finde projektet med ID: {id}, big boss.");
+                return NotFound($"Kunne ikke finde projektet med ID: {id}");
             }
 
             return Ok(result);
