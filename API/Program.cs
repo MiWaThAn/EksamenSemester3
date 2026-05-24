@@ -18,7 +18,9 @@ using Application.Services;
 using Domain.Entity.Person;
 using Domain.Interfaces;
 using Domain.Interfaces.Item;
+using Domain.Interfaces.Mapping;
 using Domain.Interfaces.Person;
+using Domain.Services.Mapping;
 using Domain.Services.Person;
 using Infrastructure;
 using Infrastructure.Adapters;
@@ -49,7 +51,7 @@ builder.Services.AddTransient<IAccountValidationService, AccountValidationServic
 builder.Services.AddTransient<IRegistrationDomainService, RegistrationDomainService>();
 builder.Services.AddTransient<IAccountFactory, AccountFactory>();
 builder.Services.AddTransient<ICompanyFactory, CompanyFactory>();
-
+builder.Services.AddTransient<IProviderFactory, ProviderFactory>();
 //INFRASTRUCTURE
 var connectionstring = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddInfrastructure(connectionstring); //FROM DEPENDENCY INJECTION IN INFRASTRUCTURE
@@ -127,7 +129,8 @@ using (var scope = app.Services.CreateScope())
         var context = services.GetRequiredService<AppDbContext>();
         var hashing = services.GetRequiredService<IHashingService>();
         var registration = services.GetRequiredService<IRegistrationDomainService>();
-        await DataSeeder.SeedAsync(context, registration,hashing);
+        var providerFactory = services.GetRequiredService<IProviderFactory>();
+        await DataSeeder.SeedAsync(context, registration, hashing, providerFactory);
     }
     catch (Exception ex)
     {

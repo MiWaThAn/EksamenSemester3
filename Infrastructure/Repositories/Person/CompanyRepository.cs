@@ -74,6 +74,11 @@ namespace Infrastructure.Repositories.Person
             .AsSplitQuery()
             .ToListAsync();
         }
-
+        public async Task<Company?> GetByAccountIdAsync(Guid accountId)
+        {
+            return await _context.Companies
+                .Include(c => c.Settings) 
+                .FirstOrDefaultAsync(c => c.AccountId == accountId);
+        }
     }
 }
