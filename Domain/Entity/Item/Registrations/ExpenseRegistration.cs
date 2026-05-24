@@ -29,6 +29,7 @@ namespace Domain.Entity.Item.Registrations
             Guard.AgainstEmptyGuid(newExpenseId, nameof(newExpenseId));
             ExpenseId = newExpenseId;
             UpdatedAt = DateTime.UtcNow;
+            MarkAsPending();
         }
     }
 }

@@ -30,7 +30,6 @@ namespace Infrastructure.Repositories.Person
                     p.Assignments.Any(a => a.EmployeeId == e.Id))))
                 .ToListAsync();
         }
-
         public async Task<Employee?> GetByIdWithAccountAsync(Guid employeeId)
         {
             return await _context.Employees
