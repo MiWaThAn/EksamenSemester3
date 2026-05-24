@@ -57,7 +57,7 @@ builder.Services.AddScoped<IHandlerRegistry, HandlerRegistry>();
 builder.Services.AddScoped<IEntitySyncHandler, CustomerSyncHandler>();
 builder.Services.AddScoped<IEntitySyncHandler, EmployeeSyncHandler>();
 builder.Services.AddScoped<IEntitySyncHandler, ProjectSyncHandler>();
-
+builder.Services.AddScoped<IPasswordResetEmailService, PasswordResetEmailService>();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails(); // Giver flottere standard-fejlformater

@@ -35,7 +35,7 @@ namespace API.Controllers
 
             if (result == null)
             {
-                return NotFound($"Kunne ikke finde medarbejderen, legend.");
+                return NotFound($"Kunne ikke finde medarbejderen.");
             }
 
             return Ok(result);
@@ -72,7 +72,7 @@ namespace API.Controllers
         {
             if (model == null || id != model.Id)
             {
-                return BadRequest("Data-mismatch eller manglende body, big boss.");
+                return BadRequest("Data-mismatch eller manglende body");
             }
 
             var command = new UpdateEmployeeDetailsCommand(

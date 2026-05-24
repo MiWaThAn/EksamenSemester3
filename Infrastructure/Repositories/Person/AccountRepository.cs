@@ -32,8 +32,17 @@ namespace Infrastructure.Repositories.Person
         {
             return await _context.Accounts.Include(a => a.Employee).Include(a => a.Company).FirstOrDefaultAsync(a => a.Username == username, cancellationToken);
         }
-       
+        public async Task<Account?> GetByEmployeeEmailAsync(string email, CancellationToken cancellationToken = default)
+        {
+            var formattedEmail = email.ToLower().Trim();
 
+            return _context.Accounts
+                .Include(a => a.Employee)
+                .AsEnumerable()
+                .FirstOrDefault(a => a.Employee != null &&
+                                     a.Employee.Email != null &&
+                                     a.Employee.Email.Value == formattedEmail);
+        }
 
     }
 }
