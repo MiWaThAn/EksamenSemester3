@@ -95,6 +95,7 @@
 
     private string? loggedInUserId;
     private string? dynamicCompanyId;
+    [Inject] private JwtAuthStateProvider AuthStateProvider { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -107,6 +108,20 @@
             if (string.IsNullOrWhiteSpace(token))
             {
                 errorString = "Ingen aktiv session fundet. Prøv at logge ind igen.";
+                return;
+            }
+
+            var claims = AuthStateProvider.ParseClaimsFromJwt(token);
+
+            bool isSystemAdmin = claims.Any(c => c.Type == "permission" && c.Value.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+                                 || claims.Any(c => c.Type == "role" && c.Value.Equals("Admin", StringComparison.OrdinalIgnoreCase));
+
+            var employeeIdClaim = claims.FirstOrDefault(c => c.Type == "employee_id")?.Value;
+            bool isEmployee = !string.IsNullOrWhiteSpace(employeeIdClaim) && Guid.TryParse(employeeIdClaim, out _);
+
+            if (!isSystemAdmin && isEmployee)
+            {
+                errorString = "Adgang nægtet: Denne sektion er forbeholdt virksomhedens ejer eller en administrator.";
                 return;
             }
 
@@ -143,10 +158,9 @@
 
     private async Task LoadEmployeeData()
     {
-        if (string.IsNullOrEmpty(dynamicCompanyId)) return;
+        if (string.IsNullOrEmpty(dynamicCompanyId) || !string.IsNullOrEmpty(errorString)) return;
         try
         {
-            errorString = null;
             employees = await Http.GetFromJsonAsync<List<CompanyEmployeeModel>>($"api/employee/company/{dynamicCompanyId}");
         }
         catch (Exception ex)
@@ -159,10 +173,9 @@
 
     private async Task LoadProjectData()
     {
-        if (string.IsNullOrEmpty(dynamicCompanyId)) return;
+        if (string.IsNullOrEmpty(dynamicCompanyId) || !string.IsNullOrEmpty(errorString)) return;
         try
         {
-            errorString = null;
             projects = await Http.GetFromJsonAsync<List<CompanyProjectModel>>($"api/project/company/{dynamicCompanyId}");
         }
         catch (Exception ex)
@@ -175,6 +188,8 @@
 
     private async Task SwitchTab(string tabName)
     {
+        if (!string.IsNullOrEmpty(errorString)) return;
+
         activeTab = tabName;
 
         if (activeTab == "employees")

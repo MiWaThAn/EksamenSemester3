@@ -42,9 +42,10 @@ namespace Infrastructure.Repositories.Item
         {
             return await _context.Projects
                 .Include(p => p.Activities)
+                    .ThenInclude(pa => pa.Activity)
                 .Include(p => p.Registrations)
                 .AsSplitQuery()
-                .FirstOrDefaultAsync(p => p.Id == projectId,cancellationToken);
+                .FirstOrDefaultAsync(p => p.Id == projectId, cancellationToken);
         }
     }
 }

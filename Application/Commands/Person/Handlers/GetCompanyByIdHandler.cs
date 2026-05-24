@@ -9,7 +9,7 @@ using System.Text;
 
 namespace Application.Commands.Person.Handlers
 {
-    internal class GetCompanyByIdHandler : IRequestHandler<GetCompanyByIdQuery, CompanyDTO>
+    public class GetCompanyByIdHandler : IRequestHandler<GetCompanyByIdQuery, CompanyDTO>
     {
         private readonly IUnitOfWork _uow;
 

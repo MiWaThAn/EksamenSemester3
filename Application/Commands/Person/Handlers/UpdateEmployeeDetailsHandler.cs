@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Application.Commands.Person.Handlers
 {
-    internal class UpdateEmployeeDetailsHandler : IRequestHandler<UpdateEmployeeDetailsCommand, bool>
+    public class UpdateEmployeeDetailsHandler : IRequestHandler<UpdateEmployeeDetailsCommand, bool>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -33,7 +33,7 @@ namespace Application.Commands.Person.Handlers
                 employee.Account.UpdatePhoneNumber(new PhoneNumber(request.MobileNumber));
             }
 
-            await _unitOfWork.CompleteAsync();
+            await _unitOfWork.CompleteAsync(); 
 
             return true;
         }

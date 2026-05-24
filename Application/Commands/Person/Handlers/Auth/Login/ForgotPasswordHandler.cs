@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Application.Commands.Account.Handlers
 {
-    internal class ForgotPasswordHandler : IRequestHandler<ForgotPasswordCommand>
+    public class ForgotPasswordHandler : IRequestHandler<ForgotPasswordCommand>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPasswordResetEmailService _emailService;

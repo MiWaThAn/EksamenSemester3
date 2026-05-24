@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Application.Commands.Account.Handlers
 {
-    internal class ResetPasswordHandler : IRequestHandler<ResetPasswordCommand, bool>
+    public class ResetPasswordHandler : IRequestHandler<ResetPasswordCommand, bool>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHashingService _hashingService;
