@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Domain.Entity.Item.Registrations
 {
-    [ComplexTypeAttribute()]
+    [ComplexType]
     public class TimeInterval
     {
         public Guid Id { get; private set; }

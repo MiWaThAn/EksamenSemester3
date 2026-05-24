@@ -52,7 +52,6 @@ namespace Infrastructure.Data
         //Registrations
         public DbSet<HourRegistration> HourRegistrations { get; set; }
         public DbSet<ExpenseRegistration> ExpenseRegistrations { get; set; }
-        public DbSet<TimeInterval> TimeIntervals { get; set; }
         public DbSet<WorkLog> WorkLogs { get; set; }
 
 

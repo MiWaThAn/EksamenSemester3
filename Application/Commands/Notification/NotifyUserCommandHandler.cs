@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 
 namespace Application.Commands.Notification
 {
-    // 1. Husk MediatR interfacet
     public class NotifyUserCommandHandler : IRequestHandler<NotifyUserCommand>
     {
         private readonly IPushNotificationService _pushService;
@@ -22,15 +21,13 @@ namespace Application.Commands.Notification
 
         public async Task Handle(NotifyUserCommand request, CancellationToken cancellationToken)
         {
-            // 2. Husk cancellationToken
             var user = await _unitOfWork.Accounts.GetByIdAsync(request.AccountId, cancellationToken);
 
             if (user == null || !user.DeviceTokens.Any())
             {
-                return; // Ingenting at gøre
+                return;
             }
 
-            // 3. Kør alle netværkskald parallelt og fang fejl på individuelle tokens
             var pushTasks = user.DeviceTokens.Select(async token =>
             {
                 try
@@ -39,8 +36,6 @@ namespace Application.Commands.Notification
                 }
                 catch (Exception ex)
                 {
-                    // TODO: Log fejlen (f.eks. "Kunne ikke sende til token X for bruger Y")
-                    // Vi kaster IKKE fejlen videre, for så stopper de andre notifikationer
                 }
             });
 
