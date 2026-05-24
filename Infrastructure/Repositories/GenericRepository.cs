@@ -38,5 +38,13 @@ namespace Infrastructure.Repositories
         {
             return _context.Set<T>().AsNoTracking();
         }
+        public void DeleteByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            var entity = _context.Set<T>().Find(id);
+            if (entity != null)
+            {
+                _context.Set<T>().Remove(entity);
+            }
+        }
     }
 }

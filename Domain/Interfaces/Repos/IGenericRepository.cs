@@ -12,5 +12,6 @@ namespace Domain.Interfaces.Repos
         Task AddAsync(T entity, CancellationToken cancellationToken = default);
         Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, CancellationToken ct = default);
         IQueryable<T> GetQueryable();
+        void DeleteByIdAsync(Guid id, CancellationToken cancellationToken = default);
     }
 }

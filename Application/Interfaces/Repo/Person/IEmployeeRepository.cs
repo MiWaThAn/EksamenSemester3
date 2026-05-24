@@ -12,5 +12,7 @@ namespace Application.Interfaces.Repo.Person
         Task<List<Employee>> GetEmployeesRelatedToProjectAsync(Guid projectId);
         Task<Employee?> GetByIdWithAccountAsync(Guid employeeId);
         Task<Employee?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<Guid?> GetAccountIdAsync(Guid employeeId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Guid?>> GetAccountIdsForEmployeesAsync(IEnumerable<Guid> employees, CancellationToken cancellationToken = default);
     }
 }
