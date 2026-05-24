@@ -1,24 +1,26 @@
-﻿using Domain.Entity.Item;
+﻿using Domain.Entity;
+using Domain.Entity.Item;
+using Domain.Entity.Item.Activities;
 using Domain.Entity.Item.Activities;
 using Domain.Entity.Item.Registrations;
+using Domain.Entity.Item.Registrations;
+using Domain.Entity.Mapping;
 using Domain.Entity.Mapping;
 using Domain.Entity.Mapping.ValueObjects;
 using Domain.Entity.Person;
+using Domain.Entity.Person;
+using Domain.Entity.Person.Auth;
 using Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
-using Domain.Entity.Person;
-using System.Diagnostics;
-using Domain.Entity.Item.Activities;
 using Activity = Domain.Entity.Item.Activities.Activity;
-using Domain.Entity.Item.Registrations;
-using Domain.Entity.Mapping;
-using Domain.Entity.Person.Auth;
 
 namespace Infrastructure.Data
 {
@@ -32,6 +34,9 @@ namespace Infrastructure.Data
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Company> Companies { get; set; }
         public DbSet<Customer> Customers { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<ProjectAssignment> ProjectAssignments { get; set; }
+
         //auth
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Role> Roles { get; set; }
@@ -71,11 +76,21 @@ namespace Infrastructure.Data
                       .IsRequired(false)
                       .OnDelete(DeleteBehavior.NoAction);
             });
+            modelBuilder.Entity<HourRegistration>(entity =>
+            {
+                entity.OwnsMany(r => r.Intervals, navigationBuilder =>
+                {
+                    navigationBuilder.ToJson();
+                })
+                            .Navigation(r => r.Intervals)
+            .HasField("_intervals")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+            });
             modelBuilder.Entity<Registration>()
-                .HasOne<Project>()
-      .WithMany(p => p.Registrations)
-      .HasForeignKey(r => r.ProjectId)
-      .OnDelete(DeleteBehavior.NoAction);
+                    .HasOne<Project>()
+          .WithMany(p => p.Registrations)
+          .HasForeignKey(r => r.ProjectId)
+          .OnDelete(DeleteBehavior.NoAction);
             modelBuilder.Entity<WorkLog>().HasOne<Employee>()
       .WithMany(e => e.WorkLogs)
       .HasForeignKey(r => r.EmployeeId)
@@ -98,14 +113,14 @@ namespace Infrastructure.Data
             modelBuilder.Entity<ProjectAssignment>(entity =>
             {
                 entity.HasOne<Employee>()
-                      .WithMany(e=>e.Assignments) 
+                      .WithMany(e => e.Assignments)
                       .HasForeignKey(a => a.EmployeeId)
                       .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne<Project>()
                       .WithMany(p => p.Assignments)
                       .HasForeignKey(a => a.ProjectId)
-                      .OnDelete(DeleteBehavior.Restrict); 
+                      .OnDelete(DeleteBehavior.Restrict);
             });
             modelBuilder.Entity<Employee>()
       .Navigation(p => p.Assignments)
@@ -269,18 +284,18 @@ namespace Infrastructure.Data
                     .OnDelete(DeleteBehavior.NoAction);
 
                 entity.OwnsOne(s => s.Credential, credential =>
-                    {
-                        credential.Property(c => c.Key)
-                            .HasColumnName("CredentialKey");
+                {
+                    credential.Property(c => c.Key)
+                        .HasColumnName("CredentialKey");
 
-                        credential.Property(c => c.Value)
-                            .HasColumnName("CredentialValue");
+                    credential.Property(c => c.Value)
+                        .HasColumnName("CredentialValue");
 
 
 
-                    });
+                });
 
-                
+
                 modelBuilder.Entity<IntegrationMapping>(entity =>
                 {
                     entity.HasKey(m => m.Id);

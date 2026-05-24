@@ -35,5 +35,10 @@ namespace Domain.Guards
         {
             if (Start >= End) throw new ArgumentException("Start dato må være før slutdato.");
         }
+        public static void AgainstNegativeOrZero(decimal input, string parameterName)
+        {
+            if (input <= 0)
+                throw new ArgumentOutOfRangeException(parameterName, $"{parameterName} må ikke være negativ eller nul.");
+        }
     }
 }

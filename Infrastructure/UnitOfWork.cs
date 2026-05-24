@@ -31,6 +31,7 @@ namespace Infrastructure
         public ICustomerRepository Customers { get; }
         public IEmployeeRepository Employees { get; }
         public ICompanyRepository Companies { get; }
+        public INotificationRepository Notifications { get; }
         //Auth
         public IAccountRepository Accounts { get; }
         public IRoleRepository Roles { get; }
@@ -61,6 +62,7 @@ namespace Infrastructure
             Accounts = new AccountRepository(_context);
             Roles = new RoleRepository(_context);
             Permissions = new PermissionRepository(_context);
+            Notifications = new NotificationRepository(_context);
 
             Projects = new ProjectRepository(_context);
             ProjectActivities = new ProjectActivityRepository(_context);

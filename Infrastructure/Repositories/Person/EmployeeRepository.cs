@@ -30,13 +30,16 @@ namespace Infrastructure.Repositories.Person
                     p.Assignments.Any(a => a.EmployeeId == e.Id))))
                 .ToListAsync();
         }
-
         public async Task<Employee?> GetByIdWithAccountAsync(Guid employeeId)
         {
             return await _context.Employees
                 .Include(e => e.Account)
                 .FirstOrDefaultAsync(e => e.Id == employeeId);
         }
-
+        public async Task<Guid?> GetAccountIdAsync(Guid employeeId, CancellationToken cancellationToken = default)
+        {
+            var employee = await GetByIdWithAccountAsync(employeeId);
+            return employee?.Account?.Id;
+        }
     }
 }

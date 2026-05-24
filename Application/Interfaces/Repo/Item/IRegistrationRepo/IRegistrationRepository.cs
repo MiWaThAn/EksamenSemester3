@@ -13,5 +13,6 @@ namespace Application.Interfaces.Repo.Item.IRegistrationRepo
         Task<IEnumerable<T>> GetByProjectIdAsync(Guid projectId, CancellationToken cancellationToken = default);
         Task<IEnumerable<T>> GetByActivityIdAsync(Guid activityId, CancellationToken cancellationToken = default);
         Task<IEnumerable<T>> GetByStatusAsync(RegistrationStatus status, CancellationToken cancellationToken = default);
+        Task<bool> CanCompanyModerateAsync(Guid companyId, Guid registrationId, CancellationToken cancellationToken = default);
     }
 }
