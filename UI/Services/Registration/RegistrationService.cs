@@ -20,6 +20,7 @@ namespace UI.Services.Registration
         private readonly ISecureStorage _secureStorage;
         private readonly PushRegistrationService _pushRegistrationService;
         private const string BasePath = "api/WorkLog";
+
         public RegistrationService(HttpClient httpClient, JwtAuthStateProvider authStateProvider, ISecureStorage secureStorage, PushRegistrationService pushRegistrationService)
         {
             _http = httpClient;
@@ -27,21 +28,22 @@ namespace UI.Services.Registration
             _secureStorage = secureStorage;
             _pushRegistrationService = pushRegistrationService;
         }
+
         public async Task<ServiceResult> StartWork(StartWorkCommand command, CancellationToken ct)
         {
             var url = $"{BasePath}/{command.AccountId}/{command.projectId}/{command.projectActivityId}/start-work";
             return await SendPostAsync(url, command, ct);
         }
 
-        public async Task<ServiceResult> TakeBreak(Guid accountId, Guid projectId, Guid projectActivityId, CancellationToken ct)
+        public async Task<ServiceResult> TakeBreak(Guid accountId, CancellationToken ct)
         {
-            var url = $"{BasePath}/{accountId}/{projectId}/{projectActivityId}/take-break";
+            var url = $"{BasePath}/{accountId}/take-break";
             return await SendPostAsync<object>(url, null, ct);
         }
 
-        public async Task<ServiceResult> ResumeWork(Guid accountId, Guid projectId, Guid projectActivityId, CancellationToken ct)
+        public async Task<ServiceResult> ResumeWork(Guid accountId, CancellationToken ct)
         {
-            var url = $"{BasePath}/{accountId}/{projectId}/{projectActivityId}/resume-work";
+            var url = $"{BasePath}/{accountId}/resume-work";
             return await SendPostAsync<object>(url, null, ct);
         }
 
@@ -57,15 +59,15 @@ namespace UI.Services.Registration
             return await SendPostAsync<object>(url, null, ct);
         }
 
-        public async Task<ServiceResult> EndWork(Guid accountId, Guid projectId, Guid projectActivityId, CancellationToken ct)
+        public async Task<ServiceResult> EndWork(Guid accountId, CancellationToken ct)
         {
-            var url = $"{BasePath}/{accountId}/{projectId}/{projectActivityId}/end-work";
+            var url = $"{BasePath}/{accountId}/end-work";
             return await SendPostAsync<object>(url, null, ct);
         }
 
-        public async Task<ServiceResult> ClockOut(Guid accountId, Guid projectId, Guid projectActivityId, CancellationToken ct)
+        public async Task<ServiceResult> ClockOut(Guid accountId, CancellationToken ct)
         {
-            var url = $"{BasePath}/{accountId}/{projectId}/{projectActivityId}/clock-out";
+            var url = $"{BasePath}/{accountId}/clock-out";
             return await SendPostAsync<object>(url, null, ct);
         }
 
@@ -108,13 +110,13 @@ namespace UI.Services.Registration
         public async Task<ServiceResult> RejectWorkLog(Guid accountId, Guid workLogId, string reason, CancellationToken ct)
         {
             var url = $"{BasePath}/{accountId}/{workLogId}/reject-work-log";
-            return await SendPostAsync(url, reason, ct); // Backend expects string from body
+            return await SendPostAsync(url, new { reason }, ct);
         }
 
         public async Task<ServiceResult> UpdateRegistrationDescription(Guid accountId, Guid workLogId, Guid registrationId, string description, CancellationToken ct)
         {
             var url = $"{BasePath}/{accountId}/{workLogId}/{registrationId}/update-registration-description";
-            return await SendPostAsync(url, description, ct);
+            return await SendPostAsync(url, new { description }, ct);
         }
 
         public async Task<ServiceResult> UpdateTimeRegistrationInterval(Guid accountId, Guid workLogId, Guid registrationId, Guid timeIntervalId, DateTime start, DateTime end, bool isBreak, CancellationToken ct)
@@ -131,19 +133,20 @@ namespace UI.Services.Registration
             return await SendPostAsync(url, payload, ct);
         }
 
-        public async Task<ServiceResult> UpdateRegistrationActivity(Guid accountId, Guid workLogId, Guid registrationId, Guid newProjectActivityId, CancellationToken ct)
+        public async Task<ServiceResult> UpdateRegistrationActivity(Guid workLogId, Guid accountId, Guid registrationId, Guid newProjectActivityId, CancellationToken ct)
         {
             var url = $"{BasePath}/{accountId}/{workLogId}/{registrationId}/update-registration-activity";
             var payload = new { NewProjectActivityId = newProjectActivityId };
             return await SendPostAsync(url, payload, ct);
         }
 
-        public async Task<ServiceResult> UpdateRegistrationExpense(Guid accountId, Guid workLogId, Guid registrationId, Guid? newExpenseId, DateTime? date, decimal? amount, string? description, CancellationToken ct)
+        public async Task<ServiceResult> UpdateRegistrationExpense(Guid accountId, Guid registrationId, Guid? newExpenseId, DateTime? date, decimal? amount, string? description, CancellationToken ct)
         {
-            var url = $"{BasePath}/{accountId}/{workLogId}/{registrationId}/update-registration-expense";
+            var url = $"{BasePath}/{accountId}/{registrationId}/update-registration-expense";
             var payload = new { NewExpenseId = newExpenseId, Date = date, Amount = amount, Description = description };
             return await SendPostAsync(url, payload, ct);
         }
+
         private async Task<ServiceResult> SendPostAsync<T>(string url, T payload, CancellationToken ct)
         {
             try

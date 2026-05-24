@@ -41,5 +41,9 @@ namespace Infrastructure.Repositories.Person
             var employee = await GetByIdWithAccountAsync(employeeId);
             return employee?.Account?.Id;
         }
+        public async Task<IEnumerable<Guid?>>GetAccountIdsForEmployeesAsync(IEnumerable<Guid> employees,CancellationToken cancellationToken = default)
+        {
+            return await _context.Employees.Select(e=>e.AccountId).ToListAsync(cancellationToken);
+        }
     }
 }
