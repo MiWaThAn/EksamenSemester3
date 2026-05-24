@@ -1,0 +1,91 @@
+﻿@page "/employee-projects"
+@using Shared.Model
+@using UI.Services.Auth
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IAuthService AuthService
+
+<div class="admin-container">
+    <div class="p-4 border-b bg-white rounded-t-xl">
+        <h1 class="text-2xl font-bold text-gray-800">Mine Aktive Projekter</h1>
+    </div>
+
+    <div class="list-wrapper shadow-box">
+        @if (!string.IsNullOrWhiteSpace(errorString))
+        {
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm" role="alert">
+                <span>@errorString</span>
+            </div>
+        }
+
+        @if (myProjects == null && string.IsNullOrWhiteSpace(errorString))
+        {
+            <p style="padding: 20px;">Henter dine projekter...</p>
+        }
+        else if (myProjects != null && !myProjects.Any())
+        {
+            <p style="padding: 20px;">Du er ikke tilknyttet nogen projekter i øjeblikket.</p>
+        }
+        else if (myProjects != null)
+        {
+            @foreach (var proj in myProjects)
+            {
+                <div class="employee-row @(proj.NotificationCount > 0 ? "selected" : "")"
+                     @onclick="() => NavigateToProjectDetails(proj.Id)">
+                    <span>@proj.ProjectName</span>
+
+                    <div class="mail-container">
+                        <i class="bi bi-envelope-fill"></i>
+                        @if (proj.NotificationCount > 0)
+                        {
+                            <span class="mail-badge">@proj.NotificationCount</span>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    private List<CompanyProjectModel>? myProjects;
+    private string? errorString;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            errorString = null;
+
+            var response = await Http.GetAsync("api/project/employee/projects");
+
+            if (response.IsSuccessStatusCode)
+            {
+                myProjects = await response.Content.ReadFromJsonAsync<List<CompanyProjectModel>>();
+            }
+            else
+            {
+                var serverErrorMessage = await response.Content.ReadAsStringAsync();
+
+                if (!string.IsNullOrWhiteSpace(serverErrorMessage))
+                {
+                    errorString = serverErrorMessage;
+                }
+                else
+                {
+                    errorString = $"Serveren svarede med fejlkode: {response.StatusCode}";
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            var errorHandler = ex.InnerException ?? ex;
+            errorString = $"Frontend Netværksfejl: {errorHandler.Message}";
+        }
+    }
+
+    private void NavigateToProjectDetails(Guid projectId)
+    {
+        Navigation.NavigateTo($"/specific-project-employee/{projectId}");
+    }
+}
