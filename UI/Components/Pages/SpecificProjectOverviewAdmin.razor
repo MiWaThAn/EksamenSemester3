@@ -116,7 +116,6 @@
         {
             isLoading = true;
             errorMessage = null;
-            // Vi kalder nøjagtig samme endpoint som medarbejdersiden – ren genanvendelse!
             projectDetail = await Http.GetFromJsonAsync<DetailedProjectModel>($"api/Project/company/project/{projectId}");
         }
         catch (Exception ex)
@@ -145,7 +144,6 @@
         Navigation.NavigateTo($"/specific-employee-admin/{id}");
     }
 
-    // Bootstrap badge-farver til admin-panelet baseret på aktivitetens status
     private string GetAdminStatusBadgeClass(string status)
     {
         return status?.ToLower() switch

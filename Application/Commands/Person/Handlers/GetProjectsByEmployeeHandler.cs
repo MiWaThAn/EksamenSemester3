@@ -1,8 +1,8 @@
 ﻿using Application.Commands.Person.Queries;
 using Application.Interfaces;
-using Domain.Interfaces.Repos; // Ret til jeres rigtige namespace for IUnitOfWork
+using Domain.Interfaces.Repos;
 using MediatR;
-using Shared.Model; // Gør det muligt at finde CompanyProjectModel
+using Shared.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;

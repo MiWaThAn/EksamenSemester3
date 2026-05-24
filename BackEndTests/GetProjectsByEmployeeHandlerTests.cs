@@ -2,7 +2,7 @@
 using Application.Commands.Person.Queries;
 using Application.Interfaces;
 using Domain.Entity.Person;
-using Domain.Entity.Item; // Antager at jeres Project ligger her, tilpas hvis det er under Person
+using Domain.Entity.Item;
 using Moq;
 using Shared.Model;
 using System;
