@@ -5,7 +5,7 @@ using Shared.Model;
 
 namespace Application.Commands.Person.Handlers
 {
-    internal class GetEmployeesByCompanyHandler : IRequestHandler<GetEmployeesByCompanyQuery, IEnumerable<CompanyEmployeeModel>>
+    public class GetEmployeesByCompanyHandler : IRequestHandler<GetEmployeesByCompanyQuery, IEnumerable<CompanyEmployeeModel>>
     {
         private readonly IUnitOfWork _unitOfWork;
 

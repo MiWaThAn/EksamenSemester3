@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Application.Commands.Person.Handlers
 {
-    internal class GetProjectsByEmployeeHandler : IRequestHandler<GetProjectsByEmployeeQuery, IEnumerable<CompanyProjectModel>>
+    public class GetProjectsByEmployeeHandler : IRequestHandler<GetProjectsByEmployeeQuery, IEnumerable<CompanyProjectModel>>
     {
         private readonly IUnitOfWork _unitOfWork;
 

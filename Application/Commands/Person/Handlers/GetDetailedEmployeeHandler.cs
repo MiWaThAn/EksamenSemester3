@@ -4,7 +4,7 @@ using MediatR;
 using Shared.Model;
 namespace Application.Commands.Person.Handlers
 {
-    internal class GetDetailedEmployeeHandler : IRequestHandler<GetDetailedEmployeeQuery, DetailedEmployeeModel?>
+    public class GetDetailedEmployeeHandler : IRequestHandler<GetDetailedEmployeeQuery, DetailedEmployeeModel?>
     {
         private readonly IUnitOfWork _unitOfWork;
 

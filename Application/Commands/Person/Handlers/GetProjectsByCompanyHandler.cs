@@ -9,8 +9,7 @@ using System.Threading.Tasks;
 
 namespace Application.Commands.Person.Handlers
 {
-    // Vi retter returtypen her til IEnumerable, så den matcher din Query 1 til 1!
-    internal class GetProjectsByCompanyHandler : IRequestHandler<GetProjectsByCompanyQuery, IEnumerable<CompanyProjectModel>>
+    public class GetProjectsByCompanyHandler : IRequestHandler<GetProjectsByCompanyQuery, IEnumerable<CompanyProjectModel>>
     {
         private readonly IUnitOfWork _unitOfWork;
 

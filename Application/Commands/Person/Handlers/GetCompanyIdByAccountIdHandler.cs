@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace Application.Commands.Person.Handlers
 {
-    internal class GetCompanyIdByAccountIdQueryHandler : IRequestHandler<GetCompanyIdByAccountIdQuery, Guid>
+    public class GetCompanyIdByAccountIdHandler : IRequestHandler<GetCompanyIdByAccountIdQuery, Guid>
     {
         private readonly IUnitOfWork _unitOfWork;
 
-        public GetCompanyIdByAccountIdQueryHandler(IUnitOfWork uow)
+        public GetCompanyIdByAccountIdHandler(IUnitOfWork uow)
         {
             _unitOfWork = uow;
         }

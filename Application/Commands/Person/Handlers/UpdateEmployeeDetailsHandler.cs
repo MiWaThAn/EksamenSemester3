@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Application.Commands.Person.Handlers
 {
-    internal class UpdateEmployeeDetailsHandler : IRequestHandler<UpdateEmployeeDetailsCommand, bool>
+    public class UpdateEmployeeDetailsHandler : IRequestHandler<UpdateEmployeeDetailsCommand, bool>
     {
         private readonly IUnitOfWork _unitOfWork;
 

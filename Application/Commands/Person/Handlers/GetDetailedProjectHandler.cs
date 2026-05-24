@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Application.Commands.Person.Handlers
 {
-    internal class GetDetailedProjectHandler : IRequestHandler<GetDetailedProjectQuery, DetailedProjectModel?>
+    public class GetDetailedProjectHandler : IRequestHandler<GetDetailedProjectQuery, DetailedProjectModel?>
     {
         private readonly IUnitOfWork _unitOfWork;
 
