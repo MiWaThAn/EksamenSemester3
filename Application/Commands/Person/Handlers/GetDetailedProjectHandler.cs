@@ -21,7 +21,6 @@ namespace Application.Commands.Person.Handlers
 
         public async Task<DetailedProjectModel?> Handle(GetDetailedProjectQuery request, CancellationToken ct)
         {
-            // 1. Hent projektet fra databasen
             var project = await _unitOfWork.Projects.GetByIdWithDetailsAsync(request.ProjectId);
 
             if (project == null)

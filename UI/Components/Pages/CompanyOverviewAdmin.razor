@@ -125,7 +125,6 @@
                 return;
             }
 
-            // 3. Hent brugerens ID
             loggedInUserId = AuthService.GetUserId(token);
 
             if (string.IsNullOrEmpty(loggedInUserId))
@@ -134,7 +133,6 @@
                 return;
             }
 
-            // 4. Hent firmaets ID fra jeres eksisterende endpoint
             var response = await Http.GetFromJsonAsync<CompanyResponse>($"api/account/company-id/{loggedInUserId}");
 
             if (response != null)
@@ -148,7 +146,6 @@
                 return;
             }
 
-            // Alt er godkendt – vi henter dataene nu!
             await LoadEmployeeData();
         }
         catch (Exception ex)
