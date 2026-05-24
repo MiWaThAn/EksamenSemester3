@@ -43,7 +43,6 @@ namespace API.Controllers
         {
             try
             {
-                // 1. Træk NameIdentifier ud
                 var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
                 if (string.IsNullOrEmpty(userIdClaim))
@@ -56,7 +55,6 @@ namespace API.Controllers
                     return BadRequest($"API Fejl: Det NameIdentifier-claim der blev fundet ({userIdClaim}) kunne ikke laves om til en Guid.");
                 }
 
-                // 2. Opret query og send afsted via MediatR
                 var query = new GetProjectsByEmployeeQuery(loggedInAccountId);
                 var result = await _mediator.Send(query);
 
@@ -64,8 +62,6 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                // Hvis koden knækker nede i Handleren eller i jeres Repository, fanger vi det HER!
-                // ex.Message vil fortælle os NØJAGTIG hvad der gik galt (f.eks. om en database-forbindelse fejlede)
                 var innerFejl = ex.InnerException != null ? $" -> Inner: {ex.InnerException.Message}" : "";
                 return BadRequest($"API Crash i Handler/Repo: {ex.Message}{innerFejl}");
             }
