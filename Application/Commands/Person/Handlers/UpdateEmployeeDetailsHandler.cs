@@ -33,7 +33,7 @@ namespace Application.Commands.Person.Handlers
                 employee.Account.UpdatePhoneNumber(new PhoneNumber(request.MobileNumber));
             }
 
-            await _unitOfWork.CompleteAsync();
+            await _unitOfWork.CompleteAsync(); 
 
             return true;
         }
