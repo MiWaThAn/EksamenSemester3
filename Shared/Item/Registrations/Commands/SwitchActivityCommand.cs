@@ -6,5 +6,5 @@ using System.Text;
 
 namespace Shared.Item.Registrations.Commands
 {
-    public record SwitchActivityCommand(Guid EmployeeId, Guid ProjectId, Guid NewProjectActivityId) : IRequest<BaseRegistrationResponse>;
+    public record SwitchActivityCommand(Guid AccountId, Guid ProjectId, Guid NewProjectActivityId) : IRequest<BaseRegistrationResponse>;
 }

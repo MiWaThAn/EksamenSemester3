@@ -19,7 +19,7 @@ namespace Domain.Builders.Item.Registration
         protected Guid ProjectId;
         protected RegistrationStatus Status = RegistrationStatus.Pending;
         protected string RegistrationNumber = string.Empty;
-        protected string Description = string.Empty;
+        protected string? Description = string.Empty;
         internal TBuilder WithWorkLog(WorkLog workLog)
         {
             Guard.AgainstNull(workLog, nameof(workLog));

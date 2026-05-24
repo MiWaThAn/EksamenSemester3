@@ -28,7 +28,12 @@ namespace Application.Commands.Item.Registrations.Expense
                 await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted, cancellationToken);
                 var registrationBuilder = new ExpenseRegistrationBuilder();
                 var expenseBuilder = new ExpenseBuilder();
-                var worklog = await _unitOfWork.WorkLogs.GetActiveByEmployeeIdAsync(request.EmployeeId, cancellationToken);
+                var account = await _unitOfWork.Accounts.GetByIdAsync(request.AccountId, cancellationToken);
+                if (account == null)
+                    return new BaseRegistrationResponse { Success = false, Message = "Konto ikke fundet" };
+                if(account.EmployeeId == null)
+                    return new BaseRegistrationResponse { Success = false, Message = "Konto ikke medarbejderkonto" };
+                var worklog = await _unitOfWork.WorkLogs.GetActiveByEmployeeIdAsync(account.EmployeeId.Value, cancellationToken);
                 if (worklog == null)
                     return new BaseRegistrationResponse { Success = false, Message = "Du har ikke et aktivt worklog. Start et worklog for at kunne registrere en udgift." };
                 var project = await _unitOfWork.Projects.GetByIdAsync(request.ProjectId, cancellationToken);
@@ -52,7 +57,7 @@ namespace Application.Commands.Item.Registrations.Expense
                     }
                 else if (!string.IsNullOrWhiteSpace(request.NewCategoryName))
                 {
-                    var emp = await _unitOfWork.Employees.GetByIdAsync(request.EmployeeId,cancellationToken);
+                    var emp = await _unitOfWork.Employees.GetByIdAsync(account.EmployeeId.Value,cancellationToken);
                     if(emp == null)
                         return new BaseRegistrationResponse { Success = false, Message = "Medarbejderen blev ikke fundet." };
                     var company = await _unitOfWork.Companies.GetByIdAsync(emp.CompanyId, cancellationToken);

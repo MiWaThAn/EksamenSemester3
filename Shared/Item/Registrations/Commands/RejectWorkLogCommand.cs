@@ -6,5 +6,5 @@ using System.Text;
 
 namespace Shared.Item.Registrations.Commands
 {
-    public record RejectWorkLogCommand(Guid WorkLogId, Guid OwnerId,string reason) : IRequest<BaseRegistrationResponse>;
+    public record RejectWorkLogCommand(Guid WorkLogId, Guid AccountId,string reason) : IRequest<BaseRegistrationResponse>;
 }

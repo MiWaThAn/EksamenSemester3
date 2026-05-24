@@ -6,5 +6,5 @@ using System.Text;
 
 namespace Shared.Item.Registrations.Commands.Time
 {
-    public record ClockOutCommand(Guid EmployeeId) : IRequest<BaseRegistrationResponse>;
+    public record ClockOutCommand(Guid AccountId) : IRequest<BaseRegistrationResponse>;
 }

@@ -6,5 +6,5 @@ using System.Text;
 
 namespace Shared.Item.Registrations.Commands.Expenses
 {
-    public record CreateExpenseCommand(Guid EmployeeId, decimal Amount, string Description, Guid? ExpenseCategoryId, string? NewCategoryName,Guid? ProjectActivityId, Guid ProjectId) : IRequest<BaseRegistrationResponse>;
+    public record CreateExpenseCommand(Guid AccountId, decimal Amount, string Description, Guid? ExpenseCategoryId, string? NewCategoryName,Guid? ProjectActivityId, Guid ProjectId) : IRequest<BaseRegistrationResponse>;
 }

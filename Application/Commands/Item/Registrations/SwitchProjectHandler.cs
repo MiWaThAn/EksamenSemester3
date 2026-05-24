@@ -24,16 +24,24 @@ namespace Application.Commands.Item.Registrations
             try
             {
                 await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted, cancellationToken);
+                var account = await _unitOfWork.Accounts.GetByIdAsync(request.AccountId, cancellationToken);
+                if (account == null)
+                    return BaseRegistrationResponse.Fail("Account not found.");
+                if(account.EmployeeId == null)
+                    return BaseRegistrationResponse.Fail("Account is not linked to an employee.");
+                var emp = await _unitOfWork.Employees.GetByIdAsync(account.EmployeeId.Value, cancellationToken);
+                if (emp == null)
+                    return BaseRegistrationResponse.Fail("Employee not found.");
                 Project = await _unitOfWork.Projects.GetByIdAsync(request.NewProjectId, cancellationToken);
                 if (Project == null)
                     return BaseRegistrationResponse.Fail("New project not found.");
                 ProjectActivity = await _unitOfWork.ProjectActivities.GetByIdAsync(request.NewProjectActivityId, cancellationToken);
                 if (ProjectActivity == null)
                     return BaseRegistrationResponse.Fail("New project activity not found.");
-                var WorkLog = await _unitOfWork.WorkLogs.GetActiveByEmployeeIdAsync(request.EmployeeId, cancellationToken);
+                var WorkLog = await _unitOfWork.WorkLogs.GetActiveByEmployeeIdAsync(emp.Id, cancellationToken);
                 if (WorkLog == null)
                     return BaseRegistrationResponse.Fail("No active work log found for the employee.");
-                WorkLog.SwitchProjectAndActivity(Project, ProjectActivity, null);
+                WorkLog.SwitchProjectAndActivity(Project, ProjectActivity, emp);
                 await _unitOfWork.CompleteAsync(cancellationToken);
                 await _unitOfWork.CommitTransactionAsync(cancellationToken);
                 return BaseRegistrationResponse.Ok(WorkLog.ActiveRegistrationId.Value);

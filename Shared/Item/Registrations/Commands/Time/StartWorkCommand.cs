@@ -6,5 +6,5 @@ using System.Text;
 
 namespace Shared.Item.Registrations.Commands.Time
 {
-    public record StartWorkCommand(Guid employeeId, Guid projectId, Guid projectActivityId) : IRequest<BaseRegistrationResponse>;
+    public record StartWorkCommand(Guid AccountId, Guid projectId, Guid projectActivityId) : IRequest<BaseRegistrationResponse>;
 }

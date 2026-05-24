@@ -25,7 +25,15 @@ namespace Application.Commands.Item.Registrations.Time
             try
             {
                 await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted, cancellationToken);
-                var worklog = await _unitOfWork.WorkLogs.GetActiveByEmployeeIdAsync(request.EmployeeId, cancellationToken);
+                var account = await _unitOfWork.Accounts.GetByIdAsync(request.AccountId, cancellationToken);
+                if(account == null)
+                    return new BaseRegistrationResponse { Success = false, Message = "Konto ikke fundet." };
+                if(!account.EmployeeId.HasValue)
+                    return new BaseRegistrationResponse { Success = false, Message = "Konto er ikke tilknyttet en medarbejder." };
+                var employee = await _unitOfWork.Employees.GetByIdAsync(account.EmployeeId.Value, cancellationToken);
+                if (employee == null)
+                    return new BaseRegistrationResponse { Success = false, Message = "Medarbejder ikke fundet." };
+                var worklog = await _unitOfWork.WorkLogs.GetActiveByEmployeeIdAsync(account.EmployeeId.Value, cancellationToken);
                 if (worklog == null)
                     return new BaseRegistrationResponse { Success = false, Message = "Aktivt worklog ikke fundet for medarbejderen." };
                 var project = await _unitOfWork.Projects.GetByIdAsync(request.ProjectId, cancellationToken);

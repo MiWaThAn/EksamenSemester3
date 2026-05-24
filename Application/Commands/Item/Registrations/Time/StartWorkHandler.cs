@@ -22,10 +22,18 @@ namespace Application.Commands.Item.Registrations.Time
             try
             {
                 await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted, cancellationToken);
-                var Worklog = await _unitOfWork.WorkLogs.GetActiveByEmployeeIdAsync(request.employeeId, cancellationToken);
+                var account = await _unitOfWork.Accounts.GetByIdAsync(request.AccountId, cancellationToken);
+                if(account == null)
+                    return new BaseRegistrationResponse { Success = false, Message = "Konto ikke fundet." };
+                if(account.EmployeeId.HasValue)
+                    return new BaseRegistrationResponse { Success = false, Message = "Konto er allerede tilknyttet en medarbejder." };
+                var employee = await _unitOfWork.Employees.GetByIdAsync(account.EmployeeId.Value, cancellationToken);
+                if (employee == null)
+                    return new BaseRegistrationResponse { Success = false, Message = "Medarbejder ikke fundet." };
+                var Worklog = await _unitOfWork.WorkLogs.GetActiveByEmployeeIdAsync(employee.Id, cancellationToken);
                 if (Worklog == null)
                 {
-                    var emp = await _unitOfWork.Employees.GetByIdAsync(request.employeeId, cancellationToken);
+                    var emp = await _unitOfWork.Employees.GetByIdAsync(employee.Id, cancellationToken);
                     if (emp == null)
                         return new BaseRegistrationResponse { Success = false, Message = "Medarbejder ikke fundet." };
                     Worklog = emp.CreateWorkLog(new WorkLogBuilder());
@@ -37,7 +45,7 @@ namespace Application.Commands.Item.Registrations.Time
                 var activity = await _unitOfWork.ProjectActivities.GetByIdAsync(request.projectActivityId, cancellationToken);
                 if (activity == null)
                     return new BaseRegistrationResponse { Success = false, Message = "Projektaktivitet ikke fundet." };
-                Worklog.StartWork(project, activity);
+                Worklog.StartWork(project, activity,employee);
                 await _unitOfWork.CompleteAsync(cancellationToken);
                 await _unitOfWork.CommitTransactionAsync(cancellationToken);
                 return new BaseRegistrationResponse { Success = true, Message = "Arbejdet er startet." };

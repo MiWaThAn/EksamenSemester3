@@ -6,5 +6,5 @@ using System.Text;
 
 namespace Shared.Item.Registrations.Commands
 {
-    public record SubmitWorkLogCommand(Guid WorkLogId, Guid EmployeeId) : IRequest<BaseRegistrationResponse>;
+    public record SubmitWorkLogCommand(Guid WorkLogId, Guid AccountId) : IRequest<BaseRegistrationResponse>;
 }

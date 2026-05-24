@@ -36,6 +36,10 @@ namespace Infrastructure.Repositories.Person
                 .Include(e => e.Account)
                 .FirstOrDefaultAsync(e => e.Id == employeeId);
         }
-
+        public async Task<Guid?> GetAccountIdAsync(Guid employeeId, CancellationToken cancellationToken = default)
+        {
+            var employee = await GetByIdWithAccountAsync(employeeId);
+            return employee?.Account?.Id;
+        }
     }
 }

@@ -75,6 +75,14 @@ namespace Domain.Entity.Item.Registrations
             MarkAsPending();
             UpdatedAt = DateTime.UtcNow;
         }
+        public void LinkToProjectAndActivity(Guid projectId, Guid activityId)
+        {
+            Guard.AgainstEmptyGuid(projectId, nameof(projectId));
+            Guard.AgainstEmptyGuid(activityId, nameof(activityId));
+            ProjectActivityId = activityId;
+            MarkAsPending();
+            UpdatedAt = DateTime.UtcNow;
+        }
         public void UnlinkFromActivity()
         {
             ProjectActivityId = null;

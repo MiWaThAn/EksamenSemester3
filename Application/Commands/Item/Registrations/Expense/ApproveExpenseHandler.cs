@@ -28,9 +28,14 @@ namespace Application.Commands.Item.Registrations.Expense
                 var expense = await _unitOfWork.Expenses.GetByIdAsync(registration.ExpenseId, cancellationToken);
                 if (expense == null)
                     return new BaseRegistrationResponse { Success = false, Message = "Udgift ikke fundet." };
-                var company = await _unitOfWork.Companies.GetByIdAsync(expense.CompanyId, cancellationToken);
-                if (company == null)
-                    return new BaseRegistrationResponse { Success = false, Message = "Firma ikke fundet." };
+                var account = await _unitOfWork.Accounts.GetByIdAsync(request.OwnerId, cancellationToken);
+                if (account == null)
+                    return new BaseRegistrationResponse { Success = false, Message = "Konto ikke fundet." };
+                if (!account.CompanyId.HasValue || account.CompanyId.Value != expense.CompanyId)
+                    return new BaseRegistrationResponse { Success = false, Message = "Konto er ikke ejer" };
+                var company = await _unitOfWork.Companies.GetByIdAsync(account.CompanyId.Value);
+                if(company == null)
+                    return new BaseRegistrationResponse { Success = false, Message = "Firma ikke fundet" };
                 if (request.MakeCategoryGlobal)
                 {
                     expense.Approve(company);
@@ -40,7 +45,6 @@ namespace Application.Commands.Item.Registrations.Expense
                 {
                     return new BaseRegistrationResponse { Success = false, Message = "Firmaet har ikke tilladelse til at godkende denne udgift." };
                 }
-                registration.Approve(company);
                 await _unitOfWork.CompleteAsync(cancellationToken);
                 await _unitOfWork.CommitTransactionAsync(cancellationToken);
                 return new BaseRegistrationResponse { Success = true, Message = "Udgiften er godkendt." };

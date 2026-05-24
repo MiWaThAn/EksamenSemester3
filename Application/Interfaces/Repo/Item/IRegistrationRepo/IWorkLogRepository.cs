@@ -12,5 +12,6 @@ namespace Application.Interfaces.Repo.Item.IRegistrationRepo
         Task<WorkLog?> GetTodayByEmployeeIdAsync(Guid employeeId, CancellationToken cancellationToken = default);
         Task<WorkLog?> GetByIdWithRegistrationsAsync(Guid id, CancellationToken cancellationToken = default);
         Task<WorkLog?> GetActiveByEmployeeIdAsync(Guid employeeId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<WorkLog>> GetAllActiveWorkLogsAsync(CancellationToken cancellationToken = default);
     }
 }

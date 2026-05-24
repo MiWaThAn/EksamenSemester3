@@ -9,9 +9,7 @@ namespace Domain.Entity.Item.Registrations
     public class HourRegistration : Registration
     {
         public DateTime StartTime => _intervals.Count > 0 ? _intervals.Min(i => i.StartTime) : DateTime.MinValue;
-        public DateTime? EndTime => (_intervals.Count > 0 && _intervals.All(i => i.EndTime.HasValue))
-            ? _intervals.Max(i => i.EndTime)
-            : null;
+        public DateTime? EndTime => _intervals.Count > 0 ? _intervals.Where(i => i.EndTime.HasValue).Max(i => i.EndTime) : null;
         public bool IsFinished => EndTime.HasValue;
         private readonly List<TimeInterval> _intervals = new();
         public IReadOnlyCollection<TimeInterval> Intervals => _intervals.AsReadOnly();
@@ -19,7 +17,7 @@ namespace Domain.Entity.Item.Registrations
         {
 
         }
-        internal HourRegistration(Guid ProjectId, WorkLog workLog, Guid? activityId, DateTime startTime, DateTime? endTime, string description, RegistrationStatus status) : base(ProjectId, workLog, activityId, description, status)
+        internal HourRegistration(Guid ProjectId, WorkLog workLog, Guid? activityId, DateTime startTime, DateTime? endTime, RegistrationStatus status,string description) : base(ProjectId, workLog, activityId, description, status)
         {
             _intervals.Add(new TimeInterval(startTime, endTime, TimeType.Work));
         }
@@ -97,6 +95,57 @@ namespace Domain.Entity.Item.Registrations
                 throw new InvalidOperationException("Tidsintervaller kan kun tilføjes til tidsregistreringer.");
             }
             MarkAsPending();
+        }
+        internal void RemoveTimeInterval(Guid intervalId)
+        {
+            var interval = _intervals.FirstOrDefault(i => i.Id == intervalId);
+            if (interval == null)
+                throw new ArgumentException("Tidsinterval ikke fundet.");
+            _intervals.Remove(interval);
+            UpdatedAt = DateTime.UtcNow;
+            MarkAsPending();
+        }
+        internal void UpdateTimeInterval(Guid intervalId, DateTime? newStart, DateTime? newEnd, TimeType? newType)
+        {
+            var interval = _intervals.FirstOrDefault(i => i.Id == intervalId);
+            if (interval == null)
+                throw new ArgumentException("Tidsinterval ikke fundet.");
+            if(!interval.EndTime.HasValue)
+                throw new ArgumentException("Kan ikke redigerer i et aktiv tidsinterval.");
+            var updatedStart = newStart ?? interval.StartTime;
+            var updatedEnd = newEnd ?? interval.EndTime.Value;
+            var updatedType = newType ?? interval.Type;
+            Guard.AgainstInvalidTimeRange(updatedStart, updatedEnd);
+            interval.UpdateRange(updatedStart, updatedEnd);
+            interval.SetType(updatedType);
+            UpdatedAt = DateTime.UtcNow;
+            MarkAsPending();
+        }
+        public double HoursSinceBreak()
+        {
+            var active = FindActive();
+            if (active == null || active.Type != TimeType.Work)
+                return 0;
+            var lastBreak = _intervals.LastOrDefault(i => i.Type == TimeType.Break && i.EndTime.HasValue);
+            var breakEnd = lastBreak?.EndTime ?? StartTime;
+            var hours = (DateTime.UtcNow - breakEnd).TotalHours;
+            return (double)hours;
+        }
+        public bool HasHadBreak()
+        {
+            return _intervals.Any(i => i.Type == TimeType.Break);
+        }
+        public double TotalHours()
+        {
+            double total = 0;
+            foreach (var interval in _intervals)
+            {
+                if (interval.Type == TimeType.Work && interval.EndTime.HasValue)
+                {
+                    total += (double)(interval.EndTime.Value - interval.StartTime).TotalHours;
+                }
+            }
+            return total;
         }
         //håndterer trimning og ekstraktion af tidsintervaller baseret på overlap med et givent interval (retunerer intervaller der kom efter overlappet)
         internal List<TimeInterval> TrimAndExtractAfter(DateTime overlapStart, DateTime overlapEnd)

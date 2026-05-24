@@ -20,13 +20,21 @@ namespace Application.Commands.Item.Registrations
             try
             {
                 await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted, cancellationToken);
-                var worklog = await _unitOfWork.WorkLogs.GetActiveByEmployeeIdAsync(request.EmployeeId, cancellationToken);
+                var account = await _unitOfWork.Accounts.GetByIdAsync(request.AccountId, cancellationToken);
+                if (account == null)
+                    return BaseRegistrationResponse.Fail("Account not found.");
+                if (!account.EmployeeId.HasValue)
+                    return BaseRegistrationResponse.Fail("Account is not associated with an employee.");
+                var emp = await _unitOfWork.Employees.GetByIdAsync(account.EmployeeId.Value, cancellationToken);
+                if (emp == null)
+                    return BaseRegistrationResponse.Fail("Employee not found.");
+                var worklog = await _unitOfWork.WorkLogs.GetActiveByEmployeeIdAsync(emp.Id, cancellationToken);
                 if (worklog == null)
                     return BaseRegistrationResponse.Fail("Work log not found.");
                 var projectActivity = await _unitOfWork.ProjectActivities.GetByIdAsync(request.NewProjectActivityId, cancellationToken);
                 if (projectActivity == null)
                     return BaseRegistrationResponse.Fail("Project activity not found.");
-                worklog.SwitchActivity(projectActivity, null);
+                worklog.SwitchActivity(projectActivity, emp);
                 var active = worklog.Registrations.FirstOrDefault(wl => wl.Id == worklog.ActiveRegistrationId);
                 await _unitOfWork.CompleteAsync(cancellationToken);
                 await _unitOfWork.CommitTransactionAsync(cancellationToken);

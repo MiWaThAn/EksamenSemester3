@@ -9,6 +9,7 @@ namespace Domain.Entity.Item.Registrations
     [ComplexTypeAttribute()]
     public class TimeInterval
     {
+        public Guid Id { get; private set; }
         public DateTime StartTime { get; internal set; }
         public DateTime? EndTime { get; internal set; }
         public TimeType Type { get; internal set; }
@@ -17,6 +18,7 @@ namespace Domain.Entity.Item.Registrations
             StartTime = startTime;
             EndTime = endTime;
             Type = type;
+            Id = Guid.NewGuid();
         }
         public void UpdateRange(DateTime start, DateTime? end)
         {
@@ -28,6 +30,11 @@ namespace Domain.Entity.Item.Registrations
             Guard.AgainstInvalidTimeRange(StartTime, endTime);
             Guard.AgainstNull(endTime, nameof(endTime));
             EndTime = endTime;
+        }
+        public void SetType(TimeType type)
+        {
+            Guard.AgainstNull(type, nameof(type));
+            Type = type;
         }
     }
 }

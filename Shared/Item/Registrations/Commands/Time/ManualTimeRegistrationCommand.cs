@@ -6,5 +6,5 @@ using System.Text;
 
 namespace Shared.Item.Registrations.Commands.Time
 {
-    public record ManualTimeRegistrationCommand(Guid EmployeeId, Guid ProjectId, Guid? ProjectActivityId, DateTime StartTime, DateTime EndTime,string Description, DateTime Date,bool isWork) : IRequest<BaseRegistrationResponse>;
+    public record ManualTimeRegistrationCommand(Guid AccountId, Guid ProjectId, Guid? ProjectActivityId, DateTime StartTime, DateTime EndTime,string Description, DateTime Date,bool isWork) : IRequest<BaseRegistrationResponse>;
 }

@@ -20,10 +20,18 @@ namespace Application.Commands.Item.Registrations.Time
             try
             {
                 await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted, cancellationToken);
-                var Worklog = await _unitOfWork.WorkLogs.GetActiveByEmployeeIdAsync(request.EmployeeId, cancellationToken);
+                var account = await _unitOfWork.Accounts.GetByIdAsync(request.AccountId, cancellationToken);
+                if (account == null)
+                    return new BaseRegistrationResponse { Success = false, Message = "Konto ikke fundet." };
+                if(account.EmployeeId == null)
+                    return new BaseRegistrationResponse { Success = false, Message = "Konto er ikke tilknyttet en medarbejder." };
+                var Worklog = await _unitOfWork.WorkLogs.GetActiveByEmployeeIdAsync(account.EmployeeId.Value, cancellationToken);
                 if (Worklog == null)
                     return new BaseRegistrationResponse { Success = false, Message = "Aktiv worklog ikke fundet for medarbejder." };
-                Worklog.ResumeWork();
+                var employee = await _unitOfWork.Employees.GetByIdAsync(account.EmployeeId.Value, cancellationToken);
+                if (employee == null)
+                    return new BaseRegistrationResponse { Success = false, Message = "Medarbejder ikke fundet." };
+                Worklog.ResumeWork(employee);
                 await _unitOfWork.CompleteAsync(cancellationToken);
                 await _unitOfWork.CommitTransactionAsync(cancellationToken);
                 return new BaseRegistrationResponse { Success = true, Message = "Arbejdet er genoptaget." };

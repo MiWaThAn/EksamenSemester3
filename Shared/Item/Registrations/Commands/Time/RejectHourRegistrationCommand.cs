@@ -6,5 +6,5 @@ using System.Text;
 
 namespace Shared.Item.Registrations.Commands.Time
 {
-    public record RejectHourRegistrationCommand(Guid HourRegistrationId, Guid OwnerId, string Reason) : IRequest<BaseRegistrationResponse>;
+    public record RejectHourRegistrationCommand(Guid HourRegistrationId, Guid AccountId, string Reason) : IRequest<BaseRegistrationResponse>;
 }
