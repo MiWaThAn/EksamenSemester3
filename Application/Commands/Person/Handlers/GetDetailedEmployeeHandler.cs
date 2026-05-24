@@ -17,9 +17,14 @@ namespace Application.Commands.Person.Handlers
         public async Task<DetailedEmployeeModel?> Handle(GetDetailedEmployeeQuery request, CancellationToken ct)
         {
             var employee = await _unitOfWork.Employees.GetByIdWithAccountAsync(request.EmployeeId);
+            if (employee == null) return null;
 
-            if (employee == null)
-                return null;
+            var account = await _unitOfWork.Accounts.GetByIdAsync(request.AccountId, ct);
+
+            if (account == null || account.CompanyId != employee.CompanyId)
+            {
+                throw new UnauthorizedAccessException("Du har ikke adgang til denne medarbejder.");
+            }
 
             var relatedProjects = await _unitOfWork.Projects.GetProjectsRelatedToEmployeeAsync(request.EmployeeId);
 
