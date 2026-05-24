@@ -30,5 +30,12 @@ namespace Infrastructure.Repositories.Item.Registrations
         {
             return await _context.Set<T>().Where(x => x.Status == status).AsNoTracking().AsSplitQuery().ToListAsync(cancellationToken);
         }
+        public async Task<bool> CanCompanyModerateAsync(Guid companyId, Guid registrationId, CancellationToken cancellationToken = default)
+        {
+            var registration = await _context.Set<T>().FirstOrDefaultAsync(r => r.Id == registrationId, cancellationToken);
+            if (registration == null) return false;
+            var project = await _context.Projects.FirstOrDefaultAsync(p => p.Id == registration.ProjectId, cancellationToken);
+            return project != null && project.CompanyId == companyId;
+        }
     }
 }

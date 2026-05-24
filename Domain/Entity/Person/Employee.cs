@@ -33,12 +33,17 @@ namespace Domain.Entity.Person
         public EmployeeType EmployeeType { get; internal set; }
         //bool på om en medarbejder er selvstændig (har tilladelser til selv registrering osv...)
         public bool IsAutonomous { get; internal set; }
+
+        // hvis true så kan man redigere medarbejder lokalt
+        public bool IsLocal { get; internal set; } = false;
         //Id på firmaet de tilhøre
         public Guid CompanyId { get; internal set; }
         public Company Company { get; internal set; }
         //Id fra extern kilde (fx. e-conomic database)
         public Guid? AccountId { get; internal set; }
         public Account Account { get; internal set; }
+        
+
 
         // hvis true så kan man redigere medarbejder lokalt
         public bool IsLocal { get; internal set; } = false;
@@ -46,6 +51,9 @@ namespace Domain.Entity.Person
         //Medarbejder registreringer
         private readonly List<WorkLog> _workLogs = new();
         public IReadOnlyCollection<WorkLog> WorkLogs => _workLogs.Where(r => !r.IsDeleted).ToList().AsReadOnly();
+
+        private readonly List<ProjectAssignment> _assignments = new();
+        public IReadOnlyCollection<ProjectAssignment> Assignments => _assignments.AsReadOnly();
         public Employee() : base()
         {
 

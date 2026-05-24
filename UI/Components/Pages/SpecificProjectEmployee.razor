@@ -1,0 +1,133 @@
+﻿@page "/specific-project-employee/{ProjectId:guid}"
+@using Shared.Model
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<div class="specific-admin-bg">
+    @if (projectDetails == null && string.IsNullOrWhiteSpace(errorString))
+    {
+        <div class="text-white text-center p-4">
+            <div class="spinner-border text-light mb-3" role="status"></div>
+            <div><strong>Henter projektets detaljer...</strong></div>
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(errorString))
+    {
+        <div class="alert alert-danger" role="alert">
+            @errorString
+        </div>
+    }
+    else if (projectDetails != null)
+    {
+        <div style="margin-bottom: 1rem;">
+            <button class="specific-admin-btn" style="width: auto; padding: 0.4rem 1rem; font-size: 0.9rem;" @onclick="GoBack">
+                ← Tilbage
+            </button>
+        </div>
+
+        <h1 class="specific-admin-title">@projectDetails.ProjectName</h1>
+
+        <div class="specific-admin-info-box">
+            <div class="specific-admin-info-item">
+                Status: @projectDetails.Status
+            </div>
+            <div class="specific-admin-divider"></div>
+            <div class="specific-admin-info-item text-muted" style="font-size: 0.9rem;">
+                Kunde: @projectDetails.CustomerName
+            </div>
+        </div>
+
+        <div class="specific-admin-label">Beskrivelse:</div>
+        <div class="specific-admin-list" style="margin-bottom: 1.5rem;">
+            <div class="specific-admin-project-card" style="cursor: default; padding: 1rem; font-size: 0.95rem; line-height: 1.4;">
+                @projectDetails.Description
+            </div>
+        </div>
+
+        <div class="specific-admin-label">Dine Aktiviteter:</div>
+        <div class="specific-admin-list" style="margin-bottom: 2rem;">
+            @if (projectDetails.Activities != null && projectDetails.Activities.Any())
+            {
+                @foreach (ProjectActivityModel akt in projectDetails.Activities)
+                {
+                    <div class="specific-admin-project-card" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; cursor: default; margin-bottom: 0.75rem;">
+                        <div style="flex: 1;">
+                            <div style="font-size: 0.8rem; font-family: monospace;" class="text-muted">Nr: @akt.ActivityNumber</div>
+                            <strong style="font-size: 1.1rem; display: block; margin: 0.2rem 0; color: #333;">@akt.ActivityName</strong>
+                            <span style="font-size: 0.85rem;" class="text-muted">Estimeret tid: @akt.TimeEstimate timer</span>
+                        </div>
+
+                        <div>
+                            <span class="badge @GetStatusBadgeClass(akt.Status)">
+                                @akt.StatusText
+                            </span>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="specific-admin-empty-card">
+                    Der er ingen aktiviteter tilknyttet dette projekt endnu.
+                </div>
+            }
+        </div>
+
+        <div class="specific-admin-btn-container" style="margin-top: 2rem;">
+            <button class="specific-admin-btn" style="width: 100%; padding: 1rem;" @onclick="OpenTimeRegistration">
+                ➕ Ny Registrering
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public Guid ProjectId { get; set; }
+
+    private DetailedProjectModel? projectDetails;
+    private string? errorString;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            errorString = null;
+            var response = await Http.GetAsync($"api/project/company/project/{ProjectId}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                projectDetails = await response.Content.ReadFromJsonAsync<DetailedProjectModel>();
+            }
+            else
+            {
+                errorString = $"Kunne ikke hente projektet. Status: {response.StatusCode}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorString = $"Fejl under indlæsning: {ex.Message}";
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/employee-projects");
+    }
+
+    private void OpenTimeRegistration()
+    {
+        Navigation.NavigateTo($"/time-registration/{ProjectId}");
+    }
+
+    // Genbruger Bootstrap-badge logikken for et ensartet look!
+    private string GetStatusBadgeClass(string status)
+    {
+        return status?.ToLower() switch
+        {
+            "lukket" => "bg-danger text-white",
+            "åben" => "bg-success text-white",
+            "godkendes" => "bg-warning text-dark",
+            _ => "bg-secondary text-white"
+        };
+    }
+}

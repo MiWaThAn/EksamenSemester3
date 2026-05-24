@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "944107620320",
+    "project_id": "eksamensemester3",
+    "storage_bucket": "eksamensemester3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:944107620320:android:51190b65826a0799a84d85",
+        "android_client_info": {
+          "package_name": "com.company.pakage"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDERSIiON1NGow57v1QvGja5z4zz5YOrJI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:944107620320:android:11e30096570030d2a84d85",
+        "android_client_info": {
+          "package_name": "com.companyname.ui"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDERSIiON1NGow57v1QvGja5z4zz5YOrJI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

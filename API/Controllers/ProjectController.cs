@@ -16,10 +16,9 @@ namespace API.Controllers
             _mediator = mediator;
         }
 
-        [HttpGet("company/{companyId}")]
+        [HttpGet("company/{companyId:guid}")]
         public async Task<IActionResult> GetCompanyProjects(Guid companyId)
         {
-            // Vi sender vores query afsted ind i MediatR-systemet, som automatisk finder vores Handler!
             var result = await _mediator.Send(new GetProjectsByCompanyQuery(companyId));
 
             return Ok(result);
@@ -33,10 +32,39 @@ namespace API.Controllers
 
             if (result == null)
             {
-                return NotFound($"Kunne ikke finde projektet med ID: {id}, big boss.");
+                return NotFound($"Kunne ikke finde projektet med ID: {id}");
             }
 
             return Ok(result);
+        }
+
+        [HttpGet("employee/projects")]
+        public async Task<IActionResult> GetEmployeeProjects()
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userIdClaim))
+                {
+                    return BadRequest("API Fejl: Kunne slet ikke finde NameIdentifier-claimet i din JWT-token. Er du logget ordentligt ind?");
+                }
+
+                if (!Guid.TryParse(userIdClaim, out Guid loggedInAccountId))
+                {
+                    return BadRequest($"API Fejl: Det NameIdentifier-claim der blev fundet ({userIdClaim}) kunne ikke laves om til en Guid.");
+                }
+
+                var query = new GetProjectsByEmployeeQuery(loggedInAccountId);
+                var result = await _mediator.Send(query);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                var innerFejl = ex.InnerException != null ? $" -> Inner: {ex.InnerException.Message}" : "";
+                return BadRequest($"API Crash i Handler/Repo: {ex.Message}{innerFejl}");
+            }
         }
     }
 }

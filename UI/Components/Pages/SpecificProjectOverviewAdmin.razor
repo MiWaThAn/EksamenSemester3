@@ -11,7 +11,7 @@
     {
         <div class="text-white text-center p-4">
             <div class="spinner-border text-light mb-3" role="status"></div>
-            <div><strong>Henter projektets detaljer, big boss...</strong></div>
+            <div><strong>Henter projektets detaljer...</strong></div>
         </div>
     }
     else if (!string.IsNullOrEmpty(errorMessage))
@@ -34,8 +34,44 @@
             </div>
         </div>
 
-        <div class="specific-admin-label">Tilknyttede medarbejdere:</div>
+        <div class="specific-admin-label">Projekt Information:</div>
+        <div class="specific-admin-list" style="margin-bottom: 1.5rem;">
+            <div class="specific-admin-project-card" style="cursor: default; display: block; padding: 1rem;">
+                <p style="margin-bottom: 0.5rem;"><strong>Kunde:</strong> @projectDetail.CustomerName</p>
+                <p style="margin: 0; font-size: 0.9rem;" class="text-muted"><strong>Beskrivelse:</strong> @projectDetail.Description</p>
+            </div>
+        </div>
 
+        <div class="specific-admin-label">Projektets Aktiviteter:</div>
+        <div class="specific-admin-list" style="margin-bottom: 1.5rem;">
+            @if (projectDetail.Activities != null && projectDetail.Activities.Any())
+            {
+                @foreach (var akt in projectDetail.Activities)
+                {
+                    <div class="specific-admin-project-card" style="display: flex; justify-between; items-center; padding: 1rem; cursor: default;">
+                        <div style="flex: 1;">
+                            <div style="font-size: 0.8rem; font-family: monospace;" class="text-muted">Nr: @akt.ActivityNumber</div>
+                            <strong style="font-size: 1.1rem; display: block; margin: 0.2rem 0;">@akt.ActivityName</strong>
+                            <span style="font-size: 0.85rem;" class="text-muted">Estimat: @akt.TimeEstimate timer</span>
+                        </div>
+
+                        <div>
+                            <span class="badge @GetAdminStatusBadgeClass(akt.Status)">
+                                @akt.StatusText
+                            </span>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="specific-admin-empty-card">
+                    Ingen aktiviteter oprettet på dette projekt endnu.
+                </div>
+            }
+        </div>
+
+        <div class="specific-admin-label">Tilknyttede medarbejdere:</div>
         <div class="specific-admin-list">
             @if (projectDetail.Employees != null && projectDetail.Employees.Any())
             {
@@ -65,7 +101,7 @@
     [Parameter]
     public Guid projectId { get; set; }
 
-    private DetailedProjectModel? projectDetail; 
+    private DetailedProjectModel? projectDetail;
     private bool isLoading = true;
     private string? errorMessage;
 
@@ -106,5 +142,16 @@
     private void GoToEmployee(Guid id)
     {
         Navigation.NavigateTo($"/specific-employee-admin/{id}");
+    }
+
+    private string GetAdminStatusBadgeClass(string status)
+    {
+        return status?.ToLower() switch
+        {
+            "lukket" => "bg-danger text-white",
+            "åben" => "bg-success text-white",
+            "godkendes" => "bg-warning text-dark",
+            _ => "bg-secondary text-white"
+        };
     }
 }

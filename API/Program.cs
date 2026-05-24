@@ -1,23 +1,17 @@
 using API;
 using API.Workers;
-using API.Workers;
 using Application;
-using Application;
+using Application.Commands.Notification.Service;
 using Application.Commands.Person.Handlers.SyncHandlers;
 using Application.Interfaces.Adapters;
-using Application.Interfaces.Adapters;
-using Application.Interfaces.Data;
 using Application.Interfaces.Handlers;
 using Application.Interfaces.Registries;
 using Application.Interfaces.Services;
-using Application.Interfaces.Services;
-using Application.Interfaces.Services.Sync;
 using Application.Interfaces.Services.Sync;
 using Application.Registries;
 using Application.Services;
-using Domain.Entity.Person;
-using Domain.Interfaces;
 using Domain.Interfaces.Item;
+using Domain.Interfaces.Notification;
 using Domain.Interfaces.Mapping;
 using Domain.Interfaces.Person;
 using Domain.Services.Mapping;
@@ -29,6 +23,7 @@ using Infrastructure.Configuration;
 using Infrastructure.Data;
 using Infrastructure.Data.Seeding;
 using Infrastructure.Service;
+using Infrastructure.Service.Notification.Providers;
 using Infrastructure.Service.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -67,6 +62,8 @@ builder.Services.AddScoped<IEntitySyncHandler, ProjectSyncHandler>();
 builder.Services.AddScoped<IEntitySyncHandler, ProjectActivitySyncHandler>();
 builder.Services.AddScoped<IEntitySyncHandler, ActivitySyncHandler>();
 builder.Services.AddScoped<IEntitySyncHandler, ExpenseSyncHandler>();
+builder.Services.AddScoped<IPasswordResetEmailService, PasswordResetEmailService>();
+
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails(); // Giver flottere standard-fejlformater
 
@@ -90,7 +87,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ClockSkew = TimeSpan.Zero
         };
     });
-
+string base64Key = builder.Configuration["EncryptionSettings:Key"]
+    ?? throw new InvalidOperationException("Encryption key is missing!");
+byte[] encryptionKey = Convert.FromBase64String(base64Key);
+builder.Services.AddSingleton<IEncryptionService>(new EncryptionService(encryptionKey));
 builder.Services.AddAuthorization();
 
 
@@ -100,7 +100,8 @@ builder.Services.Configure<EconomicOptions>(
     builder.Configuration.GetSection(EconomicOptions.SectionName));
 builder.Services.AddHttpClient<IEconomicApiClient, EconomicApiClient>();
 builder.Services.AddApplication();
-
+builder.Services.AddTransient<IPushNotificationService, PushNotificationService>();
+builder.Services.AddScoped<IUserNotifierService, UserNotifierService>();
 
 var app = builder.Build();
 

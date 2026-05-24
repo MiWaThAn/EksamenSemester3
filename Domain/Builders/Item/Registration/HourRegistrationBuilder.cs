@@ -10,10 +10,16 @@ namespace Domain.Builders.Item.Registration
     public class HourRegistrationBuilder : RegistrationBuilder<HourRegistrationBuilder, HourRegistration>
     {
         private DateTime Start;
+        private DateTime? End;
         private TimeType TimeType;
         public HourRegistrationBuilder WithStart(DateTime startTime)
         {
             Start = startTime;
+            return this;
+        }
+        public HourRegistrationBuilder WithEnd(DateTime endTime)
+        {
+            End = endTime;
             return this;
         }
         public HourRegistrationBuilder WithType(TimeType timeType)
@@ -23,7 +29,7 @@ namespace Domain.Builders.Item.Registration
         }
         internal override HourRegistration Build()
         {
-            return new HourRegistration(WorkLog,ActivityId, Start, Description, Status,TimeType);
+            return new HourRegistration(ProjectId,WorkLog,ActivityId, Start,End, Status,Description);
         }
     }
 }

@@ -4,6 +4,7 @@ using Application.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Model;
+using System.Security.Claims;
 
 namespace API.Controllers
 {
@@ -21,10 +22,19 @@ namespace API.Controllers
         // GET: api/employee/company/{companyId}
         // Denne rute henter medarbejdere for et firma
         [HttpGet("company/{companyId}")]
-        public async Task<ActionResult<IEnumerable<CompanyEmployeeModel>>> GetByCompany(Guid companyId)
+        public async Task<IActionResult> GetEmployees(Guid companyId)
         {
-            var result = await _mediator.Send(new GetEmployeesByCompanyQuery(companyId));
-            return Ok(result); 
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid loggedInAccountId))
+            {
+                return Unauthorized("Ugyldig eller manglende token.");
+            }
+
+            GetEmployeesByCompanyQuery query = new(companyId, loggedInAccountId);
+
+            var result = await _mediator.Send(query);
+            return Ok(result);
         }
 
         [HttpGet("company/employee/{id:guid}")]
@@ -35,7 +45,7 @@ namespace API.Controllers
 
             if (result == null)
             {
-                return NotFound($"Kunne ikke finde medarbejderen, legend.");
+                return NotFound($"Kunne ikke finde medarbejderen.");
             }
 
             return Ok(result);
@@ -63,6 +73,33 @@ namespace API.Controllers
         {
             EmployeeDTO result = await _mediator.Send(command);
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+        }
+
+        // PUT: api/employee/company/employee/{id}
+        // Opdaterer medarbejderens oplysninger
+        [HttpPut("company/employee/{id:guid}")]
+        public async Task<IActionResult> UpdateEmployee(Guid id, [FromBody] DetailedEmployeeModel model)
+        {
+            if (model == null || id != model.Id)
+            {
+                return BadRequest("Data-mismatch eller manglende body");
+            }
+
+            var command = new UpdateEmployeeDetailsCommand(
+                model.Id,
+                model.FullName,
+                model.Email,
+                model.MobileNumber
+            );
+
+            var isSuccess = await _mediator.Send(command);
+
+            if (!isSuccess)
+            {
+                return NotFound("Kunne ikke opdatere medarbejderen i databasen.");
+            }
+
+            return NoContent();
         }
     }
 }

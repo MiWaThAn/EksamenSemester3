@@ -4,7 +4,7 @@ using MediatR;
 using Shared.Model;
 namespace Application.Commands.Person.Handlers
 {
-    internal class GetDetailedEmployeeHandler : IRequestHandler<GetDetailedEmployeeQuery, DetailedEmployeeModel?>
+    public class GetDetailedEmployeeHandler : IRequestHandler<GetDetailedEmployeeQuery, DetailedEmployeeModel?>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -29,6 +29,8 @@ namespace Application.Commands.Person.Handlers
                 FullName = employee.Name,
                 Email = employee.Email?.Value ?? string.Empty,
                 MobileNumber = employee.Account?.PhoneNumber?.Value ?? string.Empty,
+                IsLocal = employee.IsLocal,
+
                 Projects = relatedProjects?.Select(p => new CompanyProjectModel
                 {
                     Id = p.Id,

@@ -38,17 +38,19 @@ namespace Domain.Entity.Person
         public bool IsEmployeeAccount => EmployeeId.HasValue;
 
         //Password Recovery
-        private string? RecorveryToken;
-        private DateTime? RecoveryExpiry;
+        public string? RecorveryToken { get; private set; }
+        public DateTime? RecoveryExpiry { get; private set; }
 
         //Last time the account pinged the server (last activity time)
-        public DateTime LastLogin { get; internal set; } 
+        public DateTime LastLogin { get; internal set; }
+        private readonly List<DeviceToken> _deviceTokens = new();
+        public IReadOnlyCollection<DeviceToken> DeviceTokens => _deviceTokens.AsReadOnly();
 
         public Account() : base()
         {
 
         }
-        internal Account(string username, string hashedPassword, PhoneNumber phoneNumber,string? hashedPin,Employee? employee,Company? company) : base()
+        internal Account(string username, string hashedPassword, PhoneNumber phoneNumber, string? hashedPin, Employee? employee, Company? company) : base()
         {
             Guard.AgainstNullOrEmpty(hashedPassword, nameof(hashedPassword));
             Guard.AgainstNullOrEmpty(username, nameof(username));
@@ -57,8 +59,8 @@ namespace Domain.Entity.Person
             PhoneNumber = phoneNumber;
             UpdatedAt = DateTime.UtcNow;
             HashedPin = hashedPin;
-            if (Company != null) LinkToCompany(Company);
-            if (Employee != null) LinkToEmployee(Employee);
+            if (company != null) LinkToCompany(company);
+            if (employee != null) LinkToEmployee(employee);
         }
         public void UpdatePhoneNumber(PhoneNumber phoneNumber)
         {
@@ -99,8 +101,8 @@ namespace Domain.Entity.Person
             Guard.AgainstNull(builder, nameof(builder));
             Guard.AgainstNull(companyFactory, nameof(companyFactory));
             builder = builder.WithAccount(this);
-            var result = await companyFactory.CreateAsync(builder, this,ct);
-            if(result.IsSuccess)
+            var result = await companyFactory.CreateAsync(builder, this, ct);
+            if (result.IsSuccess)
             {
                 LinkToCompany(result.Value);
             }
@@ -135,6 +137,14 @@ namespace Domain.Entity.Person
             HashedPassword = newPasswordHash;
             RecorveryToken = null;
             RecoveryExpiry = null;
+        }
+        public void AddDeviceToken(string token)
+        {
+            if (string.IsNullOrWhiteSpace(token)) return;
+            if (!_deviceTokens.Select(t=>t.Value).Contains(token))
+            {
+                _deviceTokens.Add(new DeviceToken(this, token));
+            }
         }
     }
 }

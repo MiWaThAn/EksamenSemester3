@@ -19,6 +19,7 @@ namespace Application.Interfaces
         ICustomerRepository Customers { get; }
         IEmployeeRepository Employees { get; }
         ICompanyRepository Companies { get; }
+        INotificationRepository Notifications { get; }
 
         //Auth
         IAccountRepository Accounts { get; }

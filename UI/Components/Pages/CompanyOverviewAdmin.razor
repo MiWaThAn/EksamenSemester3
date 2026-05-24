@@ -1,7 +1,9 @@
 ﻿@page "/company-employees"
 @using Shared.Model;
+@using UI.Services.Auth;
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@inject IAuthService AuthService
 
 <div class="admin-container">
     <div class="tab-header">
@@ -17,17 +19,24 @@
     </div>
 
     <div class="list-wrapper shadow-box">
+        @if (!string.IsNullOrWhiteSpace(errorString))
+        {
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm" role="alert">
+                <span>@errorString</span>
+            </div>
+        }
+
         @if (activeTab == "employees")
         {
-            @if (employees == null)
+            @if (employees == null && string.IsNullOrWhiteSpace(errorString))
             {
                 <p style="padding: 20px;">Henter medarbejdere...</p>
             }
-            else if (!employees.Any())
+            else if (employees != null && !employees.Any())
             {
                 <p style="padding: 20px;">Ingen medarbejdere fundet.</p>
             }
-            else
+            else if (employees != null)
             {
                 @foreach (var emp in employees)
                 {
@@ -47,15 +56,15 @@
         }
         else
         {
-            @if (projects == null)
+            @if (projects == null && string.IsNullOrWhiteSpace(errorString))
             {
                 <p style="padding: 20px;">Henter projekter...</p>
             }
-            else if (!projects.Any())
+            else if (projects != null && !projects.Any())
             {
                 <p style="padding: 20px;">Ingen projekter fundet.</p>
             }
-            else
+            else if (projects != null)
             {
                 @foreach (var proj in projects)
                 {
@@ -82,44 +91,105 @@
     private string activeTab = "employees";
     private List<CompanyEmployeeModel>? employees;
     private List<CompanyProjectModel>? projects;
-    private string testCompanyId = "1F38968B-1A7E-443E-BD2D-1C1066EB821E"; // TODO: Erstat med dynamisk værdi senere
+    private string? errorString;
+
+    private string? loggedInUserId;
+    private string? dynamicCompanyId;
+    [Inject] private JwtAuthStateProvider AuthStateProvider { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadEmployeeData();
-    }
-
-    private string? tekniskFejl;
-
-    private async Task LoadEmployeeData()
-    {
         try
         {
-            tekniskFejl = null;
-            employees = await Http.GetFromJsonAsync<List<CompanyEmployeeModel>>($"api/employee/company/{testCompanyId}");
+            errorString = null;
+
+            var token = await SecureStorage.GetAsync("auth_token");
+
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                errorString = "Ingen aktiv session fundet. Prøv at logge ind igen.";
+                return;
+            }
+
+            var claims = AuthStateProvider.ParseClaimsFromJwt(token);
+
+            bool isSystemAdmin = claims.Any(c => c.Type == "permission" && c.Value.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+                                 || claims.Any(c => c.Type == "role" && c.Value.Equals("Admin", StringComparison.OrdinalIgnoreCase));
+
+            var employeeIdClaim = claims.FirstOrDefault(c => c.Type == "employee_id")?.Value;
+            bool isEmployee = !string.IsNullOrWhiteSpace(employeeIdClaim) && Guid.TryParse(employeeIdClaim, out _);
+
+            if (!isSystemAdmin && isEmployee)
+            {
+                errorString = "Adgang nægtet: Denne sektion er forbeholdt virksomhedens ejer eller en administrator.";
+                return;
+            }
+
+            loggedInUserId = AuthService.GetUserId(token);
+
+            if (string.IsNullOrEmpty(loggedInUserId))
+            {
+                errorString = "Kunne ikke finde dit bruger-ID i sessionen.";
+                return;
+            }
+
+            var response = await Http.GetFromJsonAsync<CompanyResponse>($"api/account/company-id/{loggedInUserId}");
+
+            if (response != null)
+            {
+                dynamicCompanyId = response.CompanyId.ToString();
+            }
+
+            if (string.IsNullOrEmpty(dynamicCompanyId))
+            {
+                errorString = "Kunne ikke identificere din virksomhed ud fra din konto. Prøv igen.";
+                return;
+            }
+
+            await LoadEmployeeData();
         }
         catch (Exception ex)
         {
-            var denReelleFejl = ex.InnerException ?? ex;
-            tekniskFejl = $"Fejltype: {denReelleFejl.GetType().Name}\nBesked: {denReelleFejl.Message}\n\nStack: {ex.StackTrace}";
-            Console.WriteLine(tekniskFejl);
+            var errorHandler = ex.InnerException ?? ex;
+            errorString = $"Fejl under initialisering: {errorHandler.Message}";
+            Console.WriteLine(errorString);
+        }
+    }
+
+    private async Task LoadEmployeeData()
+    {
+        if (string.IsNullOrEmpty(dynamicCompanyId) || !string.IsNullOrEmpty(errorString)) return;
+        try
+        {
+            employees = await Http.GetFromJsonAsync<List<CompanyEmployeeModel>>($"api/employee/company/{dynamicCompanyId}");
+        }
+        catch (Exception ex)
+        {
+            var errorHandler = ex.InnerException ?? ex;
+            errorString = $"Fejl ved hentning af medarbejdere: {errorHandler.Message}";
+            Console.WriteLine(errorString);
         }
     }
 
     private async Task LoadProjectData()
     {
+        if (string.IsNullOrEmpty(dynamicCompanyId) || !string.IsNullOrEmpty(errorString)) return;
         try
         {
-            projects = await Http.GetFromJsonAsync<List<CompanyProjectModel>>($"api/project/company/{testCompanyId}");
+            projects = await Http.GetFromJsonAsync<List<CompanyProjectModel>>($"api/project/company/{dynamicCompanyId}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Fejl ved hentning af projekter: {ex.Message}");
+            var errorHandler = ex.InnerException ?? ex;
+            errorString = $"Fejl ved hentning af projekter: {errorHandler.Message}";
+            Console.WriteLine(errorString);
         }
     }
 
     private async Task SwitchTab(string tabName)
     {
+        if (!string.IsNullOrEmpty(errorString)) return;
+
         activeTab = tabName;
 
         if (activeTab == "employees")
@@ -141,5 +211,10 @@
     private void NavigateToProjectDetails(Guid projectId)
     {
         Navigation.NavigateTo($"/specific-project-admin/{projectId}");
+    }
+
+    public class CompanyResponse
+    {
+        public Guid CompanyId { get; set; }
     }
 }
