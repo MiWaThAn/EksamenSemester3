@@ -127,7 +127,7 @@
                 errorMessage = "Telefonnummeret skal være præcis 8 cifre uden landekode (f.eks. 12345678).";
                 isLoading = false;
                 return;
-            }
+            } 
 
             var response = await Http.PutAsJsonAsync($"api/Employee/company/employee/{employeeId}", editModel);
 
