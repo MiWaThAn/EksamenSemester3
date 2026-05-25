@@ -40,7 +40,6 @@ namespace API.Controllers
         {
             EmployeeDTO result = await _mediator.Send(command);
 
-            // Peg på det sikre detalje-endpoint i stedet
             return CreatedAtAction(nameof(GetDetailedEmployee), new { id = result.Id }, result);
         }
 

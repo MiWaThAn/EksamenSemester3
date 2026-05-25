@@ -35,13 +35,10 @@ namespace Infrastructure
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString, bool useInMemory = false)
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString)
         {
-            if (!useInMemory && !string.IsNullOrEmpty(connectionString))
-            {
-                services.AddDbContext<AppDbContext>(options =>
-                    options.UseSqlServer(connectionString));
-            }
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(connectionString));
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 

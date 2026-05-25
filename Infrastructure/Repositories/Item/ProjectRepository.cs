@@ -42,19 +42,12 @@ namespace Infrastructure.Repositories.Item
         }
         public async Task<Project?> GetByIdWithDetailsAsync(Guid projectId, CancellationToken cancellationToken = default)
         {
-            var query = _context.Projects
+            return await _context.Projects
                 .Include(p => p.Activities)
                     .ThenInclude(pa => pa.Activity)
                 .Include(p => p.Registrations)
-                .AsQueryable();
-
-            // bruges til at gøre det muligt for in memory test at kunne håndtere include, da in memory ikke understøtter include på samme måde som en relationel database
-            if (_context.Database.IsRelational())
-            {
-                query = query.AsSplitQuery();
-            }
-
-            return await query.FirstOrDefaultAsync(p => p.Id == projectId, cancellationToken);
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(p => p.Id == projectId, cancellationToken);
         }
     }
 }

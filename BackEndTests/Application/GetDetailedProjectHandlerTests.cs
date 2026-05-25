@@ -77,7 +77,6 @@ namespace BackEndTests.Application
                 EndDate = DateTime.UtcNow.AddHours(5)
             };
 
-            // Setup af private felt for aktiviteter
             var internalActivitiesField = typeof(Project).GetField("_activities", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             if (internalActivitiesField != null)
             {
@@ -96,7 +95,6 @@ namespace BackEndTests.Application
             _mockUnitOfWork.Setup(uow => uow.Employees.GetEmployeesRelatedToProjectAsync(projectId))
                           .ReturnsAsync(relatedEmployees);
 
-            // DENNE SETUP MANGLER I DIN TEST
             var dummyAccount = new Account { Id = accountId, CompanyId = companyId };
             _mockUnitOfWork.Setup(uow => uow.Accounts.GetByIdAsync(accountId, It.IsAny<CancellationToken>()))
                           .ReturnsAsync(dummyAccount);

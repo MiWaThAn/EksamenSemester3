@@ -34,12 +34,9 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
-// if testing it runs this instead
-if (builder.Environment.EnvironmentName != "Testing")
-{
-    builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-}
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -56,8 +53,7 @@ builder.Services.AddTransient<ICompanyFactory, CompanyFactory>();
 builder.Services.AddTransient<IProviderFactory, ProviderFactory>();
 //INFRASTRUCTURE
 var connectionstring = builder.Configuration.GetConnectionString("DefaultConnection");
-bool isTest = builder.Environment.EnvironmentName == "Testing";
-builder.Services.AddInfrastructure(connectionstring, isTest); //FROM DEPENDENCY INJECTION IN INFRASTRUCTURE
+builder.Services.AddInfrastructure(connectionstring);
 builder.Services.AddScoped<IAdapterRegistry, AdapterRegistry>();
 builder.Services.AddScoped<IProviderAdapter, EconomicAdapter>();
 
@@ -72,7 +68,7 @@ builder.Services.AddScoped<IEntitySyncHandler, ActivitySyncHandler>();
 builder.Services.AddScoped<IEntitySyncHandler, ExpenseSyncHandler>();
 builder.Services.AddScoped<IPasswordResetEmailService, PasswordResetEmailService>();
 
-//builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails(); // Giver flottere standard-fejlformater
 
 
