@@ -2,19 +2,27 @@
 @inject IJSRuntime JS
 
 
-<h2>Stop-Ur</h2>
+<h2 class="text-center mb-4">Stop-Ur</h2>
 
-<div style="font-size:2rem; margin-bottom:1rem;">
+<div class="text-center mb-4" style="font-size:2rem; margin-bottom:1rem;">
 	<span id="display">00:00:00.0</span>
 </div>
 
-<button type="button" @onclick="Start">Start</button>
-<button type="button" @onclick="Stop">Stop</button>
-<button type="button" @onclick="Reset">Reset</button>
-
+<div class="d-flex justify-content-center gap-2">
+@if (!_isRunning)
+{
+	<button class="btn btn-success btn-lg" @onclick="Start">Start</button>
+}
+@if (_isRunning)
+{
+	<button class="btn btn-success btn-lg" @onclick="Stop">Pause</button>
+}
+<button class="btn btn-danger btn-lg" @onclick="Reset">Nulstil</button>
+</div>
 
 @code {
 	private IJSObjectReference? _module;
+	private bool _isRunning = false;
 
 	protected override async Task OnAfterRenderAsync (bool firstrender)
 	{
@@ -24,7 +32,26 @@
 			await _module.InvokeVoidAsync("initializeStopwatch");
 		}
 	}
-	private async Task Start() => await _module!.InvokeVoidAsync("startStopwatch");
-	private async Task Stop() => await _module!.InvokeVoidAsync("stopStopwatch");
-	private async Task Reset() => await _module!.InvokeVoidAsync("resetStopwatch");
+	private async Task Start()
+	{
+		await _module!.InvokeVoidAsync("startStopwatch");
+		_isRunning = true;
+	}
+	private async Task Stop()
+	{
+		await _module!.InvokeVoidAsync("stopStopwatch");
+		_isRunning = false;
+	}
+	private async Task Reset()
+	{
+		await _module!.InvokeVoidAsync("resetStopwatch");
+		_isRunning = false;
+	}
 }
+
+
+
+<div class="d-flex justify-content-center gap-2 mt-4">
+	<button class="btn btn-primary btn-lg" type="button">Registrer tid</button>
+	<button class="btn btn-secondary btn-lg" type="button">Manuelt indtast tid</button>
+</div>
