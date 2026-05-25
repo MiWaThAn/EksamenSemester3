@@ -45,8 +45,8 @@ namespace Domain.Entity.Person
         
 
 
-        // hvis true så kan man redigere medarbejder lokalt
-        public bool IsLocal { get; internal set; } = false;
+        
+        
 
         //Medarbejder registreringer
         private readonly List<WorkLog> _workLogs = new();

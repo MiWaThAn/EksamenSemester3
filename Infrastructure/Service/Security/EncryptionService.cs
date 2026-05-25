@@ -75,9 +75,6 @@ namespace Infrastructure.Service.Security
 
             return Encoding.UTF8.GetString(plainBytes);
         }
-        Task<string> IEncryptionService.UnEncrypt(string input)
-        {
-            throw new NotImplementedException();
-        }
+        
     }
 }

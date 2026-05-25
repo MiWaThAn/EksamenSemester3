@@ -26,7 +26,7 @@ namespace Infrastructure.Adapters.Economic
                 "employee" => MapEmployees(json, entityType, companyId),
                 "project" => MapProjects(json, entityType, companyId),
                 "customer" => MapCustomers(json, entityType, companyId),
-                "projectActivity" => MapProjectActivities(json, entityType, companyId),
+                "projectactivity" => MapProjectActivities(json, entityType, companyId),
                 "activity" => MapActivities(json, entityType, companyId),
                 "expense" => MapExpenses(json, entityType, companyId),
                 _ => throw new Exception(

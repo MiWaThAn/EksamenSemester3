@@ -29,20 +29,21 @@ namespace Infrastructure.Service
         {
             var client = _httpClientFactory.CreateClient();
 
-            var decryptedValue = await _encryptionService.UnEncrypt(credential.EncryptedValue);
+            var decryptedValue = _encryptionService.Decrypt(credential.EncryptedValue);
 
+            
+            client.DefaultRequestHeaders.Add("X-AgreementGrantToken", decryptedValue);
+
+            
             var appSecret = _configuration["ExternalProviders:Economic:X-AppSecretToken"];
-            client.DefaultRequestHeaders.Add($"X-AppSecretToken", appSecret);
-            client.DefaultRequestHeaders.Add($"{credential.Key}", decryptedValue);
+            client.DefaultRequestHeaders.Add("X-AppSecretToken", appSecret);
 
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
             var response = await client.GetAsync(url);
             if (!response.IsSuccessStatusCode)
-            {
                 throw new HttpRequestException($"Kunne ikke hente kunder fra e-conomic: {response.StatusCode}");
-            }
 
-            response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
         }
 

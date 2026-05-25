@@ -105,9 +105,9 @@ namespace Infrastructure.Data.Seeding
                 DataSource.From("economic"),
                 new Dictionary<IntegrationEntityType, string>
                 {
-            { IntegrationEntityType.From("customer", 1), "https://restapi.e-conomic.com/customers" },
-            { IntegrationEntityType.From("employee", 2), "https://restapi.e-conomic.com/employees" },
-            { IntegrationEntityType.From("project", 3), "https://restapi.e-conomic.com/projects" },
+            { IntegrationEntityType.From("customer", 1), "https://apis.e-conomic.com/customersapi/v3.1.0/Customers" },
+            { IntegrationEntityType.From("employee", 2), "https://apis.e-conomic.com/projectsapi/v1.1.0/Employees" },
+            { IntegrationEntityType.From("project", 3), "https://apis.e-conomic.com/projectsapi/v1.1.0/Projects" },
                 });
 
             if (result.IsFailure)

@@ -19,7 +19,8 @@ namespace Application.Commands.Person.Handlers.Integration
             {
                 Id = s.Id,
                 ProviderName = s.Provider.Datasource.Value,
-                KeyName = s.Credential.Key
+                KeyName = s.Credential.Key,
+                SelectedEntityTypes = s.EntityTypes.Select(e => e.EntityType.Value).ToList()
             });
         }
     }

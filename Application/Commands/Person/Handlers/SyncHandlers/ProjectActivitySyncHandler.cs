@@ -28,7 +28,7 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
 
         public bool CanHandle(IntegrationEntityType entityType)
         {
-            return entityType.Value == "projectActivity";
+            return entityType.Value == "projectactivity";
         }
         private async Task<ProjectActivity> CreateEntity(ISyncEntity syncEntity)
         {
@@ -119,7 +119,7 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
                     .WithObjectVersion(syncEntity.ObjectVersion));
 
 
-
+                await _unitOfWork.Mappings.AddAsync(mapping);
                 await _unitOfWork.ProjectActivities.AddAsync(projectActivity);
                 await _unitOfWork.CompleteAsync();
                 await _unitOfWork.CommitTransactionAsync();

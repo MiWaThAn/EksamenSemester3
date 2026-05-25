@@ -76,11 +76,12 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
 
 
 
-            setting.CreateMapping(new IntegrationMappingBuilder()
+            var mapping = setting.CreateMapping(new IntegrationMappingBuilder()
                     .WithLocalId(customer)
                     .WithEntityType(entityType)
                     .WithExternalId(syncEntity.ExternalId)
                     .WithObjectVersion(syncEntity.ObjectVersion));
+                await _unitOfWork.Mappings.AddAsync(mapping);
                 await _unitOfWork.Customers.AddAsync(customer);
                 await _unitOfWork.CompleteAsync();
                 await _unitOfWork.CommitTransactionAsync();

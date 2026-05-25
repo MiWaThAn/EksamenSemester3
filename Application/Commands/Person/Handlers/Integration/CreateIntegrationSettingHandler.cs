@@ -29,7 +29,7 @@ public class CreateIntegrationSettingHandler(IUnitOfWork _unitOfWork, IEncryptio
                 .Select(IntegrationEntityType.From)
                 .ToList();
 
-            var encryptedValue = await _encryptionService.Encrypt(request.KeyValue);
+            var encryptedValue =  _encryptionService.Encrypt(request.KeyValue);
 
             var builder = new IntegrationSettingBuilder()
                 .WithProvider(provider)
@@ -38,7 +38,7 @@ public class CreateIntegrationSettingHandler(IUnitOfWork _unitOfWork, IEncryptio
                 .WithIntegrationEntityTypes(entityTypes);
 
             var setting = company.CreateIntegrationSetting(builder);
-
+            await _unitOfWork.IntegrationSettings.AddAsync(setting, cancellationToken);
             await _unitOfWork.CompleteAsync(cancellationToken);
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
 

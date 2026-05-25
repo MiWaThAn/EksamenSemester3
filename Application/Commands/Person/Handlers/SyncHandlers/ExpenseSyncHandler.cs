@@ -61,12 +61,13 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
             {
                 await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted);
                 var expense = await CreateEntity(syncEntity);
-                setting.CreateMapping(
+                var mapping = setting.CreateMapping(
                     new IntegrationMappingBuilder()
                         .WithLocalId(expense)
                         .WithEntityType(entityType)
                         .WithExternalId(syncEntity.ExternalId)
                         .WithObjectVersion(syncEntity.ObjectVersion));
+                await _unitOfWork.Mappings.AddAsync(mapping);
                 await _unitOfWork.Expenses.AddAsync(expense);
                 await _unitOfWork.CompleteAsync();
                 await _unitOfWork.CommitTransactionAsync();

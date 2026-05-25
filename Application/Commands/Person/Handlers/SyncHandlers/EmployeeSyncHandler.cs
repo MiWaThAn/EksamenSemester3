@@ -64,12 +64,13 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
 
                 
 
-                setting.CreateMapping(
+                var mapping = setting.CreateMapping(
                     new IntegrationMappingBuilder()
                         .WithLocalId(employee)
                         .WithEntityType(entityType)
                         .WithExternalId(syncEntity.ExternalId)
                         .WithObjectVersion(syncEntity.ObjectVersion));
+                await _unitOfWork.Mappings.AddAsync(mapping);
                 await _unitOfWork.Employees.AddAsync(employee);
                 await _unitOfWork.CompleteAsync();
                 await _unitOfWork.CommitTransactionAsync();

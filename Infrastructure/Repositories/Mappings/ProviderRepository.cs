@@ -19,7 +19,9 @@ namespace Infrastructure.Repositories.Mappings
 
         public async Task<Provider?> FindByDatasourceAsync(DataSource datasource)
         {
-            return await _context.Providers.FirstOrDefaultAsync(p => p.Datasource == datasource);
+            return await _context.Providers
+                .Include(p => p.Urls)
+                .FirstOrDefaultAsync(p => p.Datasource == datasource);
         }
 
     }
