@@ -1,9 +1,10 @@
 ﻿@page "/employee-projects"
-@using Shared.Model
-@using UI.Services.Auth
+@using Shared.Model;
+@using UI.Services.Auth;
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @inject IAuthService AuthService
+@inject JwtAuthStateProvider AuthStateProvider
 
 <div class="admin-container">
     <div class="p-4 border-b bg-white rounded-t-xl">
@@ -55,8 +56,25 @@
     {
         try
         {
-            errorString = null;
+            // 1. Tjek token først
+            var token = await SecureStorage.GetAsync("auth_token");
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                errorString = "Ingen aktiv session fundet.";
+                return;
+            }
 
+            // 2. Valider rettigheder (Er de medarbejder?)
+            var claims = AuthStateProvider.ParseClaimsFromJwt(token);
+            var employeeIdClaim = claims.FirstOrDefault(c => c.Type == "employee_id")?.Value;
+
+            if (string.IsNullOrWhiteSpace(employeeIdClaim))
+            {
+                errorString = "Adgang nægtet: Du er ikke registreret som medarbejder.";
+                return;
+            }
+
+            // 3. Hent data
             var response = await Http.GetAsync("api/project/employee/projects");
 
             if (response.IsSuccessStatusCode)
@@ -65,22 +83,12 @@
             }
             else
             {
-                var serverErrorMessage = await response.Content.ReadAsStringAsync();
-
-                if (!string.IsNullOrWhiteSpace(serverErrorMessage))
-                {
-                    errorString = serverErrorMessage;
-                }
-                else
-                {
-                    errorString = $"Serveren svarede med fejlkode: {response.StatusCode}";
-                }
+                errorString = await response.Content.ReadAsStringAsync();
             }
         }
         catch (Exception ex)
         {
-            var errorHandler = ex.InnerException ?? ex;
-            errorString = $"Frontend Netværksfejl: {errorHandler.Message}";
+            errorString = $"Fejl: {ex.Message}";
         }
     }
 

@@ -4,6 +4,7 @@
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @inject IAuthService AuthService
+@inject JwtAuthStateProvider AuthStateProvider
 
 <div class="admin-container">
     <div class="tab-header">
@@ -95,7 +96,6 @@
 
     private string? loggedInUserId;
     private string? dynamicCompanyId;
-    [Inject] private JwtAuthStateProvider AuthStateProvider { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {

@@ -19,24 +19,6 @@ namespace API.Controllers
             _mediator = mediator;
         }
 
-        // GET: api/employee/company/{companyId}
-        // Denne rute henter medarbejdere for et firma
-        //[HttpGet("company/{companyId}")]
-        //public async Task<IActionResult> GetEmployees(Guid companyId)
-        //{
-        //    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        //    if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid loggedInAccountId))
-        //    {
-        //        return Unauthorized("Ugyldig eller manglende token.");
-        //    }
-
-        //    GetEmployeesByCompanyQuery query = new(companyId, loggedInAccountId);
-
-        //    var result = await _mediator.Send(query);
-        //    return Ok(result);
-        //}
-
         // GET: api/employee/company/employee/{id}
         // Denne rute henter detaljerede oplysninger om en medarbejder baseret på ID
         [HttpGet("company/employee/{id:guid}")]
@@ -50,21 +32,6 @@ namespace API.Controllers
             if (result == null) return NotFound();
             return Ok(result);
         }
-
-        // GET: api/employee/{id}
-        // Denne rute henter en medarbejder baseret på ID
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<EmployeeDTO>> GetById(Guid id)
-        //{
-        //    var result = await _mediator.Send(new GetEmployeeByIdQuery(id));
-
-        //    if (result == null)
-        //    {
-        //        return NotFound(new { Message = $"We couldn't find employee with ID: {id}" });
-        //    }
-
-        //    return Ok(result);
-        //}
 
         // POST: api/employee
         // Denne rute opretter en ny medarbejder

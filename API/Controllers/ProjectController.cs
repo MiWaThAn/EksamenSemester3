@@ -67,7 +67,6 @@ namespace API.Controllers
             {
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-                // Ret denne fra BadRequest til Unauthorized
                 if (string.IsNullOrEmpty(userIdClaim))
                 {
                     return Unauthorized("Du er ikke logget ind.");

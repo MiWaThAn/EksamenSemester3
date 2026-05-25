@@ -49,18 +49,22 @@ namespace BackEndTests.Application
         {
             // Arrange
             var employeeId = Guid.NewGuid();
+            var accountId = Guid.NewGuid();
+            var companyId = Guid.NewGuid();
 
             var dummyEmployee = new Employee
             {
                 Id = employeeId,
                 Name = "Christian Hansen",
                 IsLocal = true,
+                CompanyId = companyId,
                 Email = new EmailAddress("christian@firma.dk")
             };
 
             var dummyAccount = new Account
             {
-                Id = Guid.NewGuid(),
+                Id = accountId,
+                CompanyId = companyId,
                 PhoneNumber = new PhoneNumber("12345678")
             };
             dummyEmployee.Account = dummyAccount;
@@ -69,13 +73,17 @@ namespace BackEndTests.Application
             var proj2 = new Project { Id = Guid.NewGuid(), Name = "Kontor Renovering" };
             var dummyProjects = new List<Project> { proj1, proj2 };
 
+            // Setup Mocks
             _mockUnitOfWork.Setup(uow => uow.Employees.GetByIdWithAccountAsync(employeeId))
                           .ReturnsAsync(dummyEmployee);
+
+            _mockUnitOfWork.Setup(uow => uow.Accounts.GetByIdAsync(accountId, It.IsAny<CancellationToken>()))
+                          .ReturnsAsync(dummyAccount);
 
             _mockUnitOfWork.Setup(uow => uow.Projects.GetProjectsRelatedToEmployeeAsync(employeeId, It.IsAny<CancellationToken>()))
                           .ReturnsAsync(dummyProjects);
 
-            var query = new GetDetailedEmployeeQuery(employeeId, Guid.NewGuid());
+            var query = new GetDetailedEmployeeQuery(employeeId, accountId);
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
