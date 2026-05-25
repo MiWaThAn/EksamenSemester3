@@ -11,30 +11,36 @@ namespace Infrastructure.Adapters.Economic
 {
     public class EconomicAdapter : IProviderAdapter
     {
-        
-        
-            public bool Supports(DataSource datasource) => datasource.Value == "economic";
 
-            public IEnumerable<ISyncEntity> Map(
-                string json,
-                IntegrationEntityType entityType,
-                Guid companyId)
+
+        public bool Supports(DataSource datasource) => datasource.Value == "economic";
+
+
+        public IEnumerable<ISyncEntity> Map(
+            string json,
+            IntegrationEntityType entityType,
+            Guid companyId)
+        {
+            return entityType.Value switch
             {
-                return entityType.Value switch
-                {
-                    "employee" => MapEmployees(json, entityType, companyId),
-                    "project" => MapProjects(json, entityType, companyId),
-                    "customer" => MapCustomers(json, entityType, companyId),
-                    _ => throw new Exception(
-                        $"Economic adapter does not support '{entityType}'.")
-                };
-            }
-
+                "employee" => MapEmployees(json, entityType, companyId),
+                "project" => MapProjects(json, entityType, companyId),
+                "customer" => MapCustomers(json, entityType, companyId),
+                "projectactivity" => MapProjectActivities(json, entityType, companyId),
+                "activity" => MapActivities(json, entityType, companyId),
+                "expense" => MapExpenses(json, entityType, companyId),
+                _ => throw new Exception(
+                    $"Economic adapter does not support '{entityType}'.")
+            };
+        }
+        private static readonly JsonSerializerOptions _jsonOptions = new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
         private IEnumerable<SyncEntity<EmployeeDTO>> MapEmployees(string json, IntegrationEntityType entityType, Guid companyId)
         {
             var response = JsonSerializer.Deserialize<EmployeeDTOResponse>(
-                json, new JsonSerializerOptions{PropertyNameCaseInsensitive = true});
-
+                json, _jsonOptions);
             return response!.Items
                 .Where(dto => !dto.IsBarred)
                 .Select(dto => new SyncEntity<EmployeeDTO>
@@ -54,11 +60,7 @@ namespace Infrastructure.Adapters.Economic
         private IEnumerable<SyncEntity<ProjectDTO>> MapProjects(string json, IntegrationEntityType entityType, Guid companyId)
         {
             var response = JsonSerializer.Deserialize<ProjectDTOResponse>(
-                json,
-                new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                json, _jsonOptions);
 
             return response!.Items.Select(dto => new SyncEntity<ProjectDTO>
             {
@@ -76,15 +78,11 @@ namespace Infrastructure.Adapters.Economic
         private IEnumerable<SyncEntity<CustomerDTO>> MapCustomers(string json, IntegrationEntityType entityType, Guid companyId)
         {
             var response = JsonSerializer.Deserialize<CustomerDTOResponse>(
-                json,
-                new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                json, _jsonOptions);
 
             return response!.Items.Select(dto => new SyncEntity<CustomerDTO>
             {
-                ExternalId = dto.CustomerNumber.ToString(),
+                ExternalId = dto.Number.ToString(),
                 ObjectVersion = dto.ObjectVersion,
                 CompanyId = companyId,
                 ObjectType = entityType,
@@ -95,9 +93,65 @@ namespace Infrastructure.Adapters.Economic
                 }
             });
         }
+        private IEnumerable<SyncEntity<ProjectActivityDTO>> MapProjectActivities(string json, IntegrationEntityType entityType, Guid companyId)
+        {
+            var response = JsonSerializer.Deserialize<ProjectActivityDTOResponse>(json, _jsonOptions);
+            return response!.Items.Select(dto => new SyncEntity<ProjectActivityDTO>
+            {
+                ExternalId = dto.Number.ToString(),
+                ObjectVersion = dto.ObjectVersion,
+                CompanyId = companyId,
+                ObjectType = entityType,
+                Data = new ProjectActivityDTO
+                {
+
+                    ProjectExternalId = dto.ProjectExternalId,
+                    ActivityExternalId = dto.ActivityExternalId,
+                    StartDate = dto.StartDate,
+                    EndDate = dto.EndDate,
+                    ResponsibleEmployeeExternalId = dto.ResponsibleEmployeeExternalId,
+                    Completed = dto.Completed
+                }
+            });
+        }
+        private IEnumerable<SyncEntity<ActivityDTO>> MapActivities(string json, IntegrationEntityType entityType, Guid companyId)
+        {
+            var response = JsonSerializer.Deserialize<ActivityDTOResponse>(json, _jsonOptions);
+            return response!.Items.Select(dto => new SyncEntity<ActivityDTO>
+            {
+                ExternalId = dto.Number.ToString(),
+                ObjectVersion = dto.ObjectVersion,
+                CompanyId = companyId,
+                ObjectType = entityType,
+                Data = new ActivityDTO
+                {
+                    Name = dto.Name,
+                    GroupNumber = dto.GroupNumber,
+                    IsBarred = dto.IsBarred,
+                    HideInSearch = dto.HideInSearch
+                }
+            });
+        }
+
+        private IEnumerable<SyncEntity<ExpenseDTO>> MapExpenses(string json, IntegrationEntityType entityType, Guid companyId)
+        {
+            var response = JsonSerializer.Deserialize<ExpenseDTOResponse>(json, _jsonOptions);
+            return response!.Items.Select(dto => new SyncEntity<ExpenseDTO>
+            {
+                ExternalId = dto.Number.ToString(),
+                ObjectVersion = dto.ObjectVersion,
+                CompanyId = companyId,
+                ObjectType = entityType,
+                Data = new ExpenseDTO
+                {
+                    Name = dto.Name,
+                    IsBarred = dto.IsBarred,
+                }
+            });
 
 
 
+        }
     }
 }
 

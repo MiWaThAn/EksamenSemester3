@@ -1,7 +1,8 @@
-﻿using System;
+﻿using Domain.Entity.Mapping.ValueObjects;
+using Domain.Guards;
+using System;
 using System.Collections.Generic;
 using System.Text;
-using Domain.Entity.Mapping.ValueObjects;
 namespace Domain.Entity.Mapping
 {
     public class IntegrationMapping : Base
@@ -40,5 +41,12 @@ namespace Domain.Entity.Mapping
             if (objectVersion == null) return;
             ObjectVersion = objectVersion;
         }
+        public void UpdateExternalId(string externalId)
+        {
+            Guard.AgainstNullOrEmpty(externalId, nameof(externalId));
+            ExternalId = externalId;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
     }
 }

@@ -55,33 +55,36 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
 
         public async Task CreateAsync(ISyncEntity syncEntity,IntegrationSetting setting,IntegrationEntityType entityType)
         {
-            var customer = await CreateEntity(syncEntity);
             try {
+                await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted);
+            var customer = await CreateEntity(syncEntity);
                 var dto = ((SyncEntity<CustomerDTO>)syncEntity).Data;
 
                 var projectMapping = await _unitOfWork.Mappings
                     .GetByExternalId(syncEntity.ExternalId, syncEntity.ObjectType);
                 var local = projectMapping.FirstOrDefault(m => m.EntityType.Value == "project" && syncEntity.ExternalId == m.ExternalId);
-                await _unitOfWork.Projects.GetByIdAsync(local.LocalId);
-                if (projectMapping != null)
+               
+                if (local != null)
                 {
                     var project =  await _unitOfWork.Projects
                         .GetByIdAsync(local.LocalId);
 
-                     project.LinkToCustomer(customer);
+                     project?.LinkToCustomer(customer);
                 }
 
+              
 
 
-                await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted);
-                await _unitOfWork.Customers.AddAsync(customer);
-            setting.CreateMapping(new IntegrationMappingBuilder()
+
+            var mapping = setting.CreateMapping(new IntegrationMappingBuilder()
                     .WithLocalId(customer)
                     .WithEntityType(entityType)
                     .WithExternalId(syncEntity.ExternalId)
                     .WithObjectVersion(syncEntity.ObjectVersion));
-
-            await _unitOfWork.CommitTransactionAsync();
+                await _unitOfWork.Mappings.AddAsync(mapping);
+                await _unitOfWork.Customers.AddAsync(customer);
+                await _unitOfWork.CompleteAsync();
+                await _unitOfWork.CommitTransactionAsync();
             }
             catch
             {
@@ -96,17 +99,27 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
             var dto = ((SyncEntity<CustomerDTO>)syncEntity).Data;
             try
             {
-              var local = await _unitOfWork.Customers.GetByIdAsync(mapping.LocalId);
-              if (local == null) return;
             await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted);
-                
-              local.UpdateName(dto.Name);
-                if (dto.Email != null && dto.Email != local.Email.Value)
+              var local = await _unitOfWork.Customers.GetByIdAsync(mapping.LocalId);
+                if (local == null)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return;
+                }
+
+                local.UpdateName(dto.Name);
+                if (dto.Email != null && (local.Email == null || dto.Email != local.Email.Value))
                 {
                     local.UpdateContactInfo(new EmailAddress(dto.Email), local.PhoneNumber);
                 }
+                if (mapping.ExternalId != syncEntity.ExternalId)
+                { 
+                    mapping.UpdateExternalId(syncEntity.ExternalId); 
+                }
 
+                
                 mapping.UpdateObjectVersion(syncEntity.ObjectVersion);
+                await _unitOfWork.CompleteAsync();
                 await _unitOfWork.CommitTransactionAsync();
             }
             catch

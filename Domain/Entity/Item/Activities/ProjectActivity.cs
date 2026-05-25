@@ -19,7 +19,7 @@ namespace Domain.Entity.Item.Activities
         public DateTime EndDate { get; internal set; }
         public Guid? ResponsibleEmployeeId { get; internal set; }
         private readonly List<Registration> _registrations = new();
-        public IReadOnlyCollection<Registration> Registrations => _registrations.Where(r=>!r.IsDeleted).ToList().AsReadOnly();
+        public IReadOnlyCollection<Registration> Registrations => _registrations.Where(r => !r.IsDeleted).ToList().AsReadOnly();
         public ProjectActivity() : base()
         {
 
@@ -56,6 +56,15 @@ namespace Domain.Entity.Item.Activities
             Guard.AgainstEmptyGuid(employeeId, nameof(employeeId));
             ResponsibleEmployeeId = employeeId;
             UpdatedAt = DateTime.UtcNow;
+        }
+        public void UpdateStartAndEndDates(DateTime startDate, DateTime endDate)
+        {
+            Guard.AgainstInvalidTimeRange(startDate, endDate);
+            StartDate = startDate;
+            EndDate = endDate;
+            UpdatedAt = DateTime.UtcNow;
+
+
         }
     }
 }

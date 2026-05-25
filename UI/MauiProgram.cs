@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Logging;
 using UI.Services.Auth;
+using UI.Services.Integration;
 using UI.Services.Theme;
 using Plugin.Firebase.CloudMessaging;
 using Microsoft.Maui.LifecycleEvents;
@@ -35,7 +36,7 @@ namespace UI
             builder.Services.AddSingleton<ISecureStorage>(SecureStorage.Default);
             builder.Services.AddScoped<JwtAuthStateProvider>();
             builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<JwtAuthStateProvider>());
-
+            builder.Services.AddScoped<IIntegrationService, IntegrationService>();
             var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
 
             if (string.IsNullOrEmpty(apiBaseUrl))

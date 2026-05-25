@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces.Repo.Item;
 using Domain.Entity.Item;
+using Domain.Entity.Mapping;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -13,6 +14,7 @@ namespace Infrastructure.Repositories.Item
         public ProjectRepository(AppDbContext context) : base(context)
         {
         }
+       
         public async Task<IEnumerable<Project>> GetByEmployeeIdAsync(Guid employeeId, CancellationToken cancellationToken = default)
         {
             return await _context.Projects

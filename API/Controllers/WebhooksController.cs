@@ -1,43 +1,35 @@
-﻿using Application.Interfaces.Adapters;
-using Application.Interfaces.Services.Sync;
-using Azure.Core;
+﻿
+using Application.Commands.Webhooks;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Model.Webhook;
 
 [ApiController]
 [Route("api/[controller]")]
 public class WebhooksController : ControllerBase
 {
-    private readonly IEnumerable<IWebhookParser> _parsers;
 
-    public WebhooksController(IEnumerable<IWebhookParser> parsers)
+    private readonly IMediator _mediator;
+    public WebhooksController(IMediator mediator)
     {
-        _parsers = parsers;
+        _mediator = mediator;
     }
 
-    //[HttpPost]
-    //public async Task<IActionResult> Receive()
-    //{
-    //    //try
-    //    //{
-    //    //    using var reader = new StreamReader(Request.Body);
-    //    //    var rawBody = await reader.ReadToEndAsync();
+    [HttpPost]
+    public async Task<IActionResult> Receive([FromBody]WebhookPayload payload)
+    {
+        try
+        {
+            var command = new HandleWebhookCommand(payload.Cvr,payload.Entity,payload.Url,payload.OldId,payload.Provider);
 
-    //    //     var parser = _parsers.FirstOrDefault(p => p.ProviderName.Equals(providerName, StringComparison.OrdinalIgnoreCase));
 
-    //    //    if (parser == null)
-    //    //        return NotFound("Provider ikke understøttet");
+            await _mediator.Send(command);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message + " || " + ex.InnerException?.Message);
+        }
+    }
 
-    //    //    if (!parser.ValidateSignature(Request.Headers, rawBody))
-    //    //        return Unauthorized("Ugyldig webhook signatur");
-
-    //    //    await parser.ProcessWebhookAsync(rawBody);
-
-    //    //    return Ok();
-    //    //}
-    //    //catch (Exception ex)
-    //    //{
-    //    //    return BadRequest(ex.Message + " || " + ex.InnerException?.Message);
-    //    //}
-    //}
-   
 }

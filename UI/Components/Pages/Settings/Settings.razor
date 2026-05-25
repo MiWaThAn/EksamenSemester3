@@ -1,6 +1,10 @@
 ﻿@page "/settings"
 @inject UI.Services.Theme.ThemeService ThemeService
 @using Microsoft.AspNetCore.Authorization
+@using Shared.Model
+@using UI.Services.Integration
+
+@inject IIntegrationService IntegrationService
 @attribute [Authorize]
 
 <h3>Udsende Indstillinger</h3>
@@ -13,14 +17,118 @@
            value="@ThemeService.BackgroundColor" 
            @onchange="HandleColorChange" />
 </div>
+<h3>Nuværende integrationsindstillinger</h3>
+@if (existingSettings == null)
+{
+    <p>Henter indstillinger...</p>
+}
+else if (!existingSettings.Any())
+{
+    <p>Ingen integrationsindstillinger fundet.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Udbyder</th>
+                <th>Nøgle navn</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var setting in existingSettings)
+            {
+                <tr>
+                    <td>@setting.ProviderName</td>
+                    <td>@setting.KeyName</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm"
+                                @onclick="() => HandleDelete(setting.Id)">
+                            Slet
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<h3>Tilføj ekstern integration</h3>
+@if (providers == null)
+{
+    <p>Henter udbydere...</p>
+}
+else
+{
+    <EditForm Model="model" OnValidSubmit="HandleSubmit">
+        <InputSelect class="form-select mb-3" @bind-Value="model.ProviderName">
+            <option value="">-- Vælg en udbyder --</option>
+            @foreach (var provider in providers)
+            {
+                <option value="@provider.Name">@provider.Name</option>
+            }
+        </InputSelect>
+
+        <input type="text" class="form-control mb-2"
+               placeholder="Indtast navn på nøgle"
+               @bind="model.KeyName" />
+
+        <input type="text" class="form-control mb-2"
+               placeholder="Indtast nøgle"
+               @bind="model.KeyValue" />
+
+        <button type="submit" class="btn btn-primary">Gem</button>
+    </EditForm>
+}
 
 @code {
     private void HandleColorChange(ChangeEventArgs e)
     {
         var selectedColor = e.Value?.ToString();
         if (!string.IsNullOrEmpty(selectedColor))
-        {
             ThemeService.UpdateBackgroundColor(selectedColor);
-        }
+    }
+
+    private FormModel model = new();
+    private List<ProviderModel>? providers;
+    private List<IntegrationSettingModel>? existingSettings;
+
+    protected override async Task OnInitializedAsync()
+    {
+        providers = await IntegrationService.GetProvidersAsync();
+        existingSettings = await IntegrationService.GetMyIntegrationSettingsAsync();
+    }
+
+    private async Task HandleSubmit()
+    {
+        await IntegrationService.CreateIntegrationSettingAsync(
+            model.ProviderName,
+            model.KeyName,
+            model.KeyValue,
+            model.SelectedEntityTypes);
+
+        
+        existingSettings = await IntegrationService.GetMyIntegrationSettingsAsync();
+        model = new();
+    }
+
+    private async Task HandleDelete(Guid settingId)
+    {
+        await IntegrationService.DeleteIntegrationSettingAsync(settingId);
+        existingSettings = await IntegrationService.GetMyIntegrationSettingsAsync();
+    }
+
+    private class FormModel
+    {
+        public string ProviderName { get; set; } = string.Empty;
+        public string KeyName { get; set; } = string.Empty;
+        public string KeyValue { get; set; } = string.Empty;
+        public List<string> SelectedEntityTypes { get; set; } = new();
     }
 }
+
+   
+
+
+
+
