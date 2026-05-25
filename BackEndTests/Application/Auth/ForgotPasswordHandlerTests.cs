@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace BackEndTests
+namespace BackEndTests.Application.Auth
 {
     public class ForgotPasswordHandlerTests
     {
