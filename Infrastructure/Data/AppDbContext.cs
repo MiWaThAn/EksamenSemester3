@@ -312,24 +312,6 @@ namespace Infrastructure.Data
 
             });
 
-            if (Database.IsSqlite())
-            {
-                foreach (var entity in modelBuilder.Model.GetEntityTypes())
-                {
-                    var rowVersion = entity.FindProperty("RowVersion");
-                    if (rowVersion != null)
-                    {
-                        rowVersion.ValueGenerated = Microsoft.EntityFrameworkCore.Metadata.ValueGenerated.Never;
-                        rowVersion.IsConcurrencyToken = false;
-
-                        // Tvinger feltet til at acceptere NULL i SQLite til tests
-                        rowVersion.IsNullable = true;
-                    }
-                }
-            }
-
-
-
         }
     }
 }
