@@ -16,8 +16,8 @@ namespace Application.Interfaces.Services.Sync
 
         public Task SyncAllAsync(Company company);
         public Task SyncSingleAsync(ProviderEndpoint endpoint, IntegrationSetting setting, IntegrationEntityType entityType);
-        
 
+        Task SyncSingleByUrl(IntegrationSetting setting, IntegrationEntityType entityType, string url, string externalId);
 
 
 

@@ -61,7 +61,7 @@ namespace Domain.Entity.Mapping
         }
         public bool SupportsEntityType(IntegrationEntityType entityType)
         {
-            return _urls.Any(u => u.EntityType == entityType);
+            return _urls.Any(u => u.EntityType.Value == entityType.Value);
         }
 
         public void ValidateEntityTypes(List<IntegrationEntityType> entityTypes)

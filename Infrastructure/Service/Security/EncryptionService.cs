@@ -75,5 +75,6 @@ namespace Infrastructure.Service.Security
 
             return Encoding.UTF8.GetString(plainBytes);
         }
+        
     }
 }

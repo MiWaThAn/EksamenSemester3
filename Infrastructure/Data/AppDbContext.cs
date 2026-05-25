@@ -290,8 +290,8 @@ namespace Infrastructure.Data
                     credential.Property(c => c.Key)
                         .HasColumnName("CredentialKey");
 
-                    credential.Property(c => c.Value)
-                        .HasColumnName("CredentialValue");
+                        credential.Property(c => c.EncryptedValue)
+                            .HasColumnName("CredentialValue");
 
 
 

@@ -12,7 +12,9 @@ using Application.Registries;
 using Application.Services;
 using Domain.Interfaces.Item;
 using Domain.Interfaces.Notification;
+using Domain.Interfaces.Mapping;
 using Domain.Interfaces.Person;
+using Domain.Services.Mapping;
 using Domain.Services.Person;
 using Infrastructure;
 using Infrastructure.Adapters;
@@ -51,7 +53,7 @@ builder.Services.AddTransient<IAccountValidationService, AccountValidationServic
 builder.Services.AddTransient<IRegistrationDomainService, RegistrationDomainService>();
 builder.Services.AddTransient<IAccountFactory, AccountFactory>();
 builder.Services.AddTransient<ICompanyFactory, CompanyFactory>();
-
+builder.Services.AddTransient<IProviderFactory, ProviderFactory>();
 //INFRASTRUCTURE
 var connectionstring = builder.Configuration.GetConnectionString("DefaultConnection");
 bool isTest = builder.Environment.EnvironmentName == "Testing";
@@ -65,6 +67,9 @@ builder.Services.AddScoped<IHandlerRegistry, HandlerRegistry>();
 builder.Services.AddScoped<IEntitySyncHandler, CustomerSyncHandler>();
 builder.Services.AddScoped<IEntitySyncHandler, EmployeeSyncHandler>();
 builder.Services.AddScoped<IEntitySyncHandler, ProjectSyncHandler>();
+builder.Services.AddScoped<IEntitySyncHandler, ProjectActivitySyncHandler>();
+builder.Services.AddScoped<IEntitySyncHandler, ActivitySyncHandler>();
+builder.Services.AddScoped<IEntitySyncHandler, ExpenseSyncHandler>();
 builder.Services.AddScoped<IPasswordResetEmailService, PasswordResetEmailService>();
 
 //builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -124,25 +129,21 @@ app.UseAuthorization();
 app.MapControllers();
 
 //dataseeder til at smide noget data ind i vores program fra starten.
-// --- RET DENNE BLOK ---
-if (app.Environment.EnvironmentName != "Testing")
+using (var scope = app.Services.CreateScope())
 {
-    using (var serviceScope = app.Services.CreateScope()) // Omdøbt fra 'scope' til 'serviceScope'
+    var services = scope.ServiceProvider;
+    try
     {
-        var services = serviceScope.ServiceProvider;
-        try
-        {
-            var dbContext = services.GetRequiredService<AppDbContext>(); // Omdøbt fra 'context' til 'dbContext'
-            var hashing = services.GetRequiredService<IHashingService>();
-            var registration = services.GetRequiredService<IRegistrationDomainService>();
-            
-            await DataSeeder.SeedAsync(dbContext, registration, hashing);
-        }
-        catch (Exception ex)
-        {
-            var logger = services.GetRequiredService<ILogger<Program>>();
-            logger.LogError(ex, "An error occurred while seeding the database.");
-        }
+        var context = services.GetRequiredService<AppDbContext>();
+        var hashing = services.GetRequiredService<IHashingService>();
+        var registration = services.GetRequiredService<IRegistrationDomainService>();
+        var providerFactory = services.GetRequiredService<IProviderFactory>();
+        await DataSeeder.SeedAsync(context, registration, hashing, providerFactory);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding the database.");
     }
 }
 

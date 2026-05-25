@@ -1,9 +1,13 @@
 ﻿using Application.DataSeeding.Auth;
 using Application.Interfaces;
 using Domain.Builders.Person;
+using Domain.Entity.Mapping;
+using Domain.Entity.Mapping.ValueObjects;
 using Domain.Entity.Person.Auth;
 using Domain.Interfaces.Item;
+using Domain.Interfaces.Mapping;
 using Domain.Interfaces.Person;
+using Domain.Services.Mapping;
 using Domain.Services.Person;
 using Domain.ValueObjects;
 using Infrastructure.Service.Security;
@@ -16,10 +20,13 @@ namespace Infrastructure.Data.Seeding
 {
     public static class DataSeeder
     {
-        public static async Task SeedAsync(AppDbContext context,IRegistrationDomainService registration,IHashingService hashing)
+        
+
+        public static async Task SeedAsync(AppDbContext context,IRegistrationDomainService registration,IHashingService hashing, IProviderFactory providerFactory)
         {
             await SeedPermsAndRoles(context);
             await SeedCompanyTestAccount(context,hashing,registration);
+            await SeedProviders(context, providerFactory);
         }
         private static async Task SeedPermsAndRoles(AppDbContext context)
         {
@@ -90,5 +97,26 @@ namespace Infrastructure.Data.Seeding
                 }
             }
         }
+        private static async Task SeedProviders(AppDbContext context, IProviderFactory providerFactory)
+        {
+            if (await context.Providers.AnyAsync()) return;
+
+            var result = await providerFactory.CreateAsync(
+                DataSource.From("economic"),
+                new Dictionary<IntegrationEntityType, string>
+                {
+            { IntegrationEntityType.From("customer", 1), "https://apis.e-conomic.com/customersapi/v3.1.0/Customers" },
+            { IntegrationEntityType.From("employee", 2), "https://apis.e-conomic.com/projectsapi/v1.1.0/Employees" },
+            { IntegrationEntityType.From("project", 3), "https://apis.e-conomic.com/projectsapi/v1.1.0/Projects" },
+                });
+
+            if (result.IsFailure)
+                throw new Exception($"Provider seeding failed: {result.Error}");
+
+            context.Providers.Add(result.Value);
+            await context.SaveChangesAsync();
+        }
+
+
     }
 }

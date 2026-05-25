@@ -10,7 +10,7 @@ namespace Domain.Entity.Mapping.ValueObjects
     public class IntegrationCredential
     {
         public string Key { get; private set; } // F.eks. "AgreementGrantToken"
-        public string Value { get; private set; }  // Selve token-strengen
+        public string EncryptedValue { get; private set; }  // Selve token-strengen
 
         public IntegrationCredential()
         {
@@ -22,7 +22,7 @@ namespace Domain.Entity.Mapping.ValueObjects
             Guard.AgainstNullOrEmpty(value, nameof(value));
 
             Key = key;
-            Value = value;
+            EncryptedValue = value;
         }
 
 
