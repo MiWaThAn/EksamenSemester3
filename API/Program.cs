@@ -32,6 +32,13 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
+// if testing it runs this instead
+if (builder.Environment.EnvironmentName != "Testing")
+{
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+}
+
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -47,7 +54,8 @@ builder.Services.AddTransient<ICompanyFactory, CompanyFactory>();
 
 //INFRASTRUCTURE
 var connectionstring = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddInfrastructure(connectionstring); //FROM DEPENDENCY INJECTION IN INFRASTRUCTURE
+bool isTest = builder.Environment.EnvironmentName == "Testing";
+builder.Services.AddInfrastructure(connectionstring, isTest); //FROM DEPENDENCY INJECTION IN INFRASTRUCTURE
 builder.Services.AddScoped<IAdapterRegistry, AdapterRegistry>();
 builder.Services.AddScoped<IProviderAdapter, EconomicAdapter>();
 
@@ -59,7 +67,7 @@ builder.Services.AddScoped<IEntitySyncHandler, EmployeeSyncHandler>();
 builder.Services.AddScoped<IEntitySyncHandler, ProjectSyncHandler>();
 builder.Services.AddScoped<IPasswordResetEmailService, PasswordResetEmailService>();
 
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+//builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails(); // Giver flottere standard-fejlformater
 
 
@@ -94,7 +102,6 @@ builder.Services.AddScoped<IWebhookParser, EconomicWebhookParser>();
 builder.Services.Configure<EconomicOptions>(
     builder.Configuration.GetSection(EconomicOptions.SectionName));
 builder.Services.AddHttpClient<IEconomicApiClient, EconomicApiClient>();
-builder.Services.AddApplication();
 builder.Services.AddTransient<IPushNotificationService, PushNotificationService>();
 builder.Services.AddScoped<IUserNotifierService, UserNotifierService>();
 
@@ -117,20 +124,25 @@ app.UseAuthorization();
 app.MapControllers();
 
 //dataseeder til at smide noget data ind i vores program fra starten.
-using (var scope = app.Services.CreateScope())
+// --- RET DENNE BLOK ---
+if (app.Environment.EnvironmentName != "Testing")
 {
-    var services = scope.ServiceProvider;
-    try
+    using (var serviceScope = app.Services.CreateScope()) // Omdøbt fra 'scope' til 'serviceScope'
     {
-        var context = services.GetRequiredService<AppDbContext>();
-        var hashing = services.GetRequiredService<IHashingService>();
-        var registration = services.GetRequiredService<IRegistrationDomainService>();
-        await DataSeeder.SeedAsync(context, registration,hashing);
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding the database.");
+        var services = serviceScope.ServiceProvider;
+        try
+        {
+            var dbContext = services.GetRequiredService<AppDbContext>(); // Omdøbt fra 'context' til 'dbContext'
+            var hashing = services.GetRequiredService<IHashingService>();
+            var registration = services.GetRequiredService<IRegistrationDomainService>();
+            
+            await DataSeeder.SeedAsync(dbContext, registration, hashing);
+        }
+        catch (Exception ex)
+        {
+            var logger = services.GetRequiredService<ILogger<Program>>();
+            logger.LogError(ex, "An error occurred while seeding the database.");
+        }
     }
 }
 

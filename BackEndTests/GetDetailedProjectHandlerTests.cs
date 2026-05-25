@@ -36,7 +36,7 @@ namespace BackEndTests
             _mockUnitOfWork.Setup(uow => uow.Projects.GetByIdWithDetailsAsync(projectId))
                           .ReturnsAsync((Project?)null);
 
-            var query = new GetDetailedProjectQuery(projectId);
+            var query = new GetDetailedProjectQuery(projectId, Guid.NewGuid());
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
@@ -93,7 +93,7 @@ namespace BackEndTests
             _mockUnitOfWork.Setup(uow => uow.Employees.GetEmployeesRelatedToProjectAsync(projectId))
                           .ReturnsAsync(relatedEmployees);
 
-            var query = new GetDetailedProjectQuery(projectId);
+            var query = new GetDetailedProjectQuery(projectId, Guid.NewGuid());
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);

@@ -67,14 +67,15 @@ namespace API.Controllers
             {
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
+                // Ret denne fra BadRequest til Unauthorized
                 if (string.IsNullOrEmpty(userIdClaim))
                 {
-                    return BadRequest("API Fejl: Kunne slet ikke finde NameIdentifier-claimet i din JWT-token. Er du logget ordentligt ind?");
+                    return Unauthorized("Du er ikke logget ind.");
                 }
 
                 if (!Guid.TryParse(userIdClaim, out Guid loggedInAccountId))
                 {
-                    return BadRequest($"API Fejl: Det NameIdentifier-claim der blev fundet ({userIdClaim}) kunne ikke laves om til en Guid.");
+                    return BadRequest("Ugyldigt format på bruger-ID.");
                 }
 
                 var query = new GetProjectsByEmployeeQuery(loggedInAccountId);

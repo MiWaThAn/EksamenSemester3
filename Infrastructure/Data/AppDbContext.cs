@@ -21,6 +21,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using Activity = Domain.Entity.Item.Activities.Activity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data
 {
@@ -64,6 +65,7 @@ namespace Infrastructure.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
 
             modelBuilder.Entity<Registration>(entity =>
             {
@@ -307,7 +309,26 @@ namespace Infrastructure.Data
                         .IsUnique();
                 });
 
+
             });
+
+            if (Database.IsSqlite())
+            {
+                foreach (var entity in modelBuilder.Model.GetEntityTypes())
+                {
+                    var rowVersion = entity.FindProperty("RowVersion");
+                    if (rowVersion != null)
+                    {
+                        rowVersion.ValueGenerated = Microsoft.EntityFrameworkCore.Metadata.ValueGenerated.Never;
+                        rowVersion.IsConcurrencyToken = false;
+
+                        // Tvinger feltet til at acceptere NULL i SQLite til tests
+                        rowVersion.IsNullable = true;
+                    }
+                }
+            }
+
+
 
         }
     }
