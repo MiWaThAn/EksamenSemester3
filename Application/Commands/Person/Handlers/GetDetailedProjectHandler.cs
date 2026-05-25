@@ -22,9 +22,14 @@ namespace Application.Commands.Person.Handlers
         public async Task<DetailedProjectModel?> Handle(GetDetailedProjectQuery request, CancellationToken ct)
         {
             var project = await _unitOfWork.Projects.GetByIdWithDetailsAsync(request.ProjectId);
+            if (project == null) return null;
 
-            if (project == null)
-                return null;
+            var account = await _unitOfWork.Accounts.GetByIdAsync(request.AccountId, ct);
+
+            if (account == null || account.CompanyId != project.CompanyId)
+            {
+                throw new UnauthorizedAccessException("Du har ikke adgang til dette projekt.");
+            }
 
             var relatedEmployees = await _unitOfWork.Employees.GetEmployeesRelatedToProjectAsync(request.ProjectId);
 

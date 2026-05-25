@@ -14,7 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace BackEndTests
+namespace BackEndTests.Application
 {
     public class GetDetailedProjectHandlerTests
     {
@@ -36,7 +36,7 @@ namespace BackEndTests
             _mockUnitOfWork.Setup(uow => uow.Projects.GetByIdWithDetailsAsync(projectId))
                           .ReturnsAsync((Project?)null);
 
-            var query = new GetDetailedProjectQuery(projectId);
+            var query = new GetDetailedProjectQuery(projectId, Guid.NewGuid());
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
@@ -51,6 +51,7 @@ namespace BackEndTests
             // Arrange
             var projectId = Guid.NewGuid();
             var companyId = Guid.NewGuid();
+            var accountId = Guid.NewGuid();
 
             var dummyProject = new Project
             {
@@ -87,13 +88,18 @@ namespace BackEndTests
             var emp2 = new Employee { Id = Guid.NewGuid(), Name = "Berit Friis" };
             var relatedEmployees = new List<Employee> { emp1, emp2 };
 
+            // Mocks
             _mockUnitOfWork.Setup(uow => uow.Projects.GetByIdWithDetailsAsync(projectId))
                           .ReturnsAsync(dummyProject);
 
             _mockUnitOfWork.Setup(uow => uow.Employees.GetEmployeesRelatedToProjectAsync(projectId))
                           .ReturnsAsync(relatedEmployees);
 
-            var query = new GetDetailedProjectQuery(projectId);
+            var dummyAccount = new Account { Id = accountId, CompanyId = companyId };
+            _mockUnitOfWork.Setup(uow => uow.Accounts.GetByIdAsync(accountId, It.IsAny<CancellationToken>()))
+                          .ReturnsAsync(dummyAccount);
+
+            var query = new GetDetailedProjectQuery(projectId, accountId);
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);

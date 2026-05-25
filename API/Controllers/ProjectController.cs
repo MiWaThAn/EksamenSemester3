@@ -1,7 +1,9 @@
 ﻿using Application.Commands.Person.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using static Application.Commands.Person.Queries.GetProjectsByCompanyQuery;
+
 
 namespace API.Controllers
 {
@@ -19,15 +21,35 @@ namespace API.Controllers
         [HttpGet("company/{companyId:guid}")]
         public async Task<IActionResult> GetCompanyProjects(Guid companyId)
         {
-            var result = await _mediator.Send(new GetProjectsByCompanyQuery(companyId));
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid loggedInAccountId))
+            {
+                return Unauthorized("Kunne ikke identificere bruger.");
+            }
+
+            var myCompanyId = await _mediator.Send(new GetCompanyIdByAccountIdQuery(loggedInAccountId));
+
+            if (myCompanyId != companyId)
+            {
+                return Forbid();
+            }
+
+            var result = await _mediator.Send(new GetProjectsByCompanyQuery(companyId));
             return Ok(result);
         }
 
         [HttpGet("company/project/{id:guid}")]
         public async Task<IActionResult> GetDetailedProject(Guid id)
         {
-            var query = new GetDetailedProjectQuery(id);
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userIdClaim, out Guid loggedInAccountId))
+            {
+                return Unauthorized("Kunne ikke identificere bruger.");
+            }
+
+            var query = new GetDetailedProjectQuery(id, loggedInAccountId);
             var result = await _mediator.Send(query);
 
             if (result == null)
@@ -43,16 +65,16 @@ namespace API.Controllers
         {
             try
             {
-                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
                 if (string.IsNullOrEmpty(userIdClaim))
                 {
-                    return BadRequest("API Fejl: Kunne slet ikke finde NameIdentifier-claimet i din JWT-token. Er du logget ordentligt ind?");
+                    return Unauthorized("Du er ikke logget ind.");
                 }
 
                 if (!Guid.TryParse(userIdClaim, out Guid loggedInAccountId))
                 {
-                    return BadRequest($"API Fejl: Det NameIdentifier-claim der blev fundet ({userIdClaim}) kunne ikke laves om til en Guid.");
+                    return BadRequest("Ugyldigt format på bruger-ID.");
                 }
 
                 var query = new GetProjectsByEmployeeQuery(loggedInAccountId);
@@ -65,6 +87,16 @@ namespace API.Controllers
                 var innerFejl = ex.InnerException != null ? $" -> Inner: {ex.InnerException.Message}" : "";
                 return BadRequest($"API Crash i Handler/Repo: {ex.Message}{innerFejl}");
             }
+        }
+        [HttpGet("project-company")]
+        public async Task<IActionResult> GetMyCompanyProjects()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!Guid.TryParse(userIdClaim, out Guid loggedInAccountId)) return Unauthorized();
+
+            var result = await _mediator.Send(new GetProjectsByCompanyQuery(loggedInAccountId));
+            return Ok(result);
         }
     }
 }

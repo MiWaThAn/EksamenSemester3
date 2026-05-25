@@ -8,11 +8,13 @@ namespace Application.Commands.Person.Queries
 {
     public class GetDetailedEmployeeQuery : IRequest<DetailedEmployeeModel>
     {
-        public Guid EmployeeId { get; set; }
+        public Guid EmployeeId { get; }
+        public Guid AccountId { get; }
 
-        public GetDetailedEmployeeQuery(Guid employeeId)
+        public GetDetailedEmployeeQuery(Guid employeeId, Guid accountId)
         {
             EmployeeId = employeeId;
+            AccountId = accountId;
         }
     }
 }
