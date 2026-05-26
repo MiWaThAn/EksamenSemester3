@@ -58,7 +58,6 @@ namespace Application.Commands.Item.Registrations.Time
             catch (Exception ex)
             {
                 await _unitOfWork.RollbackTransactionAsync();
-                // TODO: _logger.LogError(ex, "Fejl ved start af arbejde for Employee {EmployeeId}", request.EmployeeId);
                 return new BaseRegistrationResponse { Success = false, Message = "Der opstod en uventet systemfejl." };
             }
         }
