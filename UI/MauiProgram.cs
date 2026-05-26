@@ -6,6 +6,8 @@ using UI.Services.Theme;
 using Plugin.Firebase.CloudMessaging;
 using Microsoft.Maui.LifecycleEvents;
 using UI.Services.Auth.Registration;
+using UI.Services.Registration;
+
 
 #if IOS
 using Plugin.Firebase.Core.Platforms.iOS;
@@ -34,9 +36,11 @@ namespace UI
             builder.Services.AddAuthorizationCore();
             builder.Services.AddSingleton<ThemeService>();
             builder.Services.AddSingleton<ISecureStorage>(SecureStorage.Default);
+            builder.Services.AddTransient<AuthorizeApiHttpMessageHandler>();
             builder.Services.AddScoped<JwtAuthStateProvider>();
             builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<JwtAuthStateProvider>());
             builder.Services.AddScoped<IIntegrationService, IntegrationService>();
+            builder.Services.AddScoped<RegistrationService>();
             var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
 
             if (string.IsNullOrEmpty(apiBaseUrl))

@@ -32,7 +32,7 @@ namespace Application.Commands.Item.Registrations.Time
                 var workLog = await _unitOfWork.WorkLogs.GetByIdAsync(request.WorkLogId, cancellationToken);
                 if (workLog == null)
                     return BaseRegistrationResponse.Fail("Work log not found.");
-                workLog.UpdateActiveRegistrationInterval(request.NewStartTime, request.NewEndTime, emp, request.RegistrationId, request.IsBreak ? TimeType.Break : TimeType.Work);
+                workLog.UpdateActiveRegistrationInterval(request.NewStartTime, request.NewEndTime, emp, request.RegistrationId, request.TimeIntervalId, request.IsBreak ? TimeType.Break : TimeType.Work);
                 await _unitOfWork.CompleteAsync(cancellationToken);
                 await _unitOfWork.CommitTransactionAsync(cancellationToken);
                 return BaseRegistrationResponse.Ok(workLog.ActiveRegistrationId.Value);

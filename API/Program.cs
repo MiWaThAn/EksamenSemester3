@@ -95,7 +95,6 @@ builder.Services.AddAuthorization();
 
 
 builder.Services.AddApplication();
-builder.Services.AddScoped<IWebhookParser, EconomicWebhookParser>();
 builder.Services.Configure<EconomicOptions>(
     builder.Configuration.GetSection(EconomicOptions.SectionName));
 builder.Services.AddHttpClient<IEconomicApiClient, EconomicApiClient>();

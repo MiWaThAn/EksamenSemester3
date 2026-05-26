@@ -6,9 +6,9 @@ namespace Domain.Entity.Person.Auth
 {
     public class Role : Base
     {
-        public string Title {  get; private set; }
-        public List<RolePermission> Permissions { get; private set; } = new List<RolePermission>();
-        public List<Account> Accounts { get; private set; } = new List<Account>();
+        public string Title {  get; internal set; }
+        public List<RolePermission> Permissions { get; internal set; } = new List<RolePermission>();
+        public List<Account> Accounts { get; internal set; } = new List<Account>();
         public Role() : base()
         { 
         }

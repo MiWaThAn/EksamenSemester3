@@ -4,6 +4,8 @@
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @inject IAuthService AuthService
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 
 <div class="admin-container">
     <div class="p-4 border-b bg-white rounded-t-xl">

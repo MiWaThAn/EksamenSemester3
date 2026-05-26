@@ -1,10 +1,12 @@
 ﻿using Application.Commands.Account;
 using Application.Commands.Person.Queries; 
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class AccountController : ControllerBase
@@ -32,6 +34,7 @@ namespace API.Controllers
         }
 
         // POST: api/account/forgot-password
+        [AllowAnonymous]
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
         {
@@ -40,6 +43,7 @@ namespace API.Controllers
         }
 
         // POST: api/account/reset-password
+        [AllowAnonymous]
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
         {

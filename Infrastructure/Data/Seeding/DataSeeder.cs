@@ -3,6 +3,7 @@ using Application.Interfaces;
 using Domain.Builders.Person;
 using Domain.Entity.Mapping;
 using Domain.Entity.Mapping.ValueObjects;
+using Domain.Entity.Person;
 using Domain.Entity.Person.Auth;
 using Domain.Interfaces.Item;
 using Domain.Interfaces.Mapping;
@@ -78,7 +79,7 @@ namespace Infrastructure.Data.Seeding
 
             await context.SaveChangesAsync();
         }
-        private static async Task SeedCompanyTestAccount(AppDbContext context,IHashingService hashingService,IRegistrationDomainService registrationDomainService)
+        private static async Task SeedCompanyTestAccount(AppDbContext context, IHashingService hashingService, IRegistrationDomainService registrationDomainService)
         {
             if (!context.Companies.Any(c => c.Name == "Admin" && c.Account.Username == "admin"))
             {
@@ -86,8 +87,36 @@ namespace Infrastructure.Data.Seeding
                 if (result.IsSuccess)
                 {
                     var (company, account) = result.Value;
-                    var companyRole = await context.Roles.FirstOrDefaultAsync(r => r.Title == SystemRoles.Company) ?? throw new InvalidOperationException("System Role 'Company' not found. Ensure DataSeeder has run.");
+
+
+                    var companyRole = await context.Roles.FirstOrDefaultAsync(r => r.Title == SystemRoles.Company)
+                        ?? throw new InvalidOperationException("System Role 'Company' not found.");
+                    var employeeRole = await context.Roles.FirstOrDefaultAsync(r => r.Title == SystemRoles.Employee)
+                        ?? throw new InvalidOperationException("System Role 'Employee' not found.");
+                    var adminRole = await context.Roles.FirstOrDefaultAsync(r => r.Title == SystemRoles.Admin)
+                        ?? throw new InvalidOperationException("System Role 'Admin' not found.");
+
+
                     account.AddRole(companyRole);
+                    account.AddRole(employeeRole);
+                    account.AddRole(adminRole);
+
+
+                    var employeeBuilder = new EmployeeBuilder()
+                        .WithName("Søren Hansen")
+                        .WithEmail(new EmailAddress("soren@byggefirma.dk"))
+                        .WithAutonomy(true)
+                        .WithEmployeeType(EmployeeType.Formand);
+
+
+                    var employee = company.CreateEmployee(employeeBuilder);
+
+
+                    employee.LinkToAccount(account);
+
+
+                    account.LinkToEmployee(employee);
+
                     await context.Accounts.AddAsync(account);
                     await context.SaveChangesAsync();
                 }

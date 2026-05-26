@@ -5,7 +5,7 @@
 @using UI.Services.Integration
 
 @inject IIntegrationService IntegrationService
-@attribute [Authorize]
+@attribute [Authorize(Roles ="Company")]
 
 <h3>Udsende Indstillinger</h3>
 

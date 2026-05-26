@@ -10,5 +10,7 @@ namespace Application.Interfaces.Repo.Item
     {
         Task<IEnumerable<ProjectActivity>> GetByEmployeeIdAsync(Guid employeeId, CancellationToken cancellationToken = default);
         Task<IEnumerable<ProjectActivity>> GetByProjectIdAsync(Guid projectId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProjectActivity>> GetByIdsAsNoTrackingAsync(IEnumerable<Guid> ids,  CancellationToken cancellationToken = default);
+        Task<ProjectActivity?> GetByIdAsNoTrackingAsync(Guid Id, CancellationToken cancellationToken = default);
     }
 }
