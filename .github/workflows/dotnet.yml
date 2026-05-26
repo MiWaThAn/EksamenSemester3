@@ -1,4 +1,4 @@
-name: SonarQube
+name: Continous Integration
 on:
   push:
     branches:
