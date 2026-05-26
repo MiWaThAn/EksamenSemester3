@@ -47,7 +47,7 @@ namespace Domain.Services.Person
             var resultCompany = await account.CreateCompany(companyBuilder, _companyFactory,ct);
             if (resultCompany.IsFailure)
             {
-                return Result<(Company, Account)>.Failure(result.Error);
+                return Result<(Company, Account)>.Failure(resultCompany.Error);
             }
             var company = resultCompany.Value;
             return Result<(Company, Account)>.Success((company, account));

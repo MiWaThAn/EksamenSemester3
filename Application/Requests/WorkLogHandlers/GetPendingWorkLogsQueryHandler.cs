@@ -1,0 +1,78 @@
+﻿using Application.Interfaces;
+using Domain.Entity.Item;
+using Domain.Entity.Item.Registrations;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Shared.Item.Registrations.DTOs;
+using Shared.Item.Registrations.Queries;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Application.Requests.WorkLogHandlers
+{
+    public class GetPendingWorkLogsQueryHandler : IRequestHandler<GetPendingWorkLogsQuery, IEnumerable<WorkLogDto>>
+    {
+        private readonly IUnitOfWork _unitOfWork;
+
+        public GetPendingWorkLogsQueryHandler(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        public async Task<IEnumerable<WorkLogDto>> Handle(GetPendingWorkLogsQuery request, CancellationToken cancellationToken)
+        {
+
+            var account = await _unitOfWork.Accounts.GetByIdAsync(request.accountId);
+            if (account == null || !account.CompanyId.HasValue)
+                return Enumerable.Empty<WorkLogDto>();
+
+            var worklogs = (await _unitOfWork.WorkLogs.GetPendingWorkLogsAsNoTrackingAsync(account.CompanyId.Value))?.ToList();
+            if (worklogs == null || !worklogs.Any())
+                return Enumerable.Empty<WorkLogDto>();
+
+            var allProjectIds = worklogs.SelectMany(w => w.Registrations).Select(r => r.ProjectId).Distinct().ToList();
+
+            var allActivityIds = worklogs.SelectMany(w => w.Registrations)
+                .Where(r => r.ProjectActivityId.HasValue)
+                .Select(r => r.ProjectActivityId!.Value)
+                .Distinct().ToList();
+
+            var allExpenseIds = worklogs.SelectMany(w => w.Registrations)
+                .OfType<ExpenseRegistration>()
+                .Select(r => r.ExpenseId)
+                .Distinct().ToList();
+
+
+            var globalActivities = await _unitOfWork.ProjectActivities.GetQueryable()
+                .Include(a => a.Activity)
+                .Where(a => allActivityIds.Contains(a.Id))
+                .ToListAsync(cancellationToken);
+
+            var globalProjects = await _unitOfWork.Projects.GetQueryable()
+                .Where(p => allProjectIds.Contains(p.Id))
+                .ToListAsync(cancellationToken);
+
+            var globalExpenses = await _unitOfWork.Expenses.GetQueryable()
+                .Where(e => allExpenseIds.Contains(e.Id))
+                .ToListAsync(cancellationToken);
+
+            List<WorkLogDto> workLogDtos = new();
+            foreach (WorkLog worklog in worklogs)
+            {
+                var logProjectIds = worklog.Registrations.Select(r => r.ProjectId).ToHashSet();
+                var logActivityIds = worklog.Registrations.Where(r => r.ProjectActivityId.HasValue).Select(r => r.ProjectActivityId!.Value).ToHashSet();
+                var logExpenseIds = worklog.Registrations.OfType<ExpenseRegistration>().Select(r => r.ExpenseId).ToHashSet();
+
+                var projects = globalProjects.Where(p => logProjectIds.Contains(p.Id)).ToList();
+                var activities = globalActivities.Where(a => logActivityIds.Contains(a.Id)).ToList();
+                var expenses = globalExpenses.Where(e => logExpenseIds.Contains(e.Id)).ToList();
+
+                var dto = worklog.ToDto(projects, activities, expenses);
+                workLogDtos.Add(dto);
+            }
+
+            return workLogDtos;
+        }
+    }
+}

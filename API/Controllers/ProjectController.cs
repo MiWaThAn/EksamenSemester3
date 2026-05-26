@@ -1,5 +1,6 @@
 ﻿using Application.Commands.Person.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using static Application.Commands.Person.Queries.GetProjectsByCompanyQuery;
@@ -8,6 +9,7 @@ using static Application.Commands.Person.Queries.GetProjectsByCompanyQuery;
 namespace API.Controllers
 {
     [ApiController]
+    [Authorize(Roles ="Employee,Company,Admin")]
     [Route("api/[controller]")]
     public class ProjectController : ControllerBase
     {

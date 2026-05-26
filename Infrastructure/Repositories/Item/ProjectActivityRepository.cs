@@ -19,5 +19,13 @@ namespace Infrastructure.Repositories.Item
         {
             return await _context.ProjectActivities.Where(pa=>pa.ProjectId == projectId).ToListAsync(cancellationToken);
         }
+        public async Task<IEnumerable<ProjectActivity>> GetByIdsAsNoTrackingAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
+        {
+            return await _context.ProjectActivities.AsNoTracking().Include(pa=>pa.Activity).Where(pa=>ids.Contains(pa.Id)).ToListAsync(cancellationToken);
+        }
+        public async Task<ProjectActivity?> GetByIdAsNoTrackingAsync(Guid Id, CancellationToken cancellationToken = default)
+        {
+            return await _context.ProjectActivities.AsNoTracking().Include(pa => pa.Activity).FirstOrDefaultAsync(pa=>pa.Id ==Id);
+        }
     }
 }

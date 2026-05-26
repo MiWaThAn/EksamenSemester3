@@ -2,11 +2,13 @@
 using Application.Commands.Person.Handlers;
 using Application.Commands.Person.Handlers.Integration;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Model.IntegrationSettings;
 
 namespace API.Controllers
 {
+    [Authorize(Roles = "Company")]
     [ApiController]
     [Route("api/[controller]")]
     public class IntegrationSettingController : ControllerBase

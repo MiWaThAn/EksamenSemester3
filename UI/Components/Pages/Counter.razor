@@ -1,4 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @attribute [Authorize]
 @page "/counter"
 
@@ -7,8 +8,49 @@
 <p role="status">Current count: @currentCount</p>
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<div style="background: #f4f4f4; padding: 20px; border-radius: 8px; margin-top: 20px;">
+    <h3>Dine nuværende Claims:</h3>
+
+    @if (_claims != null && _claims.Any())
+    {
+        <ul>
+            @foreach (var claim in _claims)
+            {
+                <li>
+                    <strong>Type:</strong> <code>@claim.Type</code> <br />
+                    <strong>Value:</strong> <span style="color: blue;">@claim.Value</span>
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p style="color: red;">Ingen claims fundet. Du er ikke logget ind (eller token er tomt).</p>
+    }
+</div>
+
 
 @code {
+    // Dette beder Blazor om at række ind i baggrunden og hente din nuværende login-tilstand
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    private IEnumerable<System.Security.Claims.Claim>? _claims;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthStateTask != null)
+        {
+            var authState = await AuthStateTask;
+            var user = authState.User;
+
+            // Hvis brugeren er genkendt, gemmer vi deres claims i en variabel
+            if (user.Identity != null && user.Identity.IsAuthenticated)
+            {
+                _claims = user.Claims;
+            }
+        }
+    }
     private int currentCount = 0;
 
     private void IncrementCount()
