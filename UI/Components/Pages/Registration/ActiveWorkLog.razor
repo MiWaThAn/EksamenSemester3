@@ -13,229 +13,236 @@
 @using Shared.Model
 @attribute [Authorize]
 
-<div class="container mx-auto p-4 max-w-xl space-y-6">
-    <h2 class="text-2xl font-bold text-slate-800">Min Tidsregistrering</h2>
+<div class="max-w-4xl mx-auto p-6">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-3xl font-extrabold text-slate-800">Arbejdsposter</h1>
+            <p class="text-sm text-slate-500">Se, rediger og afterregistrer dine arbejdstimer og udlæg</p>
+        </div>
+        <div class="flex items-center space-x-3">
+            <button class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow" @onclick="LoadActiveWorkLog">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M4 3a1 1 0 000 2h12a1 1 0 100-2H4z" /><path fill-rule="evenodd" d="M3 7a2 2 0 012-2h10a2 2 0 012 2v6a5 5 0 11-10 0H5a2 2 0 01-2-2V7z" clip-rule="evenodd" /></svg>
+                Opdater
+            </button>
+            <span class="text-xs text-slate-500">@DateTime.UtcNow.ToString("dd/MM/yyyy")</span>
+        </div>
+    </div>
 
     @if (isLoading)
     {
-        <div class="flex justify-center my-8">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-        </div>
-    }
-    else if (activeLog == null)
-    {
-        <div class="bg-white rounded-xl shadow p-6 border border-slate-100">
-            <h3 class="text-lg font-semibold mb-4 text-slate-700">Start Arbejdsdag</h3>
-
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-600 mb-1">Vælg Projekt</label>
-                    <select value="@selectedProjectId" @onchange="OnProjectChanged" class="w-full p-2.5 border rounded-lg bg-slate-5">
-                        <option value="@Guid.Empty">-- Vælg --</option>
-                        @foreach (var project in Projects)
-                        {
-                            <option value="@project.ProjectId">@project.ProjectName</option>
-                        }
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-slate-600 mb-1">Vælg Aktivitet</label>
-                    <select @bind="selectedActivityId" class="w-full p-2.5 border rounded-lg bg-slate-5">
-                        <option value=@Guid.Empty>-- Vælg --</option>
-                        @foreach (var activity in ProjectActivities)
-                        {
-                            <option value=@activity.ProjectActivityId>@activity.ActivityName</option>
-                        }
-                    </select>
-                </div>
-
-                <button @onclick="HandleStartWork"
-                        disabled="@(selectedProjectId == Guid.Empty || selectedActivityId == Guid.Empty)"
-                        class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium p-3 rounded-lg transition disabled:opacity-50">
-                    Stempel Ind
-                </button>
-            </div>
+        <div class="flex items-center justify-center py-20">
+            <div class="animate-spin h-10 w-10 border-4 border-indigo-300 border-t-indigo-600 rounded-full"></div>
         </div>
     }
     else
     {
-        <div class="bg-white rounded-xl shadow-md p-6 border border-emerald-100">
-            <div class="flex justify-between items-center mb-4">
-                <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800 animate-pulse">
-                    Status: @activeLog.Status
-                </span>
-                <span class="text-sm text-slate-500">Startet: @activeLog.ClockInTime.ToShortTimeString()</span>
-            </div>
-
-            <h3 class="text-xl font-bold text-slate-800 mb-4">I gang med tidsregistrering</h3>
-
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <button @onclick="HandleTakeBreak" class="p-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium transition">Hold Pause</button>
-                <button @onclick="HandleResumeWork" class="p-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-medium transition">Genoptag</button>
-                <button @onclick="HandleStopWork" class="p-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium transition">Stop arbejde</button>
-                <button @onclick="HandleClockOut" class="col-span-2 p-3 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold transition shadow">Stempel Ud (Afslut Dag)</button>
-            </div>
-
-            <div class="border-t pt-4 mt-4 space-y-4">
-                <h4 class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Skift Igangværende Arbejde</h4>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1">Nyt Projekt</label>
-                        <select value="@selectedProjectId" @onchange="OnProjectChanged" class="w-full p-2 text-sm border rounded-lg bg-slate-50">
-                            <option value="@Guid.Empty">-- Vælg Projekt --</option>
-                            @foreach (var project in Projects)
-                            {
-                                <option value="@project.ProjectId">@project.ProjectName</option>
-                            }
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1">Ny Aktivitet</label>
-                        <select @bind="selectedActivityId" class="w-full p-2 text-sm border rounded-lg bg-slate-50">
-                            <option value=@Guid.Empty>-- Vælg Aktivitet --</option>
-                            @foreach (var activity in ProjectActivities)
-                            {
-                                <option value=@activity.ProjectActivityId>@activity.ActivityName</option>
-                            }
-                        </select>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <button @onclick="HandleSwitchActivity" disabled="@(selectedProjectId == Guid.Empty || selectedActivityId == Guid.Empty)" class="p-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-lg font-medium transition disabled:opacity-50">Skift Aktivitet</button>
-                    <button @onclick="HandleSwitchProject" disabled="@(selectedProjectId == Guid.Empty || selectedActivityId == Guid.Empty)" class="p-2 bg-violet-600 hover:bg-violet-700 text-white text-sm rounded-lg font-medium transition disabled:opacity-50">Skift Projekt</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow p-6 border border-slate-100 space-y-6">
-            <h3 class="text-lg font-bold text-slate-800 border-b pb-2">Manuel Efterregistrering</h3>
-            <p class="text-xs text-slate-400 -mt-4">Vælg projekt og aktivitet i menuen ovenfor for at tilknytte dine manuelle registreringer korrekt.</p>
-
-            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                <h4 class="text-sm font-semibold text-indigo-700">＋ Tilføj Tid Manuelt</h4>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs text-slate-500 mb-1">Dato</label>
-                        <input type="date" @bind="manualDate" class="w-full p-2 text-sm border rounded-lg bg-white" />
-                    </div>
-                    <div class="flex items-end pb-2">
-                        <label class="inline-flex items-center text-xs text-slate-600 cursor-pointer">
-                            <input type="checkbox" @bind="manualIsWork" class="rounded text-indigo-600 mr-2 border-slate-300 focus:ring-indigo-500" />
-                            Er Arbejdstid (ikke pause)
-                        </label>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-500 mb-1">Starttidspunkt</label>
-                        <input type="time" @bind="manualStartTime" class="w-full p-2 text-sm border rounded-lg bg-white" />
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-500 mb-1">Sluttidspunkt</label>
-                        <input type="time" @bind="manualEndTime" class="w-full p-2 text-sm border rounded-lg bg-white" />
-                    </div>
-                    <div class="col-span-2">
-                        <label class="block text-xs text-slate-500 mb-1">Beskrivelse / Bemærkning</label>
-                        <input type="text" @bind="manualTimeDescription" class="w-full p-2 text-sm border rounded-lg bg-white" placeholder="Hvad lavede du?" />
-                    </div>
-                </div>
-                <button @onclick="HandleAddManualTime"
-                        disabled="@(selectedProjectId == Guid.Empty || selectedActivityId == Guid.Empty)"
-                        class="w-full p-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition disabled:opacity-50">
-                    Gem Manuel Tid
-                </button>
-            </div>
-
-            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                <h4 class="text-sm font-semibold text-emerald-700">＋ Tilføj Udgift/Udlæg</h4>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="col-span-2">
-                        <label class="block text-xs text-slate-500 mb-1">Beløb (DKK)</label>
-                        <input type="number" step="0.01" @bind="expenseAmount" class="w-full p-2 text-sm border rounded-lg bg-white" placeholder="0,00" />
-                    </div>
-                    <select @bind="selectedExpenseId" class="w-full p-2 text-sm border rounded-lg bg-slate-50">
-                        <option value=@Guid.Empty>-- Vælg Udfigft --</option>
-                        @foreach (var expense in CompanyExpenses)
-                        {
-                            <option value=@expense.Id>@expense.Name</option>
-                        }
-                    </select>
-                    <div class="col-span-2">
-                        <label class="block text-xs text-slate-500 mb-1">Beskrivelse</label>
-                        <input type="text" @bind="expenseDescription" class="w-full p-2 text-sm border rounded-lg bg-white" placeholder="F.eks. Broafgift eller Materialer" />
-                    </div>
-                </div>
-                <button @onclick="HandleAddManualExpense"
-                        disabled="@(selectedProjectId == Guid.Empty)"
-                        class="w-full p-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition disabled:opacity-50">
-                    Gem Udgift
-                </button>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow p-6 border border-slate-100">
-            <h4 class="font-bold text-slate-700 mb-3 border-b pb-2">Registrerede tidsintervaller i dag</h4>
-            @if (!activeLog.TimeRegistrations.Any())
-            {
-                <p class="text-sm text-slate-400 italic">Ingen registreringer fundet endnu.</p>
-            }
-            else
-            {
-                <div class="space-y-3">
-                    @foreach (var timeReg in activeLog.TimeRegistrations)
-                    {
-                        <div class="p-3 rounded-lg border border-slate-100 text-sm flex justify-between items-center bg-slate-50">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Main card -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white rounded-2xl shadow-md p-6 border">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
                             <div>
-                                <p class="font-semibold text-slate-700">@timeReg.ProjectName</p>
-                                <p class="text-xs text-slate-500">@timeReg.ProjectActivityName</p>
-                            </div>
-                            <div class="text-right text-xs space-y-1">
-                                @foreach (var inter in timeReg.Intervals)
+                                <div class="text-sm text-slate-500">Status</div>
+                                <div class="text-lg font-semibold text-slate-800">@((activeLog != null) ? activeLog.Status : "Ingen Aktiv Log")</div>
+                                @if (activeLog != null)
                                 {
-                                    <div>
-                                        <span class="font-medium @(inter.IsBreak ? "text-amber-600" : "text-emerald-600")">@(inter.IsBreak ? "Pause" : "Arbejde"):</span>
-                                        <span class="text-slate-600">@inter.StartTime.ToShortTimeString() - @inter.EndTime?.ToShortTimeString()</span>
-                                    </div>
+                                    <div class="text-xs text-slate-400">Startet: @activeLog.ClockInTime.ToShortTimeString()</div>
                                 }
                             </div>
-                            <button @onclick="() => HandleRemoveRegistration(timeReg.Id)" class="text-rose-600 hover:text-rose-800 p-1 font-medium">Slet</button>
                         </div>
-                    }
-                </div>
-            }
-        </div>
 
-        <div class="bg-white rounded-xl shadow p-6 border border-slate-100">
-            <h4 class="font-bold text-slate-700 mb-3 border-b pb-2">Registrerede udgifter/udlæg</h4>
-            @if (activeLog.ExpenseRegistrations == null || !activeLog.ExpenseRegistrations.Any())
-            {
-                <p class="text-sm text-slate-400 italic">Ingen udgifter registreret i dag.</p>
-            }
-            else
-            {
-                <div class="space-y-3">
-                    @foreach (var expense in activeLog.ExpenseRegistrations)
+                        <div class="flex items-center gap-3">
+                            @if (activeLog == null)
+                            {
+                                <div class="space-y-2 w-56">
+                                    <label class="block text-xs font-medium text-slate-600">Projekt</label>
+                                    <select value="@selectedProjectId" @onchange="OnProjectChanged" class="w-full p-2 border rounded-lg">
+                                        <option value="@Guid.Empty">-- Vælg Projekt --</option>
+                                        @foreach (var project in Projects)
+                                        {
+                                            <option value="@project.ProjectId">@project.ProjectName</option>
+                                        }
+                                    </select>
+
+                                    <label class="block text-xs font-medium text-slate-600">Aktivitet</label>
+                                    <select @bind="selectedActivityId" class="w-full p-2 border rounded-lg">
+                                        <option value=@Guid.Empty>-- Vælg Aktivitet --</option>
+                                        @foreach (var activity in ProjectActivities)
+                                        {
+                                            <option value=@activity.ProjectActivityId>@activity.ActivityName</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="flex flex-col">
+                                    <button @onclick="HandleStartWork" disabled="@(selectedProjectId == Guid.Empty || selectedActivityId == Guid.Empty)" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium">Stempel Ind</button>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="flex items-center gap-2">
+                                    <button @onclick="HandleTakeBreak" class="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg">Pause</button>
+                                    <button @onclick="HandleResumeWork" class="px-3 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg">Genoptag</button>
+                                    <button @onclick="HandleStopWork" class="px-3 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg">Stop</button>
+                                    <button @onclick="HandleClockOut" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-semibold shadow">Stempel Ud</button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Manual entries -->
+                <div class="bg-white rounded-2xl shadow-sm p-6 border space-y-4">
+                    <h3 class="text-lg font-semibold">Manuel Efterregistrering</h3>
+                    <p class="text-sm text-slate-400">Tilføj tid eller udlæg hurtigt.</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-4 bg-slate-50 rounded-lg">
+                            <h4 class="font-medium text-slate-700 mb-2">Tilføj Tid</h4>
+                            <div class="grid grid-cols-1 gap-3">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <select @bind="manualSelectedProjectId" class="p-2 border rounded">
+                                        <option value="@Guid.Empty">-- Vælg Projekt --</option>
+                                        @foreach (var p in Projects)
+                                        {
+                                            <option value="@p.ProjectId">@p.ProjectName</option>
+                                        }
+                                    </select>
+                                    <select @bind="manualSelectedActivityId" class="p-2 border rounded">
+                                        <option value="@Guid.Empty">-- Vælg Aktivitet --</option>
+                                        @foreach (var a in ManualProjectActivities)
+                                        {
+                                            <option value="@a.ProjectActivityId">@a.ActivityName</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <input type="date" @bind="manualDate" class="p-2 border rounded" />
+                                    <div class="flex items-center">
+                                        <label class="inline-flex items-center text-sm">
+                                            <input type="checkbox" @bind="manualIsWork" class="mr-2" /> Arbejde
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <input type="time" @bind="manualStartTime" class="p-2 border rounded" />
+                                    <input type="time" @bind="manualEndTime" class="p-2 border rounded" />
+                                </div>
+
+                                <input type="text" @bind="manualTimeDescription" placeholder="Beskrivelse" class="p-2 border rounded" />
+                                <button @onclick="HandleAddManualTime" class="w-full mt-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded">Gem Tid</button>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 rounded-lg">
+                            <h4 class="font-medium text-slate-700 mb-2">Tilføj Udgift</h4>
+                            <div class="grid grid-cols-1 gap-3">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <select @bind="manualExpenseProjectId" class="p-2 border rounded">
+                                        <option value="@Guid.Empty">-- Vælg Projekt --</option>
+                                        @foreach (var p in Projects)
+                                        {
+                                            <option value="@p.ProjectId">@p.ProjectName</option>
+                                        }
+                                    </select>
+                                    <select @bind="manualExpenseActivityId" class="p-2 border rounded">
+                                        <option value=@Guid.Empty>-- Vælg Aktivitet --</option>
+                                        @foreach (var a in ManualExpenseProjectActivities)
+                                        {
+                                            <option value=@a.ProjectActivityId>@a.ActivityName</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <input type="number" step="0.01" @bind="expenseAmount" placeholder="Beløb" class="p-2 border rounded" />
+                                    <select @bind="selectedExpenseId" class="p-2 border rounded">
+                                        <option value=@Guid.Empty>-- Udgiftstype --</option>
+                                        @foreach (var expense in CompanyExpenses)
+                                        {
+                                            <option value=@expense.Id>@expense.Name</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <input type="text" @bind="expenseDescription" placeholder="Beskrivelse" class="p-2 border rounded" />
+                                <button @onclick="HandleAddManualExpense" class="w-full mt-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded">Gem Udgift</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today's registrations -->
+                <div class="bg-white rounded-2xl shadow p-6 border">
+                    <h3 class="text-lg font-semibold mb-3">Registrerede intervaller i dag</h3>
+                    @if (activeLog == null || !activeLog.TimeRegistrations.Any())
                     {
-                        <div class="p-3 bg-slate-50 rounded-lg border border-slate-100 text-sm flex justify-between items-center">
-                            <div>
-                                <p class="font-semibold text-slate-700">@expense.Amount.ToString("C2")</p>
-                                <p class="text-xs text-slate-500">@expense.Description</p>
-                            </div>
-                            <div class="flex items-center space-x-4">
-                                <span class="text-xs text-slate-400">@expense.Date.ToShortDateString()</span>
-                                <button @onclick="() => HandleRemoveExpense(expense.Id)" class="text-rose-600 hover:text-rose-800 p-1 font-medium">Slet</button>
-                            </div>
+                        <div class="text-sm text-slate-400 italic">Ingen registreringer fundet.</div>
+                    }
+                    else
+                    {
+                        <div class="space-y-3">
+                            @foreach (var timeReg in activeLog.TimeRegistrations)
+                            {
+                                <div class="flex items-center justify-between p-3 border rounded-lg bg-slate-50">
+                                    <div>
+                                        <div class="font-semibold">@timeReg.ProjectName</div>
+                                        <div class="text-xs text-slate-500">@timeReg.ProjectActivityName</div>
+                                    </div>
+                                    <div class="text-sm text-slate-600 text-right">
+                                        @foreach (var inter in timeReg.Intervals)
+                                        {
+                                            <div class="">@(inter.IsBreak ? "Pause" : "Arbejde") - @inter.StartTime.ToShortTimeString() - @inter.EndTime?.ToShortTimeString()</div>
+                                        }
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <button @onclick="() => HandleRemoveRegistration(timeReg.Id)" class="text-rose-600 hover:text-rose-800">Slet</button>
+                                    </div>
+                                </div>
+                            }
                         </div>
                     }
                 </div>
-            }
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <div class="bg-white rounded-2xl shadow p-4 border">
+                    <h4 class="font-semibold">Oversigt</h4>
+                    <div class="mt-3 text-sm text-slate-600">
+                        <div>Aktiv registrering: <strong>@(activeLog != null && activeLog.TimeRegistrations.Any() ? "Ja" : "Nej")</strong></div>
+                        <div class="mt-2">Antal registreringer i dag: <strong>@(activeLog?.TimeRegistrations.Count ?? 0)</strong></div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow p-4 border">
+                    <h4 class="font-semibold">Udgifter</h4>
+                    @if (activeLog == null || activeLog.ExpenseRegistrations == null || !activeLog.ExpenseRegistrations.Any())
+                    {
+                        <div class="text-sm text-slate-400 italic mt-2">Ingen udlæg registreret.</div>
+                    }
+                    else
+                    {
+                        <ul class="mt-2 space-y-2 text-sm">
+                            @foreach (var ex in activeLog.ExpenseRegistrations)
+                            {
+                                <li class="flex justify-between items-center">
+                                    <span>@ex.ExpenseName</span>
+                                    <span class="text-emerald-700">@ex.Amount.ToString("C2")</span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
         </div>
     }
-
     @if (!string.IsNullOrEmpty(errorMessage))
     {
-        <div class="mt-4 p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg text-sm">
-            @errorMessage
-        </div>
+        <div class="mt-4 p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg text-sm">@errorMessage</div>
     }
 </div>
 
@@ -259,6 +266,13 @@
     private DateTime manualEndTime = DateTime.Today.AddHours(16);
     private string manualTimeDescription = string.Empty;
     private bool manualIsWork = true;
+    private Guid manualSelectedProjectId = Guid.Empty;
+    private Guid manualSelectedActivityId = Guid.Empty;
+    private List<ProjectActivityDto> ManualProjectActivities = new();
+
+    private Guid manualExpenseProjectId = Guid.Empty;
+    private Guid manualExpenseActivityId = Guid.Empty;
+    private List<ProjectActivityDto> ManualExpenseProjectActivities = new();
 
     private decimal expenseAmount;
     private string expenseDescription = string.Empty;
@@ -274,6 +288,55 @@
         Projects = fetchedProjects?.ToList() ?? new();
         var fetchedExpenses = await RegistrationService.GetCompanyExpenses(CompanyId,CancellationToken.None);
         CompanyExpenses = fetchedExpenses?.ToList() ?? new();
+    }
+
+    private async Task OnManualProjectChanged(ChangeEventArgs e)
+    {
+        ManualProjectActivities.Clear();
+        if (Guid.TryParse(e.Value?.ToString(), out Guid pid))
+        {
+            manualSelectedProjectId = pid;
+            if (manualSelectedProjectId != Guid.Empty)
+            {
+                var activities = await RegistrationService.GetProjectActivities(manualSelectedProjectId, CancellationToken.None);
+                ManualProjectActivities = activities?.ToList() ?? new();
+            }
+        }
+    }
+
+    // Called when manualSelectedProjectId changes via binding
+    private async Task ManualSelectedProjectIdChanged()
+    {
+        ManualProjectActivities.Clear();
+        if (manualSelectedProjectId != Guid.Empty)
+        {
+            var activities = await RegistrationService.GetProjectActivities(manualSelectedProjectId, CancellationToken.None);
+            ManualProjectActivities = activities?.ToList() ?? new();
+        }
+    }
+
+    private async Task OnManualExpenseProjectChanged(ChangeEventArgs e)
+    {
+        ManualExpenseProjectActivities.Clear();
+        if (Guid.TryParse(e.Value?.ToString(), out Guid pid))
+        {
+            manualExpenseProjectId = pid;
+            if (manualExpenseProjectId != Guid.Empty)
+            {
+                var activities = await RegistrationService.GetProjectActivities(manualExpenseProjectId, CancellationToken.None);
+                ManualExpenseProjectActivities = activities?.ToList() ?? new();
+            }
+        }
+    }
+
+    private async Task ManualExpenseProjectIdChanged()
+    {
+        ManualExpenseProjectActivities.Clear();
+        if (manualExpenseProjectId != Guid.Empty)
+        {
+            var activities = await RegistrationService.GetProjectActivities(manualExpenseProjectId, CancellationToken.None);
+            ManualExpenseProjectActivities = activities?.ToList() ?? new();
+        }
     }
 
     private async Task LoadActiveWorkLog()
@@ -345,7 +408,7 @@
 
         var startDateTime = manualDate.Date.Add(manualStartTime.TimeOfDay);
         var endDateTime = manualDate.Date.Add(manualEndTime.TimeOfDay);
-        Guid? activityId = selectedActivityId == Guid.Empty ? null : selectedActivityId;
+        Guid? activityId = manualSelectedActivityId == Guid.Empty ? null : manualSelectedActivityId;
 
         var command = new ManualTimeRegistrationCommand(
             UserId,
@@ -370,10 +433,9 @@
 
     private async Task HandleAddManualExpense()
     {
-        if (activeLog == null || selectedProjectId == Guid.Empty || expenseAmount <= 0) return;
+        if (activeLog == null || manualExpenseProjectId == Guid.Empty || expenseAmount <= 0) return;
 
-        Guid? activityId = selectedActivityId == Guid.Empty ? null : selectedActivityId;
-
+        Guid? activityId = manualExpenseActivityId == Guid.Empty ? null : manualExpenseActivityId;
         var command = new CreateExpenseCommand(
             UserId,
             expenseAmount,
@@ -381,7 +443,7 @@
             selectedExpenseId,
             CompanyExpenses.FirstOrDefault(e=>e.Id == selectedExpenseId)?.Name,
             activityId,
-            selectedProjectId
+            manualExpenseProjectId
         );
 
         var result = await RegistrationService.CreateExpenseRegistration(CompanyId, activeLog.Id, command, CancellationToken.None);
