@@ -25,7 +25,8 @@ namespace Application.Commands.Person.Handlers
 
             if (!isSystemAdmin)
             {
-                if (account.EmployeeId.HasValue)
+
+                if (!account.CompanyId.HasValue)
                 {
                     throw new UnauthorizedAccessException("Du har ikke tilladelse til at se dette firmas administrationspanel.");
                 }

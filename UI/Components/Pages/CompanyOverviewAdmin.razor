@@ -104,47 +104,31 @@
         try
         {
             errorString = null;
-
             var token = await SecureStorage.GetAsync("auth_token");
-
             if (string.IsNullOrWhiteSpace(token))
             {
-                errorString = "Ingen aktiv session fundet. Prøv at logge ind igen.";
-                return;
-            }
-
-            var claims = AuthStateProvider.ParseClaimsFromJwt(token);
-
-            bool isSystemAdmin = claims.Any(c => c.Type == "permission" && c.Value.Equals("Admin", StringComparison.OrdinalIgnoreCase))
-                                 || claims.Any(c => c.Type == "role" && c.Value.Equals("Admin", StringComparison.OrdinalIgnoreCase));
-
-            var employeeIdClaim = claims.FirstOrDefault(c => c.Type == "employee_id")?.Value;
-            bool isEmployee = !string.IsNullOrWhiteSpace(employeeIdClaim) && Guid.TryParse(employeeIdClaim, out _);
-
-            if (!isSystemAdmin && isEmployee)
-            {
-                errorString = "Adgang nægtet: Denne sektion er forbeholdt virksomhedens ejer eller en administrator.";
+                errorString = "Ingen aktiv session fundet.";
                 return;
             }
 
             loggedInUserId = AuthService.GetUserId(token);
 
-            if (string.IsNullOrEmpty(loggedInUserId))
+            try
             {
-                errorString = "Kunne ikke finde dit bruger-ID i sessionen.";
-                return;
+                var response = await Http.GetFromJsonAsync<CompanyResponse>($"api/account/company-id/{loggedInUserId}");
+                if (response != null)
+                {
+                    dynamicCompanyId = response.CompanyId.ToString();
+                }
             }
-
-            var response = await Http.GetFromJsonAsync<CompanyResponse>($"api/account/company-id/{loggedInUserId}");
-
-            if (response != null)
+            catch
             {
-                dynamicCompanyId = response.CompanyId.ToString();
+                dynamicCompanyId = null;
             }
 
             if (string.IsNullOrEmpty(dynamicCompanyId))
             {
-                errorString = "Kunne ikke identificere din virksomhed ud fra din konto. Prøv igen.";
+                errorString = "Du har ikke adgang til firma-administration.";
                 return;
             }
 
@@ -152,9 +136,7 @@
         }
         catch (Exception ex)
         {
-            var errorHandler = ex.InnerException ?? ex;
-            errorString = $"Fejl under initialisering: {errorHandler.Message}";
-            Console.WriteLine(errorString);
+            errorString = $"Fejl under initialisering: {ex.Message}";
         }
     }
 
