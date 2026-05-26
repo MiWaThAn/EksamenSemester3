@@ -27,7 +27,7 @@ namespace Infrastructure.Repositories.Item.Registrations
         }
         public async Task<WorkLog?> GetActiveByEmployeeIdAsync(Guid employeeId, CancellationToken cancellationToken = default)
         {
-            return await _context.WorkLogs.Include(wl => wl.Registrations).FirstOrDefaultAsync(wl => wl.EmployeeId == employeeId && wl.IsClosed == false, cancellationToken);
+            return await _context.WorkLogs.Include(wl => wl.Registrations).ThenInclude(r => ((HourRegistration)r).Intervals).FirstOrDefaultAsync(wl => wl.EmployeeId == employeeId && (wl.IsClosed == false && wl.Status==ApprovalStatus.Draft), cancellationToken);
         }
         public async Task<IEnumerable<WorkLog>> GetAllActiveWorkLogsAsync(CancellationToken cancellationToken = default)
         {

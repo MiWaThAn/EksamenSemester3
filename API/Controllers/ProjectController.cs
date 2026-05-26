@@ -100,5 +100,15 @@ namespace API.Controllers
             var result = await _mediator.Send(new GetProjectsByCompanyQuery(loggedInAccountId));
             return Ok(result);
         }
+        [HttpGet("employees-company-projects")]
+        public async Task<IActionResult> GetEmployeeCompanyProjects()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!Guid.TryParse(userIdClaim, out Guid loggedInAccountId)) return Unauthorized();
+
+            var result = await _mediator.Send(new GetCompanyProjectsByEmployeeAccountId(loggedInAccountId));
+            return Ok(result);
+        }
     }
 }

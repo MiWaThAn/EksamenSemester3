@@ -1,4 +1,7 @@
-﻿using MediatR;
+﻿using Application.DTO.External;
+using Application.DTOs;
+using MediatR;
+using Shared.Item.ProjectActivity;
 using Shared.Model;
 using System;
 using System.Collections.Generic;
@@ -13,6 +16,15 @@ namespace Application.Commands.Person.Queries
         public GetProjectsByCompanyQuery(Guid companyId)
         {
             CompanyId = companyId;
+        }
+    }
+    public class GetCompanyProjectsByEmployeeAccountId : IRequest<IEnumerable<ProjectDto>>
+    {
+        public Guid AccountId { get; }
+
+        public GetCompanyProjectsByEmployeeAccountId(Guid accountId)
+        {
+            AccountId = accountId;
         }
     }
 }

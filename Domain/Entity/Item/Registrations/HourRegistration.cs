@@ -11,7 +11,7 @@ namespace Domain.Entity.Item.Registrations
     {
         public DateTime StartTime => _intervals.Count > 0 ? _intervals.Min(i => i.StartTime) : DateTime.MinValue;
         public DateTime? EndTime => _intervals.Count > 0 ? _intervals.Where(i => i.EndTime.HasValue).Max(i => i.EndTime) : null;
-        public bool IsFinished => EndTime.HasValue;
+        public bool IsFinished = false;
         private readonly List<TimeInterval> _intervals = new();
         public IReadOnlyCollection<TimeInterval> Intervals => _intervals.AsReadOnly();
 
@@ -53,6 +53,15 @@ namespace Domain.Entity.Item.Registrations
             UpdatedAt = DateTime.UtcNow;
             MarkAsPending();
         }
+        internal void ClockOut()
+        {
+            Guard.AgainstInvalidTimeRange(StartTime, DateTime.UtcNow);
+            var active = FindActive();
+            if (active != null)
+                active.SetEndTime(DateTime.UtcNow);
+            IsFinished = true;
+            UpdatedAt = DateTime.UtcNow;
+        }
 
         internal void SetEndTime(DateTime endTime)
         {
@@ -69,22 +78,24 @@ namespace Domain.Entity.Item.Registrations
         internal void TakeBreak()
         {
             var active = FindActive();
-            if (active == null)
-                throw new InvalidOperationException("Ingen aktiv tidsinterval at tage pause fra.");
-            active.SetEndTime(DateTime.UtcNow);
+            if (active != null)
+                active.SetEndTime(DateTime.UtcNow);
             _intervals.Add(new TimeInterval(DateTime.UtcNow, null, TimeType.Break));
             UpdatedAt = DateTime.UtcNow;
             MarkAsPending();
         }
-
-        internal void ResumeWork()
+        internal void StartWork()
         {
             var activeBreak = FindActive();
-            if (activeBreak == null || activeBreak.Type != TimeType.Break)
+            if (activeBreak != null && activeBreak.Type == TimeType.Break)
+                activeBreak.SetEndTime(DateTime.UtcNow);
+            if (activeBreak != null && activeBreak.Type != TimeType.Break)
                 throw new InvalidOperationException("Ingen pause igangsat.");
-
-            activeBreak.SetEndTime(DateTime.UtcNow);
             _intervals.Add(new TimeInterval(DateTime.UtcNow, null, TimeType.Work));
+        }
+        internal void ResumeWork()
+        {
+            StartWork();
             UpdatedAt = DateTime.UtcNow;
             MarkAsPending();
         }
@@ -102,6 +113,7 @@ namespace Domain.Entity.Item.Registrations
             UpdatedAt = DateTime.UtcNow;
             MarkAsPending();
         }
+
 
         internal void RemoveTimeInterval(Guid intervalId)
         {
@@ -142,7 +154,11 @@ namespace Domain.Entity.Item.Registrations
             var hours = (DateTime.UtcNow - breakEnd).TotalHours;
             return (double)hours;
         }
-
+        public bool HasActive()
+        {
+            var active = FindActive();
+            return active != null;
+        }
         public bool HasHadBreak()
         {
             return _intervals.Any(i => i.Type == TimeType.Break);

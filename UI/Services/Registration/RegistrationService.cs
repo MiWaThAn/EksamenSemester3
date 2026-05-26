@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Shared.Item.ProjectActivity;
 using Shared.Item.Registrations.Commands;
 using Shared.Item.Registrations.Commands.Expenses;
 using Shared.Item.Registrations.Commands.Time;
@@ -18,18 +19,25 @@ namespace UI.Services.Registration
     public class RegistrationService
     {
         private readonly HttpClient _http;
-        private const string BasePath = "api/WorkLog";
+        private const string BasePath = "api/worklog";
 
         public RegistrationService(HttpClient httpClient)
         {
             _http = httpClient;
         }
 
-//QUERIES (GET)
+        //QUERIES (GET)
 
         public async Task<WorkLogDto?> GetActiveWorkLog(Guid accountId, CancellationToken ct)
         {
-            return await _http.GetFromJsonAsync<WorkLogDto>($"{BasePath}/active/{accountId}", ct);
+            try
+            {
+                return await _http.GetFromJsonAsync<WorkLogDto>($"{BasePath}/active/{accountId}", ct);
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return null;
+            }
         }
 
         public async Task<IEnumerable<WorkLogDto>?> GetWorkLogHistory(Guid accountId, CancellationToken ct)
@@ -47,7 +55,17 @@ namespace UI.Services.Registration
             return await _http.GetFromJsonAsync<IEnumerable<WorkLogDto>>($"{BasePath}/pending-approval/{accountId}", ct);
         }
 
-//COMMANDS
+        public async Task<IEnumerable<ProjectActivityDto>?> GetProjectActivities(Guid ProjectId, CancellationToken ct)
+        {
+            return await _http.GetFromJsonAsync<IEnumerable<ProjectActivityDto>>($"api/projects/{ProjectId}/activities/for-project", ct);
+        }
+
+        public async Task<IEnumerable<ProjectDto>?> GetProjects(CancellationToken ct)
+        {
+            return await _http.GetFromJsonAsync<IEnumerable<ProjectDto>>($"api/project/employees-company-projects", ct);
+        }
+
+        //COMMANDS
 
         public async Task<ServiceResult> StartWork(StartWorkCommand command, CancellationToken ct)
         {
@@ -64,7 +82,8 @@ namespace UI.Services.Registration
         public async Task<ServiceResult> ResumeWork(Guid accountId, CancellationToken ct)
         {
             var url = $"{BasePath}/{accountId}/resume-work";
-            return await SendRequestAsync<object>(HttpMethod.Post, url, null, ct);
+            var result = await SendRequestAsync<object>(HttpMethod.Post, url, null, ct);
+            return result;
         }
 
         public async Task<ServiceResult> SwitchActivity(Guid accountId, Guid projectId, Guid projectActivityId, CancellationToken ct)

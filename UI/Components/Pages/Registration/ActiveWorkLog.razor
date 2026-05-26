@@ -5,15 +5,16 @@
 @using Shared.Item.Registrations.DTOs
 @using Shared.Item.Registrations.Commands
 @using Shared.Item.Registrations.Commands.Time
+@using Shared.Item.ProjectActivity
 @using Shared.Item.Registrations.Commands.Expenses
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Authorization
 @using UI.Services.Auth
 @attribute [Authorize]
 
-<div class="container mx-auto p-4 max-w-xl">
-    <h2 class="text-2xl font-bold mb-6 text-slate-800">Min Tidsregistrering</h2>
-    wont work since we don't have projects
+<div class="container mx-auto p-4 max-w-xl space-y-6">
+    <h2 class="text-2xl font-bold text-slate-800">Min Tidsregistrering</h2>
+
     @if (isLoading)
     {
         <div class="flex justify-center my-8">
@@ -28,24 +29,28 @@
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-slate-600 mb-1">Vælg Projekt</label>
-                    <select @bind="selectedProjectId" class="w-full p-2.5 border rounded-lg bg-slate-5">
-                        <option value="">-- Vælg --</option>
-                        <option value="3fa85f64-5717-4562-b3fc-2c963f66afa6">Projekt Alfa</option>
-                        <option value="7ca85f64-5717-4562-b3fc-2c963f66afb2">Projekt Beta</option>
+                    <select value="@selectedProjectId" @onchange="OnProjectChanged" class="w-full p-2.5 border rounded-lg bg-slate-5">
+                        <option value="@Guid.Empty">-- Vælg --</option>
+                        @foreach (var project in Projects)
+                        {
+                            <option value="@project.ProjectId">@project.ProjectName</option>
+                        }
                     </select>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-slate-600 mb-1">Vælg Aktivitet</label>
                     <select @bind="selectedActivityId" class="w-full p-2.5 border rounded-lg bg-slate-5">
-                        <option value="">-- Vælg --</option>
-                        <option value="11a85f64-5717-4562-b3fc-2c963f66afa1">Udvikling</option>
-                        <option value="22a85f64-5717-4562-b3fc-2c963f66afa2">Møde</option>
+                        <option value=@Guid.Empty>-- Vælg --</option>
+                        @foreach (var activity in ProjectActivities)
+                        {
+                            <option value=@activity.ProjectActivityId>@activity.ActivityName</option>
+                        }
                     </select>
                 </div>
 
                 <button @onclick="HandleStartWork"
-                        disabled="@(string.IsNullOrEmpty(selectedProjectId) || string.IsNullOrEmpty(selectedActivityId))"
+                        disabled="@(selectedProjectId == Guid.Empty || selectedActivityId == Guid.Empty)"
                         class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium p-3 rounded-lg transition disabled:opacity-50">
                     Stempel Ind
                 </button>
@@ -54,7 +59,7 @@
     }
     else
     {
-        <div class="bg-white rounded-xl shadow-md p-6 border border-emerald-100 mb-6">
+        <div class="bg-white rounded-xl shadow-md p-6 border border-emerald-100">
             <div class="flex justify-between items-center mb-4">
                 <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800 animate-pulse">
                     Status: @activeLog.Status
@@ -65,14 +70,96 @@
             <h3 class="text-xl font-bold text-slate-800 mb-4">I gang med tidsregistrering</h3>
 
             <div class="grid grid-cols-2 gap-3 mb-6">
-                <button @onclick="HandleTakeBreak" class="p-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium transition">
-                    Hold Pause
+                <button @onclick="HandleTakeBreak" class="p-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium transition">Hold Pause</button>
+                <button @onclick="HandleResumeWork" class="p-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-medium transition">Genoptag</button>
+                <button @onclick="HandleStopWork" class="p-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium transition">Stop arbejde</button>
+                <button @onclick="HandleClockOut" class="col-span-2 p-3 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold transition shadow">Stempel Ud (Afslut Dag)</button>
+            </div>
+
+            <div class="border-t pt-4 mt-4 space-y-4">
+                <h4 class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Skift Igangværende Arbejde</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Nyt Projekt</label>
+                        <select value="@selectedProjectId" @onchange="OnProjectChanged" class="w-full p-2 text-sm border rounded-lg bg-slate-50">
+                            <option value="@Guid.Empty">-- Vælg Projekt --</option>
+                            @foreach (var project in Projects)
+                            {
+                                <option value="@project.ProjectId">@project.ProjectName</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Ny Aktivitet</label>
+                        <select @bind="selectedActivityId" class="w-full p-2 text-sm border rounded-lg bg-slate-50">
+                            <option value=@Guid.Empty>-- Vælg Aktivitet --</option>
+                            @foreach (var activity in ProjectActivities)
+                            {
+                                <option value=@activity.ProjectActivityId>@activity.ActivityName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <button @onclick="HandleSwitchActivity" disabled="@(selectedProjectId == Guid.Empty || selectedActivityId == Guid.Empty)" class="p-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-lg font-medium transition disabled:opacity-50">Skift Aktivitet</button>
+                    <button @onclick="HandleSwitchProject" disabled="@(selectedProjectId == Guid.Empty || selectedActivityId == Guid.Empty)" class="p-2 bg-violet-600 hover:bg-violet-700 text-white text-sm rounded-lg font-medium transition disabled:opacity-50">Skift Projekt</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow p-6 border border-slate-100 space-y-6">
+            <h3 class="text-lg font-bold text-slate-800 border-b pb-2">Manuel Efterregistrering</h3>
+            <p class="text-xs text-slate-400 -mt-4">Vælg projekt og aktivitet i menuen ovenfor for at tilknytte dine manuelle registreringer korrekt.</p>
+
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                <h4 class="text-sm font-semibold text-indigo-700">＋ Tilføj Tid Manuelt</h4>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Dato</label>
+                        <input type="date" @bind="manualDate" class="w-full p-2 text-sm border rounded-lg bg-white" />
+                    </div>
+                    <div class="flex items-end pb-2">
+                        <label class="inline-flex items-center text-xs text-slate-600 cursor-pointer">
+                            <input type="checkbox" @bind="manualIsWork" class="rounded text-indigo-600 mr-2 border-slate-300 focus:ring-indigo-500" />
+                            Er Arbejdstid (ikke pause)
+                        </label>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Starttidspunkt</label>
+                        <input type="time" @bind="manualStartTime" class="w-full p-2 text-sm border rounded-lg bg-white" />
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Sluttidspunkt</label>
+                        <input type="time" @bind="manualEndTime" class="w-full p-2 text-sm border rounded-lg bg-white" />
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-xs text-slate-500 mb-1">Beskrivelse / Bemærkning</label>
+                        <input type="text" @bind="manualTimeDescription" class="w-full p-2 text-sm border rounded-lg bg-white" placeholder="Hvad lavede du?" />
+                    </div>
+                </div>
+                <button @onclick="HandleAddManualTime"
+                        disabled="@(selectedProjectId == Guid.Empty || selectedActivityId == Guid.Empty)"
+                        class="w-full p-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition disabled:opacity-50">
+                    Gem Manuel Tid
                 </button>
-                <button @onclick="HandleResumeWork" class="p-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-medium transition">
-                    Genoptag Arbejde
-                </button>
-                <button @onclick="HandleClockOut" class="col-span-2 p-3 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold transition shadow">
-                    Stempel Ud (Afslut Dag)
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                <h4 class="text-sm font-semibold text-emerald-700">＋ Tilføj Udgift/Udlæg</h4>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="col-span-2">
+                        <label class="block text-xs text-slate-500 mb-1">Beløb (DKK)</label>
+                        <input type="number" step="0.01" @bind="expenseAmount" class="w-full p-2 text-sm border rounded-lg bg-white" placeholder="0,00" />
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-xs text-slate-500 mb-1">Beskrivelse</label>
+                        <input type="text" @bind="expenseDescription" class="w-full p-2 text-sm border rounded-lg bg-white" placeholder="F.eks. Broafgift eller Materialer" />
+                    </div>
+                </div>
+                <button @onclick="HandleAddManualExpense"
+                        disabled="@(selectedProjectId == Guid.Empty)"
+                        class="w-full p-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition disabled:opacity-50">
+                    Gem Udgift
                 </button>
             </div>
         </div>
@@ -88,14 +175,47 @@
                 <div class="space-y-3">
                     @foreach (var timeReg in activeLog.TimeRegistrations)
                     {
-                        <div class="p-3 bg-slate-50 rounded-lg border border-slate-100 text-sm flex justify-between items-center">
+                        <div class="p-3 rounded-lg border border-slate-100 text-sm flex justify-between items-center bg-slate-50">
                             <div>
                                 <p class="font-semibold text-slate-700">@timeReg.ProjectName</p>
                                 <p class="text-xs text-slate-500">@timeReg.ProjectActivityName</p>
                             </div>
-                            <button @onclick="() => HandleRemoveRegistration(timeReg.Id)" class="text-rose-600 hover:text-rose-800 p-1">
-                                Slet
-                            </button>
+                            <div class="text-right text-xs space-y-1">
+                                @foreach (var inter in timeReg.Intervals)
+                                {
+                                    <div>
+                                        <span class="font-medium @(inter.IsBreak ? "text-amber-600" : "text-emerald-600")">@(inter.IsBreak ? "Pause" : "Arbejde"):</span>
+                                        <span class="text-slate-600">@inter.StartTime.ToShortTimeString() - @inter.EndTime?.ToShortTimeString()</span>
+                                    </div>
+                                }
+                            </div>
+                            <button @onclick="() => HandleRemoveRegistration(timeReg.Id)" class="text-rose-600 hover:text-rose-800 p-1 font-medium">Slet</button>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="bg-white rounded-xl shadow p-6 border border-slate-100">
+            <h4 class="font-bold text-slate-700 mb-3 border-b pb-2">Registrerede udgifter/udlæg</h4>
+            @if (activeLog.ExpenseRegistrations == null || !activeLog.ExpenseRegistrations.Any())
+            {
+                <p class="text-sm text-slate-400 italic">Ingen udgifter registreret i dag.</p>
+            }
+            else
+            {
+                <div class="space-y-3">
+                    @foreach (var expense in activeLog.ExpenseRegistrations)
+                    {
+                        <div class="p-3 bg-slate-50 rounded-lg border border-slate-100 text-sm flex justify-between items-center">
+                            <div>
+                                <p class="font-semibold text-slate-700">@expense.Amount.ToString("C2")</p>
+                                <p class="text-xs text-slate-500">@expense.Description</p>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-xs text-slate-400">@expense.Date.ToShortDateString()</span>
+                                <button @onclick="() => HandleRemoveExpense(expense.Id)" class="text-rose-600 hover:text-rose-800 p-1 font-medium">Slet</button>
+                            </div>
                         </div>
                     }
                 </div>
@@ -114,19 +234,31 @@
 @code {
     private bool isLoading = true;
     private string errorMessage = string.Empty;
+    private List<ProjectDto> Projects = new();
+    private List<ProjectActivityDto> ProjectActivities = new();
     private WorkLogDto? activeLog;
     private Guid UserId;
 
-    // Hardcoded for presentation purpose; in production get dynamically from User Claim or state container
+    private Guid selectedProjectId = Guid.Empty;
+    private Guid selectedActivityId = Guid.Empty;
 
-    private string selectedProjectId = "";
-    private string selectedActivityId = "";
+    // Nye specifikke tilstande til dine præcise Commands
+    private DateTime manualDate = DateTime.Today;
+    private DateTime manualStartTime = DateTime.Today.AddHours(8);
+    private DateTime manualEndTime = DateTime.Today.AddHours(16);
+    private string manualTimeDescription = string.Empty;
+    private bool manualIsWork = true;
+
+    private decimal expenseAmount;
+    private string expenseDescription = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadActiveWorkLog();
         var guid = await authService.GetUserIdAsync();
         UserId = Guid.Parse(guid);
+        await LoadActiveWorkLog();
+        var fetchedProjects = await RegistrationService.GetProjects(CancellationToken.None);
+        Projects = fetchedProjects?.ToList() ?? new();
     }
 
     private async Task LoadActiveWorkLog()
@@ -137,7 +269,7 @@
         {
             activeLog = await RegistrationService.GetActiveWorkLog(UserId, CancellationToken.None);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             errorMessage = "Kunne ikke hente din aktive logfil.";
         }
@@ -149,16 +281,119 @@
 
     private async Task HandleStartWork()
     {
-        var command = new StartWorkCommand(UserId, Guid.Parse(selectedProjectId), Guid.Parse(selectedActivityId));
+        var command = new StartWorkCommand(UserId, selectedProjectId, selectedActivityId);
         var result = await RegistrationService.StartWork(command, CancellationToken.None);
         if (result.Success)
         {
+            ResetSelection();
             await LoadActiveWorkLog();
         }
-        else
+        else errorMessage = result.Message;
+    }
+
+    private async Task OnProjectChanged(ChangeEventArgs e)
+    {
+        selectedActivityId = Guid.Empty;
+        ProjectActivities.Clear();
+
+        if (Guid.TryParse(e.Value?.ToString(), out Guid projectId))
         {
-            errorMessage = result.Message;
+            selectedProjectId = projectId;
+            if (selectedProjectId != Guid.Empty)
+            {
+                var activities = await RegistrationService.GetProjectActivities(selectedProjectId, CancellationToken.None);
+                ProjectActivities = activities?.ToList() ?? new();
+            }
         }
+    }
+
+    private async Task HandleSwitchActivity()
+    {
+        if (activeLog == null || selectedProjectId == Guid.Empty || selectedActivityId == Guid.Empty) return;
+        var result = await RegistrationService.SwitchActivity(UserId, selectedProjectId, selectedActivityId, CancellationToken.None);
+        if (result.Success) { ResetSelection(); await LoadActiveWorkLog(); }
+        else errorMessage = result.Message;
+    }
+
+    private async Task HandleSwitchProject()
+    {
+        if (activeLog == null || selectedProjectId == Guid.Empty || selectedActivityId == Guid.Empty) return;
+        var result = await RegistrationService.SwitchProject(UserId, activeLog.Id, selectedProjectId, selectedActivityId, CancellationToken.None);
+        if (result.Success) { ResetSelection(); await LoadActiveWorkLog(); }
+        else errorMessage = result.Message;
+    }
+
+    // MANUEL TIME - Mapper præcist til din ManualTimeRegistrationCommand record
+    private async Task HandleAddManualTime()
+    {
+        if (activeLog == null || selectedProjectId == Guid.Empty) return;
+
+        // Kombinerer den valgte dato med de indtastede tidspunkter
+        var startDateTime = manualDate.Date.Add(manualStartTime.TimeOfDay);
+        var endDateTime = manualDate.Date.Add(manualEndTime.TimeOfDay);
+        Guid? activityId = selectedActivityId == Guid.Empty ? null : selectedActivityId;
+
+        var command = new ManualTimeRegistrationCommand(
+            UserId,
+            selectedProjectId,
+            activityId,
+            startDateTime,
+            endDateTime,
+            manualTimeDescription,
+            manualDate,
+            manualIsWork
+        );
+
+        var result = await RegistrationService.CreateTimeRegistration(UserId, activeLog.Id, command, CancellationToken.None);
+        if (result.Success)
+        {
+            manualTimeDescription = string.Empty;
+            await LoadActiveWorkLog();
+        }
+        else errorMessage = result.Message;
+    }
+
+    // MANUEL UDGIFT - Mapper præcist til din CreateExpenseCommand record
+    private async Task HandleAddManualExpense()
+    {
+        if (activeLog == null || selectedProjectId == Guid.Empty || expenseAmount <= 0) return;
+
+        Guid? activityId = selectedActivityId == Guid.Empty ? null : selectedActivityId;
+
+        var command = new CreateExpenseCommand(
+            UserId,
+            expenseAmount,
+            expenseDescription,
+            null, // ExpenseCategoryId (Sæt til null, da UI ikke har vælger endnu)
+            null, // NewCategoryName
+            activityId,
+            selectedProjectId
+        );
+
+        var result = await RegistrationService.CreateExpenseRegistration(UserId, activeLog.Id, command, CancellationToken.None);
+        if (result.Success)
+        {
+            expenseAmount = 0;
+            expenseDescription = string.Empty;
+            await LoadActiveWorkLog();
+        }
+        else errorMessage = result.Message;
+    }
+
+    private async Task HandleRemoveRegistration(Guid regId)
+    {
+        if (activeLog == null) return;
+        var result = await RegistrationService.RemoveTimeRegistration(UserId, activeLog.Id, regId, CancellationToken.None);
+        if (result.Success) await LoadActiveWorkLog();
+        else errorMessage = result.Message;
+    }
+
+    private async Task HandleRemoveExpense(Guid expenseId)
+    {
+        if (activeLog == null) return;
+        var result = await RegistrationService.RemoveExpenseRegistration(UserId, activeLog.Id, expenseId, CancellationToken.None);
+        if (result.Success) await LoadActiveWorkLog();
+        else errorMessage = result.Message;
     }
 
     private async Task HandleTakeBreak()
@@ -180,25 +415,26 @@
         var result = await RegistrationService.ClockOut(UserId, CancellationToken.None);
         if (result.Success)
         {
-            // Submit immediately upon clock out if matching business workflow requirement
-            if (activeLog != null)
-            {
-                await RegistrationService.SubmitWorkLogForApproval(UserId, activeLog.Id, CancellationToken.None);
-            }
+            if (activeLog != null) await RegistrationService.SubmitWorkLogForApproval(UserId, activeLog.Id, CancellationToken.None);
             activeLog = null;
+            ResetSelection();
             await LoadActiveWorkLog();
         }
-        else
-        {
-            errorMessage = result.Message;
-        }
+        else errorMessage = result.Message;
     }
 
-    private async Task HandleRemoveRegistration(Guid regId)
+    private async Task HandleStopWork()
     {
         if (activeLog == null) return;
-        var result = await RegistrationService.RemoveTimeRegistration(UserId, activeLog.Id, regId, CancellationToken.None);
+        var result = await RegistrationService.EndWork(UserId, CancellationToken.None);
         if (result.Success) await LoadActiveWorkLog();
         else errorMessage = result.Message;
+    }
+
+    private void ResetSelection()
+    {
+        selectedProjectId = Guid.Empty;
+        selectedActivityId = Guid.Empty;
+        ProjectActivities.Clear();
     }
 }

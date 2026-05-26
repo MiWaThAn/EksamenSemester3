@@ -8,14 +8,14 @@ using System.Text;
 
 namespace Application.Commands.Item.Registrations
 {
-    public class SwitchProjectActivityHandler : IRequestHandler<SwitchProjectCommand, BaseRegistrationResponse>
+    public class SwitchProjectActivityHandler : IRequestHandler<SwitchActivityCommand, BaseRegistrationResponse>
     {
         private readonly IUnitOfWork _unitOfWork;
         public SwitchProjectActivityHandler(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
-        public async Task<BaseRegistrationResponse> Handle(SwitchProjectCommand request, CancellationToken cancellationToken)
+        public async Task<BaseRegistrationResponse> Handle(SwitchActivityCommand request, CancellationToken cancellationToken)
         {
             try
             {
@@ -34,8 +34,8 @@ namespace Application.Commands.Item.Registrations
                 var projectActivity = await _unitOfWork.ProjectActivities.GetByIdAsync(request.NewProjectActivityId, cancellationToken);
                 if (projectActivity == null)
                     return BaseRegistrationResponse.Fail("Project activity not found.");
-                worklog.SwitchActivity(projectActivity, emp);
-                var active = worklog.Registrations.FirstOrDefault(wl => wl.Id == worklog.ActiveRegistrationId);
+                var active = worklog.SwitchActivity(projectActivity, emp);
+                await _unitOfWork.HourRegistrations.AddAsync(active);
                 await _unitOfWork.CompleteAsync(cancellationToken);
                 await _unitOfWork.CommitTransactionAsync(cancellationToken);
                 return BaseRegistrationResponse.Ok(active.Id);

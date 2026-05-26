@@ -41,7 +41,8 @@ namespace Application.Commands.Item.Registrations
                 var WorkLog = await _unitOfWork.WorkLogs.GetActiveByEmployeeIdAsync(emp.Id, cancellationToken);
                 if (WorkLog == null)
                     return BaseRegistrationResponse.Fail("No active work log found for the employee.");
-                WorkLog.SwitchProjectAndActivity(Project, ProjectActivity, emp);
+                var active = WorkLog.SwitchProjectAndActivity(Project, ProjectActivity, emp);
+                await _unitOfWork.HourRegistrations.AddAsync(active);
                 await _unitOfWork.CompleteAsync(cancellationToken);
                 await _unitOfWork.CommitTransactionAsync(cancellationToken);
                 return BaseRegistrationResponse.Ok(WorkLog.ActiveRegistrationId.Value);

@@ -76,13 +76,15 @@ namespace Domain.Entity.Item.Registrations
                 throw new InvalidOperationException("Du kan ikke redigere en godkendt eller pending log.");
             if (employee.Id != EmployeeId)
                 throw new InvalidOperationException("Kun den tilhørende medarbejder kan genoptage arbejdet på denne log.");
-
-            var active = GetActiveHourRegistration();
-            active.ResumeWork();
+            if(ActiveRegistrationId != null)
+            {
+                var active = GetActiveHourRegistration();
+                active.ResumeWork();
+            }
             MarkAsDraft();
         }
         //Metode til når en medarbejder vil skifte opgave
-        public void SwitchActivity(ProjectActivity newActivity, Employee employee)
+        public HourRegistration SwitchActivity(ProjectActivity newActivity, Employee employee)
         {
             if (Status == ApprovalStatus.Approved)
                 throw new InvalidOperationException("Du kan ikke redigere en godkendt log.");
@@ -91,7 +93,8 @@ namespace Domain.Entity.Item.Registrations
                 throw new InvalidOperationException("Kun den tilhørende medarbejder kan skifte aktivitet på denne log.");
 
             var active = GetActiveHourRegistration();
-            active.EndWork();
+            if(active.HasActive())
+                active.EndWork();
 
             var builder = new HourRegistrationBuilder()
                 .WithProject(active.ProjectId)
@@ -104,8 +107,9 @@ namespace Domain.Entity.Item.Registrations
             ActiveRegistrationId = reg.Id;
             UpdatedAt = DateTime.UtcNow;
             MarkAsDraft();
+            return reg;
         }
-        public void SwitchProjectAndActivity(Project newProject, ProjectActivity newActivity, Employee employee)
+        public HourRegistration SwitchProjectAndActivity(Project newProject, ProjectActivity newActivity, Employee employee)
         {
             if (Status == ApprovalStatus.Approved)
                 throw new InvalidOperationException("Du kan ikke redigere en godkendt log.");
@@ -116,7 +120,8 @@ namespace Domain.Entity.Item.Registrations
                 throw new InvalidOperationException("Kun den tilhørende medarbejder kan skifte projekt og aktivitet på denne log.");
 
             var active = GetActiveHourRegistration();
-            active.EndWork();
+            if(active.HasActive())
+                active.EndWork();
 
             var builder = new HourRegistrationBuilder()
                 .WithProject(newProject)
@@ -129,6 +134,7 @@ namespace Domain.Entity.Item.Registrations
             ActiveRegistrationId = reg.Id;
             UpdatedAt = DateTime.UtcNow;
             MarkAsDraft();
+            return reg;
         }
         //metode for at stoppe arbejde.
         public void EndWork(Employee employee)
@@ -138,9 +144,12 @@ namespace Domain.Entity.Item.Registrations
             if (employee.Id != EmployeeId)
                 throw new InvalidOperationException("Kun den tilhørende medarbejder kan afslutte arbejdet på denne log.");
 
-            var active = GetActiveHourRegistration();
-            active.EndWork();
-            ActiveRegistrationId = null;
+            if(ActiveRegistrationId != null)
+            {
+                var active = GetActiveHourRegistration();
+                if(active.HasActive())
+                    active.EndWork();
+            }
             UpdatedAt = DateTime.UtcNow;
             MarkAsDraft();
         }
@@ -387,9 +396,10 @@ namespace Domain.Entity.Item.Registrations
                 throw new InvalidOperationException("Kun den tilhørende medarbejder kan lukke denne log.");
             if (ActiveRegistrationId != null)
             {
-                EndWork(employee);
+                HourRegistration active = GetActiveHourRegistration();
+                active.ClockOut();
+                ActiveRegistrationId = null;
             }
-
             IsClosed = true;
             DateClosed = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
