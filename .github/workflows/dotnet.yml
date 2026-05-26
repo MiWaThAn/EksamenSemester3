@@ -51,15 +51,15 @@ jobs:
       - name: Install Workloads
         run: dotnet workload restore
 
-      - name: Build and analyze
+      - name: Build and analyze 
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
-          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"3semestereksamen_3-semester-eksamens-projekt" /o:"3semestereksamen" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.cs.opencover.reportsPaths="**/coverage.cobertura.xml"
+          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"3semestereksamen_3-semester-eksamens-projekt" /o:"3semestereksamen" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
           
           dotnet build --configuration Release
           
-          dotnet test --configuration Release --no-build --collect:"XPlat Code Coverage"
+          dotnet test --configuration Release --no-build --collect:"XPlat Code Coverage;Format=opencover"
           
           ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
