@@ -60,7 +60,7 @@ namespace UI.Services.Auth.Registration
         private async Task<bool> RequestNotificationPermissionAsync()
         {
             var status = await Permissions.CheckStatusAsync<Permissions.PostNotifications>();
-            if (status != PermissionStatus.Granted)
+            if(status != PermissionStatus.Granted)
             {
                 status = await Permissions.RequestAsync<Permissions.PostNotifications>();
             }
