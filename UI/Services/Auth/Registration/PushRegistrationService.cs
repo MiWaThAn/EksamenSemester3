@@ -19,42 +19,28 @@ namespace UI.Services.Auth.Registration
         {
             try
             {
-                var permissionGranted = await RequestNotificationPermissionAsync();
-                if (!permissionGranted)
-                {
-                    return;
-                }
-                await CrossFirebaseCloudMessaging.Current.CheckIfValidAsync();
-                var deviceToken = await CrossFirebaseCloudMessaging.Current.GetTokenAsync();
-                var requestPayload = new
-                {
-                    UserId = currentUserId,
-                    Token = deviceToken
-                };
-                var authToken = await SecureStorage.GetAsync("auth_token");
-                if (string.IsNullOrWhiteSpace(authToken))
-                {
-                    Console.WriteLine("Push registration skipped: No auth token found in SecureStorage.");
-                    return;
-                }
-                var request = new HttpRequestMessage(HttpMethod.Post, "api/notifications/register-token");
-                request.Content = JsonContent.Create(requestPayload);
+                // 1. Definer en flag eller tjek om du er i et testmiljø
+                bool pushEnabled = false; // Sæt til 'true' når du er klar til at teste FCM
 
-                if (!string.IsNullOrEmpty(authToken))
-                {
-                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
-                }
-                var response = await _httpClient.SendAsync(request);
+                string deviceToken = "mock-token-for-testing";
 
-                if (!response.IsSuccessStatusCode)
+                if (pushEnabled)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"API rejected token registration: {response.StatusCode} - {errorContent}");
+                    var permissionGranted = await RequestNotificationPermissionAsync();
+                    if (!permissionGranted) return;
+
+                    await CrossFirebaseCloudMessaging.Current.CheckIfValidAsync();
+                    deviceToken = await CrossFirebaseCloudMessaging.Current.GetTokenAsync();
                 }
+
+                // ... resten af din kode for at sende token til API'et ...
+                var requestPayload = new { UserId = currentUserId, Token = deviceToken };
+                // ... resten af din logik
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to register push token: {ex.Message}");
+                // Hvis fejlen skyldes NotImplementedException, bliver den fanget her
+                Console.WriteLine($"Spring push-registrering over midlertidigt: {ex.Message}");
             }
         }
         private async Task<bool> RequestNotificationPermissionAsync()
