@@ -3,16 +3,36 @@ name: ContinousIntegration
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    types: [opened, synchronize, reopened]
 
 jobs:
-  build-test-analyze:
-    runs-on: ubuntu-latest
+  build-and-analyze:
+    name: Build and analyze
+    runs-on: windows-latest
     steps:
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+
+      - name: Cache SonarQube scanner
+        id: cache-sonar-scanner
+        uses: actions/cache@v4
+        with:
+          path: .\.sonar\scanner
+          key: ${{ runner.os }}-sonar-scanner
+          restore-keys: ${{ runner.os }}-sonar-scanner
+
+      - name: Install SonarQube scanner
+        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+        shell: powershell
+        run: |
+          New-Item -Path .\.sonar\scanner -ItemType Directory
+          dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -22,20 +42,10 @@ jobs:
       - name: Install Workloads
         run: dotnet workload restore
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v5
-        with:
-          java-version: 17
-          distribution: 'zulu'
-
-      - name: Install SonarScanner
-        run: dotnet tool install --global dotnet-sonarscanner
-
       - name: Begin Analysis
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        shell: powershell
         run: |
-          dotnet sonarscanner begin \
+          .\.sonar\scanner\dotnet-sonarscanner begin \
             /k:"3semestereksamen_3-semester-eksamens-projekt" \
             /o:"3semestereksamen" \
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
@@ -46,10 +56,9 @@ jobs:
 
       - name: Test with Coverage
         run: |
-          dotnet test EksamenSemester3.sln --configuration Release --no-build \
+          dotnet test EksamenSemester3.sln --configuration Release --no-build --verbosity normal \
             --collect:"XPlat Code Coverage"
 
       - name: End Analysis
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+        shell: powershell
+        run: .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
