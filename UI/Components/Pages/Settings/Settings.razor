@@ -53,21 +53,39 @@ else
         </tbody>
     </table>
 }
-<h3>Tilføj ekstern integration</h3>
 @if (providers == null)
 {
     <p>Henter udbydere...</p>
 }
 else
 {
+    <h3>Tilføj ekstern integration</h3>
     <EditForm Model="model" OnValidSubmit="HandleSubmit">
-        <InputSelect class="form-select mb-3" @bind-Value="model.ProviderName">
+        <InputSelect class="form-select mb-3" @bind-Value="model.ProviderName"
+                     @bind-Value:after="OnProviderChanged">
             <option value="">-- Vælg en udbyder --</option>
             @foreach (var provider in providers)
             {
                 <option value="@provider.Name">@provider.Name</option>
             }
         </InputSelect>
+
+        @if (availableEntityTypes.Any())
+        {
+            <div class="mb-3">
+                <label class="form-label">Vælg entitetstyper:</label>
+                @foreach (var entityType in availableEntityTypes)
+                {
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input"
+                               id="@entityType"
+                               checked="@model.SelectedEntityTypes.Contains(entityType)"
+                               @onchange="e => ToggleEntityType(entityType, (bool)e.Value!)" />
+                        <label class="form-check-label" for="@entityType">@entityType</label>
+                    </div>
+                }
+            </div>
+        }
 
         <input type="text" class="form-control mb-2"
                placeholder="Indtast navn på nøgle"
@@ -80,7 +98,6 @@ else
         <button type="submit" class="btn btn-primary">Gem</button>
     </EditForm>
 }
-
 @code {
     private void HandleColorChange(ChangeEventArgs e)
     {
@@ -125,6 +142,27 @@ else
         public string KeyValue { get; set; } = string.Empty;
         public List<string> SelectedEntityTypes { get; set; } = new();
     }
+    private List<string> availableEntityTypes = new();
+
+    
+
+    private void OnProviderChanged()
+    {
+        var selected = providers?.FirstOrDefault(p => p.Name == model.ProviderName);
+        availableEntityTypes = selected?.SupportedEntityTypes ?? new();
+        model.SelectedEntityTypes.Clear();
+    }
+
+    private void ToggleEntityType(string entityType, bool isChecked)
+    {
+        if (isChecked && !model.SelectedEntityTypes.Contains(entityType))
+            model.SelectedEntityTypes.Add(entityType);
+        else if (!isChecked)
+            model.SelectedEntityTypes.Remove(entityType);
+    }
+
+
+
 }
 
    

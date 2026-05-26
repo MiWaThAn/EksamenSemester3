@@ -23,6 +23,11 @@ namespace Infrastructure.Repositories.Mappings
                 .Include(p => p.Urls)
                 .FirstOrDefaultAsync(p => p.Datasource == datasource);
         }
-
+        public async Task<IEnumerable<Provider>> GetAllWithUrlsAsync(CancellationToken cancellationToken = default)
+        {
+            return await _context.Providers
+                .Include(p => p.Urls)
+                .ToListAsync(cancellationToken);
+        }
     }
 }
