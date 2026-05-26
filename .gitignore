@@ -361,3 +361,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# SonarQube
+.sonarqube/
+
+# Test resultater (hvis de lander i en mappe i roden)
+TestResults/
