@@ -19,34 +19,48 @@ namespace UI.Services.Auth.Registration
         {
             try
             {
-                // 1. Definer en flag eller tjek om du er i et testmiljø
-                bool pushEnabled = false; // Sæt til 'true' når du er klar til at teste FCM
-
-                string deviceToken = "mock-token-for-testing";
-
-                if (pushEnabled)
+                var permissionGranted = await RequestNotificationPermissionAsync();
+                if (!permissionGranted)
                 {
-                    var permissionGranted = await RequestNotificationPermissionAsync();
-                    if (!permissionGranted) return;
-
-                    await CrossFirebaseCloudMessaging.Current.CheckIfValidAsync();
-                    deviceToken = await CrossFirebaseCloudMessaging.Current.GetTokenAsync();
+                    return;
                 }
+                await CrossFirebaseCloudMessaging.Current.CheckIfValidAsync();
+                var deviceToken = await CrossFirebaseCloudMessaging.Current.GetTokenAsync();
+                var requestPayload = new
+                {
+                    UserId = currentUserId,
+                    Token = deviceToken
+                };
+                var authToken = await SecureStorage.GetAsync("auth_token");
+                if (string.IsNullOrWhiteSpace(authToken))
+                {
+                    Console.WriteLine("Push registration skipped: No auth token found in SecureStorage.");
+                    return;
+                }
+                var request = new HttpRequestMessage(HttpMethod.Post, "api/notifications/register-token");
+                request.Content = JsonContent.Create(requestPayload);
 
-                // ... resten af din kode for at sende token til API'et ...
-                var requestPayload = new { UserId = currentUserId, Token = deviceToken };
-                // ... resten af din logik
+                if (!string.IsNullOrEmpty(authToken))
+                {
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
+                }
+                var response = await _httpClient.SendAsync(request);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"API rejected token registration: {response.StatusCode} - {errorContent}");
+                }
             }
             catch (Exception ex)
             {
-                // Hvis fejlen skyldes NotImplementedException, bliver den fanget her
-                Console.WriteLine($"Spring push-registrering over midlertidigt: {ex.Message}");
+                Console.WriteLine($"Failed to register push token: {ex.Message}");
             }
         }
         private async Task<bool> RequestNotificationPermissionAsync()
         {
             var status = await Permissions.CheckStatusAsync<Permissions.PostNotifications>();
-            if(status != PermissionStatus.Granted)
+            if (status != PermissionStatus.Granted)
             {
                 status = await Permissions.RequestAsync<Permissions.PostNotifications>();
             }
