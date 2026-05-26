@@ -21,13 +21,14 @@ namespace API.Controllers.Person.Auth
             var result = await mediator.Send(command, ct);
             return result.Success ? Ok(new { id = result.Id }) : BadRequest(new ProblemDetails { Detail = result.Message });
         }
-        [Authorize(Roles ="Company")]
+        [Authorize(Roles ="Company,Admin")]
         [HttpPost("register/employee")]
         public async Task<IActionResult> Register([FromBody] RegisterEmployeeAccountCommand command, CancellationToken ct)
         {
             var result = await mediator.Send(command, ct);
             return result.Success ? Ok(new { id = result.Id }) : BadRequest(new ProblemDetails { Detail = result.Message });
         }
+        [Authorize]
         [HttpPost("register/pin")]
         public async Task<IActionResult> Register([FromBody] RegisterAccountPinCommand command, CancellationToken ct)
         {
@@ -36,6 +37,7 @@ namespace API.Controllers.Person.Auth
                 return BadRequest(new ProblemDetails { Detail = result.Message });
             return Ok(result);
         }
+        [Authorize]
         [HttpPost("token/validate")]
         public IActionResult ValidateToken([FromBody] string token)
         {
@@ -74,6 +76,7 @@ namespace API.Controllers.Person.Auth
                 return Unauthorized(new ProblemDetails { Detail = "Invalid token structure or signature" });
             }
         }
+        [Authorize(Roles = "Employee,Company")]
         [HttpPost("login-pin")]
         public async Task<IActionResult> LoginWithPin([FromBody] PinLoginCommand command, CancellationToken ct)
         {
@@ -95,6 +98,7 @@ namespace API.Controllers.Person.Auth
             }
             return Ok(result);
         }
+        [Authorize]
         [HttpPost("register-token")]
         public async Task<IActionResult> RegisterToken([FromBody] RegisterTokenDto request)
         {

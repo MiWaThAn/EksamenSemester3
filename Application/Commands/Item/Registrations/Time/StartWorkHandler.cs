@@ -25,7 +25,7 @@ namespace Application.Commands.Item.Registrations.Time
                 var account = await _unitOfWork.Accounts.GetByIdAsync(request.AccountId, cancellationToken);
                 if(account == null)
                     return new BaseRegistrationResponse { Success = false, Message = "Konto ikke fundet." };
-                if(account.EmployeeId.HasValue)
+                if(!account.EmployeeId.HasValue)
                     return new BaseRegistrationResponse { Success = false, Message = "Konto er allerede tilknyttet en medarbejder." };
                 var employee = await _unitOfWork.Employees.GetByIdAsync(account.EmployeeId.Value, cancellationToken);
                 if (employee == null)
@@ -58,7 +58,6 @@ namespace Application.Commands.Item.Registrations.Time
             catch (Exception ex)
             {
                 await _unitOfWork.RollbackTransactionAsync();
-                // TODO: _logger.LogError(ex, "Fejl ved start af arbejde for Employee {EmployeeId}", request.EmployeeId);
                 return new BaseRegistrationResponse { Success = false, Message = "Der opstod en uventet systemfejl." };
             }
         }

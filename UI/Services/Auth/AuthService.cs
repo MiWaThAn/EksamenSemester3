@@ -213,13 +213,18 @@ namespace UI.Services.Auth
                 var response = await _http.PostAsJsonAsync("api/auth/login-pin", pin.ToPinLoginCommand, ct);
                 if (response.IsSuccessStatusCode)
                 {
-                    await _secureStorage.SetAsync("last_pin_login", DateTime.UtcNow.ToString("O"));
-                    var token = await _secureStorage.GetAsync("auth_token");
+                    var result = await response.Content.ReadFromJsonAsync<LoginResponse>(ct);
 
-                    _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                    _authStateProvider.NotifyLogin(token);
+                    if (result?.Token != null)
+                    {
+                        await _secureStorage.SetAsync("auth_token", result.Token);
+                        await _secureStorage.SetAsync("last_pin_login", DateTime.UtcNow.ToString("O"));
 
-                    return new LoginResponse { Success = true };
+                        _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", result.Token);
+                        _authStateProvider.NotifyLogin(result.Token);
+
+                        return new LoginResponse { Success = true, Token = result.Token };
+                    }
                 }
                 return new LoginResponse { Success = false, Message = "Forkert PIN-kode." };
             }
@@ -303,6 +308,20 @@ namespace UI.Services.Auth
             var claims = _authStateProvider.ParseClaimsFromJwt(token);
             var accountId = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub || c.Type == "sub")?.Value;
             return accountId;
+        }
+        public async Task<string?> GetUserIdAsync()
+        {
+            var token = await _secureStorage.GetAsync("auth_token");
+            var claims = _authStateProvider.ParseClaimsFromJwt(token);
+            var accountId = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub || c.Type == "sub")?.Value;
+            return accountId;
+        }
+        public async Task<string?> GetComapnyIdAsync()
+        {
+            var token = await _secureStorage.GetAsync("auth_token");
+            var claims = _authStateProvider.ParseClaimsFromJwt(token);
+            var companyId = claims.FirstOrDefault(c => c.Type == "company_id")?.Value;
+            return companyId;
         }
     }
 }

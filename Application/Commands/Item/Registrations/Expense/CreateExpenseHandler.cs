@@ -76,6 +76,7 @@ namespace Application.Commands.Item.Registrations.Expense
                     .WithProject(project)
                     .WithStatus(RegistrationStatus.Pending);
                 var registration = worklog.CreateRegistration(registrationBuilder);
+                await _unitOfWork.ExpenseRegistrations.AddAsync(registration);
                 await _unitOfWork.CompleteAsync(cancellationToken);
                 await _unitOfWork.CommitTransactionAsync(cancellationToken);
                 return new BaseRegistrationResponse { Success = true, Id = registration.Id };

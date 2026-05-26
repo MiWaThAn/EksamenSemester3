@@ -1,5 +1,6 @@
 ﻿using Application.Commands.Person.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using static Application.Commands.Person.Queries.GetProjectsByCompanyQuery;
@@ -8,6 +9,7 @@ using static Application.Commands.Person.Queries.GetProjectsByCompanyQuery;
 namespace API.Controllers
 {
     [ApiController]
+    [Authorize(Roles ="Employee,Company,Admin")]
     [Route("api/[controller]")]
     public class ProjectController : ControllerBase
     {
@@ -96,6 +98,29 @@ namespace API.Controllers
             if (!Guid.TryParse(userIdClaim, out Guid loggedInAccountId)) return Unauthorized();
 
             var result = await _mediator.Send(new GetProjectsByCompanyQuery(loggedInAccountId));
+            return Ok(result);
+        }
+        [HttpGet("employees-company-projects")]
+        public async Task<IActionResult> GetEmployeeCompanyProjects()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!Guid.TryParse(userIdClaim, out Guid loggedInAccountId)) return Unauthorized();
+
+            var result = await _mediator.Send(new GetCompanyProjectsByEmployeeAccountId(loggedInAccountId));
+            return Ok(result);
+        }
+
+        [HttpGet("company/{companyId:guid}/expenses")]
+        public async Task<IActionResult> GetCompanyExpenses(Guid companyId)
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userIdClaim, out Guid loggedInAccountId)) return Unauthorized();
+
+            var myCompanyId = await _mediator.Send(new GetCompanyIdByAccountIdQuery(loggedInAccountId));
+            if (myCompanyId != companyId) return Forbid();
+
+            var result = await _mediator.Send(new Application.Commands.Item.Queries.GetCompanyExpensesQuery(companyId));
             return Ok(result);
         }
     }

@@ -11,20 +11,20 @@ namespace Domain.Entity.Item.Registrations
     public class WorkLog : Base
     {
         //Worklog needs a builder that is given to the relevant employee. It then needs to check if theres already a worklog in their worklogs that overlaps with the current one
-        public Guid EmployeeId { get; private set; }
-        public DateTime DateCreated { get; private set; }
-        public Guid? ActiveRegistrationId { get; private set; }
+        public Guid EmployeeId { get; internal set; }
+        public DateTime DateCreated { get; internal set; }
+        public Guid? ActiveRegistrationId { get; internal set; }
         public DateTime LastActivityEndTime => _registrations.OfType<HourRegistration>().Where(r => !r.IsDeleted && r.EndTime != null).OrderByDescending(r => r.EndTime).FirstOrDefault()?.EndTime ?? DateTime.MinValue;
         public bool HasActiveRegistration => ActiveRegistrationId != null;
-        public bool IsClosed { get; private set; } = false;
-        public DateTime? DateClosed { get; private set; }
-        public ApprovalStatus Status { get; private set; } = ApprovalStatus.Draft;
-        public string? RejectionReason { get; private set; }
-        public DateTime? ReviewedAt { get; private set; }
+        public bool IsClosed { get; internal set; } = false;
+        public DateTime? DateClosed { get; internal set; }
+        public ApprovalStatus Status { get; internal set; } = ApprovalStatus.Draft;
+        public string? RejectionReason { get; internal set; }
+        public DateTime? ReviewedAt { get; internal set; }
 
         private readonly List<Registration> _registrations = new();
         public IReadOnlyCollection<Registration> Registrations => _registrations.Where(r => !r.IsDeleted).ToList().AsReadOnly();
-        public DateTime LastRemindedAt { get; private set; } = DateTime.UtcNow;
+        public DateTime LastRemindedAt { get; internal set; } = DateTime.UtcNow;
 
         internal WorkLog(Employee employee) : base()
         {
@@ -36,21 +36,22 @@ namespace Domain.Entity.Item.Registrations
 
         //Business Methods (UI) 
         //Method for when the user wants to start work on an activity
-        public void StartWork(Project project, ProjectActivity activity,Employee employee)
+        public void StartWork(Project project, ProjectActivity activity, Employee employee)
         {
             if (Status == ApprovalStatus.Approved)
                 throw new InvalidOperationException("Du kan ikke redigere en godkendt log.");
             Guard.AgainstNull(activity, nameof(activity));
             if (ActiveRegistrationId != null && ActiveRegistrationId != Guid.Empty)
                 throw new InvalidOperationException("Der er allerede en aktiv registrering.");
-            if(employee.Id != EmployeeId)
+            if (employee.Id != EmployeeId)
                 throw new InvalidOperationException("Kun den tilhørende medarbejder kan starte arbejde på denne log.");
+
             var builder = new HourRegistrationBuilder()
-            .WithProject(project)
-            .WithProjectActivity(activity)
-            .WithStart(DateTime.UtcNow)
-            .WithType(TimeType.Work)
-            .WithWorkLog(this);
+                .WithProject(project)
+                .WithProjectActivity(activity)
+                .WithStart(DateTime.UtcNow)
+                .WithType(TimeType.Work)
+                .WithWorkLog(this);
 
             ActiveRegistrationId = CreateRegistration(builder).Id;
             UpdatedAt = DateTime.UtcNow;
@@ -60,8 +61,9 @@ namespace Domain.Entity.Item.Registrations
         {
             if (Status == ApprovalStatus.Approved)
                 throw new InvalidOperationException("Du kan ikke redigere en godkendt log.");
-            if(employee.Id != EmployeeId)
+            if (employee.Id != EmployeeId)
                 throw new InvalidOperationException("Kun den tilhørende medarbejder kan tage pause på denne log.");
+
             var active = GetActiveHourRegistration();
             active.TakeBreak();
             UpdatedAt = DateTime.UtcNow;
@@ -70,24 +72,29 @@ namespace Domain.Entity.Item.Registrations
         //metode til når en bruger fil forsætte arbejde
         public void ResumeWork(Employee employee)
         {
-            if(Status == ApprovalStatus.Approved || Status == ApprovalStatus.Pending)
+            if (Status == ApprovalStatus.Approved || Status == ApprovalStatus.Pending)
                 throw new InvalidOperationException("Du kan ikke redigere en godkendt eller pending log.");
-            if(employee.Id != EmployeeId)
+            if (employee.Id != EmployeeId)
                 throw new InvalidOperationException("Kun den tilhørende medarbejder kan genoptage arbejdet på denne log.");
-            var active = GetActiveHourRegistration();
-            active.ResumeWork();
+            if(ActiveRegistrationId != null)
+            {
+                var active = GetActiveHourRegistration();
+                active.ResumeWork();
+            }
             MarkAsDraft();
         }
         //Metode til når en medarbejder vil skifte opgave
-        public void SwitchActivity(ProjectActivity newActivity,Employee employee)
+        public HourRegistration SwitchActivity(ProjectActivity newActivity, Employee employee)
         {
             if (Status == ApprovalStatus.Approved)
                 throw new InvalidOperationException("Du kan ikke redigere en godkendt log.");
             Guard.AgainstNull(newActivity, nameof(newActivity));
-            if(employee.Id != EmployeeId)
+            if (employee.Id != EmployeeId)
                 throw new InvalidOperationException("Kun den tilhørende medarbejder kan skifte aktivitet på denne log.");
+
             var active = GetActiveHourRegistration();
-            active.EndWork();
+            if(active.HasActive())
+                active.EndWork();
 
             var builder = new HourRegistrationBuilder()
                 .WithProject(active.ProjectId)
@@ -100,8 +107,9 @@ namespace Domain.Entity.Item.Registrations
             ActiveRegistrationId = reg.Id;
             UpdatedAt = DateTime.UtcNow;
             MarkAsDraft();
+            return reg;
         }
-        public void SwitchProjectAndActivity(Project newProject, ProjectActivity newActivity, Employee employee)
+        public HourRegistration SwitchProjectAndActivity(Project newProject, ProjectActivity newActivity, Employee employee)
         {
             if (Status == ApprovalStatus.Approved)
                 throw new InvalidOperationException("Du kan ikke redigere en godkendt log.");
@@ -112,7 +120,8 @@ namespace Domain.Entity.Item.Registrations
                 throw new InvalidOperationException("Kun den tilhørende medarbejder kan skifte projekt og aktivitet på denne log.");
 
             var active = GetActiveHourRegistration();
-            active.EndWork();
+            if(active.HasActive())
+                active.EndWork();
 
             var builder = new HourRegistrationBuilder()
                 .WithProject(newProject)
@@ -124,17 +133,23 @@ namespace Domain.Entity.Item.Registrations
             var reg = CreateRegistration(builder);
             ActiveRegistrationId = reg.Id;
             UpdatedAt = DateTime.UtcNow;
+            MarkAsDraft();
+            return reg;
         }
         //metode for at stoppe arbejde.
         public void EndWork(Employee employee)
         {
-            if(Status == ApprovalStatus.Approved || Status == ApprovalStatus.Pending)
+            if (Status == ApprovalStatus.Approved || Status == ApprovalStatus.Pending)
                 throw new InvalidOperationException("Du kan ikke redigere en godkendt log.");
             if (employee.Id != EmployeeId)
                 throw new InvalidOperationException("Kun den tilhørende medarbejder kan afslutte arbejdet på denne log.");
-            var active = GetActiveHourRegistration();
-            active.EndWork();
-            ActiveRegistrationId = null;
+
+            if(ActiveRegistrationId != null)
+            {
+                var active = GetActiveHourRegistration();
+                if(active.HasActive())
+                    active.EndWork();
+            }
             UpdatedAt = DateTime.UtcNow;
             MarkAsDraft();
         }
@@ -152,16 +167,24 @@ namespace Domain.Entity.Item.Registrations
             if (Status == ApprovalStatus.Approved)
                 throw new InvalidOperationException("Du kan ikke redigere en godkendt log.");
             Guard.AgainstNull(builder, nameof(builder));
+            if(ActiveRegistrationId != null)
+            {
+                var active = GetActiveHourRegistration();
+                active.EndWork();
+            }
             var registration = builder.WithWorkLog(this).Build();
-            if(registration.EmployeeId != EmployeeId)
+            if (registration.EmployeeId != EmployeeId)
                 throw new InvalidOperationException("Registreringen skal tilhøre den samme medarbejder som loggen.");
+
             if (registration is HourRegistration newHourReg)
             {
                 AdjustForOverlap(newHourReg);
             }
-            if (registration.WorkLogId != this.Id) throw new ArgumentException("Denne registrering tilhører ikke denne log");
-            registration.ValidateAgainst(_registrations);
+            if (registration.WorkLogId != this.Id)
+                throw new ArgumentException("Denne registrering tilhører ikke denne log");
+
             registration.ValidateAgainst(_registrations.Where(r => !r.IsDeleted));
+
             _registrations.Add(registration);
             UpdatedAt = DateTime.UtcNow;
             MarkAsDraft();
@@ -173,11 +196,12 @@ namespace Domain.Entity.Item.Registrations
                 .Where(r => !r.IsDeleted)
                 .Sum(r => r.TotalHours());
         }
+
         public double CalculateHoursSinceLastBreak()
         {
             var regs = _registrations.OfType<HourRegistration>();
             double total = 0;
-            foreach(var reg in regs)
+            foreach (var reg in regs)
             {
                 if (reg.HasHadBreak())
                 {
@@ -190,25 +214,24 @@ namespace Domain.Entity.Item.Registrations
             }
             return total;
         }
-        public void UpdateActiveRegistrationInterval(DateTime? newStart, DateTime? newEnd, Employee employee,Guid registrationId,TimeType timeType)
+        public void UpdateActiveRegistrationInterval(DateTime? newStart, DateTime? newEnd, Employee employee, Guid registrationId, Guid intervalId, TimeType timeType)
         {
             if (Status == ApprovalStatus.Approved)
                 throw new InvalidOperationException("Du kan ikke redigere en godkendt log.");
             if (employee.Id != EmployeeId)
                 throw new InvalidOperationException("Kun den tilhørende medarbejder kan redigere denne log.");
+
             var reg = _registrations.FirstOrDefault(r => r.Id == registrationId && !r.IsDeleted);
             if (reg == null)
                 throw new InvalidOperationException("Registrering ikke fundet.");
-            if(reg is not HourRegistration hourReg)
+            if (reg is not HourRegistration hourReg)
                 throw new InvalidOperationException("Kun timeregistreringer kan have intervallet redigeret.");
             if (hourReg.IsFinished)
                 throw new InvalidOperationException("Du kan kun redigere intervallet på en aktiv registrering.");
-            if(reg is HourRegistration Reg)
-            {
-                Reg.UpdateTimeInterval(reg.Id, newStart, newEnd, timeType);
-                UpdatedAt = DateTime.UtcNow;
-                MarkAsDraft();
-            }
+
+            hourReg.UpdateTimeInterval(intervalId, newStart, newEnd, timeType);
+            UpdatedAt = DateTime.UtcNow;
+            MarkAsDraft();
         }
         public void DeleteRegistration(Guid registrationId)
         {
@@ -274,7 +297,7 @@ namespace Domain.Entity.Item.Registrations
                 RejectionReason = reason;
                 ReviewedAt = DateTime.UtcNow;
                 UpdatedAt = DateTime.UtcNow;
-                foreach(var reg in _registrations.Where(r => !r.IsDeleted))
+                foreach (var reg in _registrations.Where(r => !r.IsDeleted))
                 {
                     reg.Reject(company);
                 }
@@ -299,7 +322,7 @@ namespace Domain.Entity.Item.Registrations
             Guard.AgainstNull(employee, nameof(employee));
             if (Status != ApprovalStatus.Draft)
                 throw new InvalidOperationException("Kun kladder kan sendes til godkendelse.");
-            if(employee.Id != EmployeeId)
+            if (employee.Id != EmployeeId)
                 throw new InvalidOperationException("Kun den tilhørende medarbejder kan sende denne log til godkendelse.");
             Status = ApprovalStatus.Pending;
             UpdatedAt = DateTime.UtcNow;
@@ -316,10 +339,13 @@ namespace Domain.Entity.Item.Registrations
             var newStart = newReg.StartTime;
             var newEnd = newReg.EndTime.Value;
 
-            //get finished registrations which overlap with new registration
+            //get registrations which have an end time and overlap with new registration
+            //We consider registrations that have an EndTime set (ended via EndWork or ClockOut),
+            //not only those marked IsFinished. EndWork sets an end time but leaves IsFinished false,
+            //so using EndTime ensures we detect and adjust those as well.
             var overlaps = _registrations.OfType<HourRegistration>()
-                .Where(r => !r.IsDeleted && r.IsFinished && r.StartTime < newEnd && r.EndTime > newStart)
-                .ToList();
+                            .Where(r => !r.IsDeleted && r.EndTime != null && r.StartTime < newEnd && r.EndTime > newStart)
+                            .ToList();
 
             foreach (var existing in overlaps)
             {
@@ -339,18 +365,31 @@ namespace Domain.Entity.Item.Registrations
                 {
                     existing.SoftDelete();
                 }
-
                 //hvis der blev udtrukket nogle intervaller betyder det at de kom efter den nye registrering, så vi skal have dem ind i en ny registrering der har samme aktivitet og beskrivelse som den gamle
                 if (extractedIntervals.Any())
                 {
-                    var splitReg = new HourRegistrationBuilder()
+                    var firstInterval = extractedIntervals.First();
+
+                    var splitBuilder = new HourRegistrationBuilder()
                         .WithWorkLog(this)
                         .WithProjectActivity(existing.ProjectActivityId)
                         .WithProject(existing.ProjectId)
                         .WithDescription(existing.Description)
-                        .Build();
+                        .WithStart(firstInterval.StartTime);
 
-                    splitReg.AddIntervals(extractedIntervals);
+                    if (firstInterval.EndTime.HasValue)
+                    {
+                        splitBuilder.WithEnd(firstInterval.EndTime.Value);
+                    }
+
+                    var splitReg = splitBuilder.Build();
+
+                    // If there are any remaining trailing intervals, add them safely
+                    if (extractedIntervals.Count > 1)
+                    {
+                        splitReg.AddIntervals(extractedIntervals.Skip(1));
+                    }
+
                     _registrations.Add(splitReg);
                 }
             }
@@ -359,13 +398,14 @@ namespace Domain.Entity.Item.Registrations
         public void ClockOut(Employee employee)
         {
             if (IsClosed) throw new InvalidOperationException("Arbejdspasset er allerede lukket.");
-            if(employee.Id != EmployeeId) 
+            if (employee.Id != EmployeeId)
                 throw new InvalidOperationException("Kun den tilhørende medarbejder kan lukke denne log.");
             if (ActiveRegistrationId != null)
             {
-                EndWork(employee);
+                HourRegistration active = GetActiveHourRegistration();
+                active.ClockOut();
+                ActiveRegistrationId = null;
             }
-
             IsClosed = true;
             DateClosed = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;

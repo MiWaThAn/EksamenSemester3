@@ -43,6 +43,8 @@ namespace Application.Commands.Item.Registrations.Time
                 var builder = new HourRegistrationBuilder()
                     .WithProject(project)
                     .WithStart(request.StartTime)
+                    .WithEnd(request.EndTime)
+                    .WithStatus(true)
                     .WithType(type)
                     .WithStatus(RegistrationStatus.Pending)
                     .WithDescription(request.Description);
@@ -52,7 +54,8 @@ namespace Application.Commands.Item.Registrations.Time
                     if (activity != null)
                         builder.WithProjectActivity(activity);
                 }
-                worklog.CreateRegistration(builder);
+                var reg = worklog.CreateRegistration(builder);
+                await _unitOfWork.HourRegistrations.AddAsync(reg);
                 await _unitOfWork.CompleteAsync(cancellationToken);
                 await _unitOfWork.CommitTransactionAsync(cancellationToken);
                 return new BaseRegistrationResponse { Success = true, Message = "Tidsregistrering er tilføjet." };

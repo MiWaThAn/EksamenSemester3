@@ -38,7 +38,10 @@ namespace UI.Services.Auth
                     return new AuthenticationState(_anonymous);
                 //hvis de har en token sætter vi den på deres client så api kald altid har dem med.
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt")));
+                var claims = ParseClaimsFromJwt(token);
+                // Notice the two extra parameters at the end!
+                var identity = new ClaimsIdentity(claims, "jwt", "name", ClaimTypes.Role);
+                return new AuthenticationState(new ClaimsPrincipal(identity));
             }
             catch
             {
@@ -48,7 +51,7 @@ namespace UI.Services.Auth
         //kaldes når en bruger logger ind
         public void NotifyLogin(string token)
         {
-            var identity = new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt");
+            var identity = new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt", "name", ClaimTypes.Role);
             var user = new ClaimsPrincipal(identity);
             var state = Task.FromResult(new AuthenticationState(user));
 
@@ -74,18 +77,28 @@ namespace UI.Services.Auth
 
             var claims = new List<Claim>();
 
-            if (keyValuePairs.TryGetValue(ClaimTypes.Role, out var roles))
-            {
-                if (roles.ToString()!.Trim().StartsWith("["))
-                {
-                    var parsedRoles = JsonSerializer.Deserialize<string[]>(roles.ToString()!);
-                    foreach (var role in parsedRoles!) claims.Add(new Claim(ClaimTypes.Role, role));
-                }
-                else claims.Add(new Claim(ClaimTypes.Role, roles.ToString()!));
+            // 1. UNIFY ROLE PARSING (Check both "role" and the long XML URI string)
+            string roleKey = keyValuePairs.ContainsKey("role") ? "role" : ClaimTypes.Role;
 
-                keyValuePairs.Remove(ClaimTypes.Role);
+            if (keyValuePairs.TryGetValue(roleKey, out var roles))
+            {
+                var rolesStr = roles.ToString()!.Trim();
+                if (rolesStr.StartsWith("["))
+                {
+                    var parsedRoles = JsonSerializer.Deserialize<string[]>(rolesStr);
+                    foreach (var role in parsedRoles!)
+                        claims.Add(new Claim(ClaimTypes.Role, role)); // Always map to standard ClaimTypes.Role
+                }
+                else
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, rolesStr));
+                }
+
+                keyValuePairs.Remove(roleKey);
+                if (keyValuePairs.ContainsKey(ClaimTypes.Role)) keyValuePairs.Remove(ClaimTypes.Role);
             }
 
+            // 2. PARSE PERMISSIONS
             if (keyValuePairs.TryGetValue("permission", out var perms))
             {
                 if (perms.ToString()!.Trim().StartsWith("["))
@@ -97,6 +110,8 @@ namespace UI.Services.Auth
 
                 keyValuePairs.Remove("permission");
             }
+
+            // Add remaining fields (sub, exp, etc.)
             claims.AddRange(keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString()!)));
 
             return claims;

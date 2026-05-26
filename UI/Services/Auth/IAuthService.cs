@@ -20,5 +20,7 @@ namespace UI.Services.Auth
         Task<AuthStateStatus> GetRequiredLoginState(CancellationToken ct = default);
         bool UserHasPin(string token);
         string? GetUserId(string token);
+        Task<string?> GetUserIdAsync();
+        Task<string?> GetComapnyIdAsync();
     }
 }

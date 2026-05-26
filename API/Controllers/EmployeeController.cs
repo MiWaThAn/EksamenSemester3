@@ -2,12 +2,14 @@
 using Application.Commands.Person.Queries;
 using Application.DTOs;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Model;
 using System.Security.Claims;
 
 namespace API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class EmployeeController : ControllerBase
@@ -19,6 +21,23 @@ namespace API.Controllers
             _mediator = mediator;
         }
 
+        // GET: api/employee/company/{companyId}
+        // Denne rute henter medarbejdere for et firma
+        [HttpGet("company/{companyId}")]
+        public async Task<IActionResult> GetEmployees(Guid companyId)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid loggedInAccountId))
+            {
+                return Unauthorized("Ugyldig eller manglende token.");
+            }
+
+            GetEmployeesByCompanyQuery query = new(companyId, loggedInAccountId);
+
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
         // GET: api/employee/company/employee/{id}
         // Denne rute henter detaljerede oplysninger om en medarbejder baseret på ID
         [HttpGet("company/employee/{id:guid}")]
@@ -35,6 +54,7 @@ namespace API.Controllers
 
         // POST: api/employee
         // Denne rute opretter en ny medarbejder
+        [Authorize(Roles = "Company, Admin")]
         [HttpPost]
         public async Task<ActionResult<EmployeeDTO>> Create([FromBody] CreateEmployeeCommand command)
         {
@@ -46,6 +66,7 @@ namespace API.Controllers
 
         // PUT: api/employee/company/employee/{id}
         // Opdaterer medarbejderens oplysninger
+        [Authorize(Roles ="Employee,Company")]
         [HttpPut("company/employee/{id:guid}")]
         public async Task<IActionResult> UpdateEmployee(Guid id, [FromBody] DetailedEmployeeModel model)
         {
