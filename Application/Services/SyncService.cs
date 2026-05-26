@@ -20,7 +20,7 @@ namespace Application.Services
     public class SyncService : ISyncService
     {
         private readonly IExternalAPIService _externalAPIService;
-        
+
         private readonly ILogger<SyncService> _logger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAdapterRegistry _adapterRegistry;
@@ -35,11 +35,11 @@ namespace Application.Services
         }
 
 
-        public async Task SyncAllAsync(Company company) 
+        public async Task SyncAllAsync(Company company)
         {
-          
 
-           
+
+
             foreach (var setting in company.Settings)
             {
                 foreach (var entityType in setting.EntityTypes.OrderBy(selEn => selEn.EntityType.SyncPriority))
@@ -55,11 +55,11 @@ namespace Application.Services
 
 
                     await SyncSingleAsync(providerUrl, setting, entityType.EntityType);
-                        
-                    
-                    
+
+
+
                 }
-            
+
             }
         }
         public async Task SyncSingleAsync(ProviderEndpoint endpoint, IntegrationSetting setting, IntegrationEntityType entityType)
@@ -108,19 +108,13 @@ namespace Application.Services
                 throw;
             }
         }
-        private async Task ProcessAsync(ISyncEntity syncEntity,IntegrationSetting setting,IntegrationEntityType entityType)
-        {
-            var existing = await _unitOfWork.Mappings
-                .GetByExternalId(syncEntity.ExternalId, entityType);
-            var handler = _handlerRegistry.GetHandler(entityType);
-            if (!existing.Any())
-                await handler.CreateAsync(syncEntity, setting, entityType);
-            else
-                await handler.UpdateAsync(syncEntity, existing.First());
-        }
 
-        public async Task SyncSingleByUrl(IntegrationSetting setting,IntegrationEntityType entityType,string url,string externalId)  
+
+        public async Task SyncSingleByUrl(IntegrationSetting setting, IntegrationEntityType entityType, string url, string externalId)
         {
+
+
+
             var json = await _externalAPIService.FetchFromAPI(url, setting.Credential);
             var adapter = _adapterRegistry.GetAdapter(setting.Provider.Datasource);
             var syncEntity = adapter.Map(json, entityType, setting.CompanyId).FirstOrDefault();
@@ -129,24 +123,35 @@ namespace Application.Services
 
             var handler = _handlerRegistry.GetHandler(entityType);
 
-            
+
+            await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted);
+            try
+            {
             var existingMappings = await _unitOfWork.Mappings
                 .GetByExternalId(externalId, entityType);
+                var mapping = existingMappings.FirstOrDefault();
 
-            var mapping = existingMappings.FirstOrDefault();
-            if (mapping == null)
-            {
-                
-                await handler.CreateAsync(syncEntity, setting, entityType);
+                if (mapping == null)
+                {
+
+                    await handler.CreateAsync(syncEntity, setting, entityType);
+                }
+                else
+                {
+
+                    await handler.UpdateAsync(syncEntity, mapping);
+                }
+                await _unitOfWork.CompleteAsync();
+                await _unitOfWork.CommitTransactionAsync();
             }
-            else
+
+            catch (Exception ex)
             {
-                
-                await handler.UpdateAsync(syncEntity, mapping);
+                _logger.LogError(ex, "Sync failed for entity type {entityType} with external ID {externalId}. Rolling back.", entityType, externalId);
+                await _unitOfWork.RollbackTransactionAsync();
+                throw;
             }
+
         }
-
-
-
     }
 }
