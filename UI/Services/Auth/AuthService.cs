@@ -316,5 +316,12 @@ namespace UI.Services.Auth
             var accountId = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub || c.Type == "sub")?.Value;
             return accountId;
         }
+        public async Task<string?> GetComapnyIdAsync()
+        {
+            var token = await _secureStorage.GetAsync("auth_token");
+            var claims = _authStateProvider.ParseClaimsFromJwt(token);
+            var companyId = claims.FirstOrDefault(c => c.Type == "company_id")?.Value;
+            return companyId;
+        }
     }
 }

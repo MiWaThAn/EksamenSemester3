@@ -28,12 +28,24 @@ namespace Infrastructure.Service.Security
             //Så tager vi alle permisions fra vores accounts roles sammler dem i en liste og sletter dublikater 
             var allPermissions = account.Roles.SelectMany(r => r.Permissions).Select(p => p.Title).Distinct();
             //Så laver vi vores liste af claims (info)
+            var companyIdClaim = string.Empty;
+            if (account.CompanyId.HasValue)
+            {
+                companyIdClaim = account.CompanyId.Value.ToString();
+            }
+            else if (account.Employee != null)
+            {
+                // If account is an employee account that wasn't directly linked to a company,
+                // derive company id from the related employee entity.
+                companyIdClaim = account.Employee.CompanyId.ToString();
+            }
+
             var Claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, account.Id.ToString()),//<-- sub er en brugers unikke id
                 new Claim("account_id", account.Id.ToString()),//<-- accountid er en brugers unikke id
                 new Claim(JwtRegisteredClaimNames.UniqueName, account.Username), //<-- UniqueName giver lidt sig selv
-                new Claim("company_id", account.CompanyId?.ToString() ?? ""),  //<-- og så har vi id'er til info som brugeren er forbundet med
+                new Claim("company_id", companyIdClaim),  //<-- company id (from account or employee)
                 new Claim("employee_id", account.EmployeeId?.ToString() ?? ""),
                 new Claim("has_pin",(account.HashedPin != null).ToString().ToLower()) //<-- Til logind logik så vi ved om de har en pinkode
             };

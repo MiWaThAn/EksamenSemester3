@@ -24,7 +24,11 @@ namespace Application.Commands.Person.Handlers.Auth.Login
             {
                 await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted, ct);
                 Active = true;
-                var user = await _unitOfWork.Accounts.GetQueryable().Include(a => a.Roles).ThenInclude(r => r.Permissions).FirstOrDefaultAsync(a => a.Username == command.Username);
+                var user = await _unitOfWork.Accounts.GetQueryable()
+                    .Include(a => a.Roles).ThenInclude(r => r.Permissions)
+                    .Include(a => a.Employee).ThenInclude(e=>e.Company)
+                    .Include(a => a.Company)
+                    .FirstOrDefaultAsync(a => a.Username == command.Username);
                 if(user == null)
                 {
                     return new LoginResponse { Success = false,Message = invalidCredentialsMessage };

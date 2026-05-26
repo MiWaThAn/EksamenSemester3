@@ -9,6 +9,7 @@ namespace Domain.Builders.Item.Registration
     {
         private DateTime Start;
         private DateTime? End;
+        private bool IsClosed = false;
         private TimeType TimeType = TimeType.Work;
 
         public HourRegistrationBuilder WithStart(DateTime startTime)
@@ -29,10 +30,15 @@ namespace Domain.Builders.Item.Registration
             TimeType = timeType;
             return this;
         }
+        public HourRegistrationBuilder WithStatus(bool isClosed)
+        {
+            IsClosed = isClosed;
+            return this;
+        }
 
         internal override HourRegistration Build()
         {
-            return new HourRegistration(ProjectId, WorkLog, ActivityId, Start, End, TimeType, Status, Description);
+            return new HourRegistration(ProjectId, WorkLog, ActivityId, Start, End, TimeType, Status, Description,IsClosed);
         }
     }
 }

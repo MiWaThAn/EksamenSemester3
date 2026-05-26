@@ -167,7 +167,11 @@ namespace Domain.Entity.Item.Registrations
             if (Status == ApprovalStatus.Approved)
                 throw new InvalidOperationException("Du kan ikke redigere en godkendt log.");
             Guard.AgainstNull(builder, nameof(builder));
-
+            if(ActiveRegistrationId != null)
+            {
+                var active = GetActiveHourRegistration();
+                active.EndWork();
+            }
             var registration = builder.WithWorkLog(this).Build();
             if (registration.EmployeeId != EmployeeId)
                 throw new InvalidOperationException("Registreringen skal tilhøre den samme medarbejder som loggen.");
@@ -176,7 +180,6 @@ namespace Domain.Entity.Item.Registrations
             {
                 AdjustForOverlap(newHourReg);
             }
-
             if (registration.WorkLogId != this.Id)
                 throw new ArgumentException("Denne registrering tilhører ikke denne log");
 
@@ -336,9 +339,12 @@ namespace Domain.Entity.Item.Registrations
             var newStart = newReg.StartTime;
             var newEnd = newReg.EndTime.Value;
 
-            //get finished registrations which overlap with new registration
+            //get registrations which have an end time and overlap with new registration
+            //We consider registrations that have an EndTime set (ended via EndWork or ClockOut),
+            //not only those marked IsFinished. EndWork sets an end time but leaves IsFinished false,
+            //so using EndTime ensures we detect and adjust those as well.
             var overlaps = _registrations.OfType<HourRegistration>()
-                            .Where(r => !r.IsDeleted && r.IsFinished && r.StartTime < newEnd && r.EndTime > newStart)
+                            .Where(r => !r.IsDeleted && r.EndTime != null && r.StartTime < newEnd && r.EndTime > newStart)
                             .ToList();
 
             foreach (var existing in overlaps)

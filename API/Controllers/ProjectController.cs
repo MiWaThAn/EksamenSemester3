@@ -110,5 +110,18 @@ namespace API.Controllers
             var result = await _mediator.Send(new GetCompanyProjectsByEmployeeAccountId(loggedInAccountId));
             return Ok(result);
         }
+
+        [HttpGet("company/{companyId:guid}/expenses")]
+        public async Task<IActionResult> GetCompanyExpenses(Guid companyId)
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userIdClaim, out Guid loggedInAccountId)) return Unauthorized();
+
+            var myCompanyId = await _mediator.Send(new GetCompanyIdByAccountIdQuery(loggedInAccountId));
+            if (myCompanyId != companyId) return Forbid();
+
+            var result = await _mediator.Send(new Application.Commands.Item.Queries.GetCompanyExpensesQuery(companyId));
+            return Ok(result);
+        }
     }
 }

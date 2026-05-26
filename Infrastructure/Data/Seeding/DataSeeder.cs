@@ -34,6 +34,7 @@ namespace Infrastructure.Data.Seeding
             await SeedActivities(context);
             await SeedProjects(context);
             await SeedProjectActivities(context);
+            await SeedExpenses(context);
         }
         private static async Task SeedPermsAndRoles(AppDbContext context)
         {
@@ -258,6 +259,32 @@ namespace Infrastructure.Data.Seeding
                 var act3 = company.CreateActivity(activityBuilder3);
 
                 await context.Activities.AddRangeAsync(act1, act2, act3);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        private static async Task SeedExpenses(AppDbContext context)
+        {
+            if (await context.Expenses.AnyAsync())
+                return;
+
+            var company = await context.Companies
+                .Include(c => c.Expenses)
+                .FirstOrDefaultAsync(c => c.Name == "Admin" && c.Account.Username == "admin");
+
+            if (company == null) return;
+
+            if (!company.Expenses.Any())
+            {
+                var eb1 = new ExpenseBuilder().WithName("Materials");
+                var eb2 = new ExpenseBuilder().WithName("Transport");
+                var eb3 = new ExpenseBuilder().WithName("Miscellaneous");
+
+                var exp1 = company.CreateExpense(eb1);
+                var exp2 = company.CreateExpense(eb2);
+                var exp3 = company.CreateExpense(eb3);
+
+                await context.Expenses.AddRangeAsync(exp1, exp2, exp3);
                 await context.SaveChangesAsync();
             }
         }

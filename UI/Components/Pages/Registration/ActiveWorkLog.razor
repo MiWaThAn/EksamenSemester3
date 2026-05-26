@@ -10,6 +10,7 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Authorization
 @using UI.Services.Auth
+@using Shared.Model
 @attribute [Authorize]
 
 <div class="container mx-auto p-4 max-w-xl space-y-6">
@@ -151,6 +152,13 @@
                         <label class="block text-xs text-slate-500 mb-1">Beløb (DKK)</label>
                         <input type="number" step="0.01" @bind="expenseAmount" class="w-full p-2 text-sm border rounded-lg bg-white" placeholder="0,00" />
                     </div>
+                    <select @bind="selectedExpenseId" class="w-full p-2 text-sm border rounded-lg bg-slate-50">
+                        <option value=@Guid.Empty>-- Vælg Udfigft --</option>
+                        @foreach (var expense in CompanyExpenses)
+                        {
+                            <option value=@expense.Id>@expense.Name</option>
+                        }
+                    </select>
                     <div class="col-span-2">
                         <label class="block text-xs text-slate-500 mb-1">Beskrivelse</label>
                         <input type="text" @bind="expenseDescription" class="w-full p-2 text-sm border rounded-lg bg-white" placeholder="F.eks. Broafgift eller Materialer" />
@@ -236,11 +244,14 @@
     private string errorMessage = string.Empty;
     private List<ProjectDto> Projects = new();
     private List<ProjectActivityDto> ProjectActivities = new();
+    private List<CompanyExpenseModel> CompanyExpenses = new();
     private WorkLogDto? activeLog;
     private Guid UserId;
+    private Guid CompanyId;
 
     private Guid selectedProjectId = Guid.Empty;
     private Guid selectedActivityId = Guid.Empty;
+    private Guid selectedExpenseId = Guid.Empty;
 
     // Nye specifikke tilstande til dine præcise Commands
     private DateTime manualDate = DateTime.Today;
@@ -256,9 +267,13 @@
     {
         var guid = await authService.GetUserIdAsync();
         UserId = Guid.Parse(guid);
+        var companyId = await authService.GetComapnyIdAsync();
+        CompanyId = Guid.Parse(companyId);
         await LoadActiveWorkLog();
         var fetchedProjects = await RegistrationService.GetProjects(CancellationToken.None);
         Projects = fetchedProjects?.ToList() ?? new();
+        var fetchedExpenses = await RegistrationService.GetCompanyExpenses(CompanyId,CancellationToken.None);
+        CompanyExpenses = fetchedExpenses?.ToList() ?? new();
     }
 
     private async Task LoadActiveWorkLog()
@@ -323,12 +338,11 @@
         else errorMessage = result.Message;
     }
 
-    // MANUEL TIME - Mapper præcist til din ManualTimeRegistrationCommand record
     private async Task HandleAddManualTime()
     {
         if (activeLog == null || selectedProjectId == Guid.Empty) return;
 
-        // Kombinerer den valgte dato med de indtastede tidspunkter
+
         var startDateTime = manualDate.Date.Add(manualStartTime.TimeOfDay);
         var endDateTime = manualDate.Date.Add(manualEndTime.TimeOfDay);
         Guid? activityId = selectedActivityId == Guid.Empty ? null : selectedActivityId;
@@ -353,7 +367,7 @@
         else errorMessage = result.Message;
     }
 
-    // MANUEL UDGIFT - Mapper præcist til din CreateExpenseCommand record
+
     private async Task HandleAddManualExpense()
     {
         if (activeLog == null || selectedProjectId == Guid.Empty || expenseAmount <= 0) return;
@@ -364,13 +378,13 @@
             UserId,
             expenseAmount,
             expenseDescription,
-            null, // ExpenseCategoryId (Sæt til null, da UI ikke har vælger endnu)
-            null, // NewCategoryName
+            selectedExpenseId,
+            CompanyExpenses.FirstOrDefault(e=>e.Id == selectedExpenseId)?.Name,
             activityId,
             selectedProjectId
         );
 
-        var result = await RegistrationService.CreateExpenseRegistration(UserId, activeLog.Id, command, CancellationToken.None);
+        var result = await RegistrationService.CreateExpenseRegistration(CompanyId, activeLog.Id, command, CancellationToken.None);
         if (result.Success)
         {
             expenseAmount = 0;

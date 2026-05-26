@@ -21,5 +21,6 @@ namespace UI.Services.Auth
         bool UserHasPin(string token);
         string? GetUserId(string token);
         Task<string?> GetUserIdAsync();
+        Task<string?> GetComapnyIdAsync();
     }
 }

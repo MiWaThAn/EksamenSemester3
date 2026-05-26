@@ -65,6 +65,11 @@ namespace UI.Services.Registration
             return await _http.GetFromJsonAsync<IEnumerable<ProjectDto>>($"api/project/employees-company-projects", ct);
         }
 
+        public async Task<IEnumerable<Shared.Model.CompanyExpenseModel>?> GetCompanyExpenses(Guid companyId, CancellationToken ct)
+        {
+            return await _http.GetFromJsonAsync<IEnumerable<Shared.Model.CompanyExpenseModel>>($"api/project/company/{companyId}/expenses", ct);
+        }
+
         //COMMANDS
 
         public async Task<ServiceResult> StartWork(StartWorkCommand command, CancellationToken ct)

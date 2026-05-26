@@ -25,6 +25,11 @@ namespace Domain.Entity.Item.Registrations
         {
             _intervals.Add(new TimeInterval(startTime, endTime, timeType)); 
         }
+        internal HourRegistration(Guid ProjectId, WorkLog workLog, Guid? activityId, DateTime startTime, DateTime? endTime, TimeType timeType, RegistrationStatus status, string description,bool isclosed) : base(ProjectId, workLog, activityId, description, status)
+        {
+            _intervals.Add(new TimeInterval(startTime, endTime, timeType));
+            IsFinished = !isclosed;
+        }
         internal override void ValidateAgainst(IEnumerable<Registration> existingRegistrations)
         {
             if (existingRegistrations.Any(r => r.Id == this.Id))
@@ -48,7 +53,7 @@ namespace Domain.Entity.Item.Registrations
             Guard.AgainstInvalidTimeRange(StartTime, DateTime.UtcNow);
             var active = FindActive();
             if (active == null)
-                throw new InvalidOperationException("Ingen aktiv tidsinterval at afslutte.");
+                return;
             active.SetEndTime(DateTime.UtcNow);
             UpdatedAt = DateTime.UtcNow;
             MarkAsPending();
