@@ -230,6 +230,11 @@ namespace Infrastructure.Data
                 entity.Navigation(p => p.Urls)
                     .HasField("_urls")
                     .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+                entity.HasMany(p => p.Urls)
+                 .WithOne()
+                     .HasForeignKey(u => u.ProviderId)
+                     .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<ProviderEndpoint>(entity =>

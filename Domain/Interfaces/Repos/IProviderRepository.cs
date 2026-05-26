@@ -9,6 +9,7 @@ namespace Domain.Interfaces.Repos
     {
 
         Task<Provider?> FindByDatasourceAsync(DataSource datasource);
-
+        public Task<IEnumerable<Provider>> GetAllWithUrlsAsync(CancellationToken cancellationToken);
+        
     }
 }
