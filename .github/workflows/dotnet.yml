@@ -47,11 +47,7 @@ jobs:
       - name: Begin Analysis
         shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin \
-            /k:"3semestereksamen_3-semester-eksamens-projekt" \
-            /o:"3semestereksamen" \
-            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
-            /d:sonar.cs.opencover.reportsPaths="**/coverage.cobertura.xml"
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"3semestereksamen_3-semester-eksamens-projekt" /o:"3semestereksamen" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.cs.opencover.reportsPaths="**/coverage.cobertura.xml"
 
       - name: Build
         run: dotnet build EksamenSemester3.sln --configuration Release
