@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          fetch-depth: 0 # Nødvendig for korrekt SonarQube-analyse
+          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
