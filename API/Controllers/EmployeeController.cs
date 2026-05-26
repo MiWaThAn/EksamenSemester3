@@ -38,32 +38,17 @@ namespace API.Controllers
             var result = await _mediator.Send(query);
             return Ok(result);
         }
+        // GET: api/employee/company/employee/{id}
+        // Denne rute henter detaljerede oplysninger om en medarbejder baseret på ID
         [HttpGet("company/employee/{id:guid}")]
         public async Task<IActionResult> GetDetailedEmployee(Guid id)
         {
-            var query = new GetDetailedEmployeeQuery(id);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userIdClaim, out Guid loggedInAccountId)) return Unauthorized();
+            var query = new GetDetailedEmployeeQuery(id, loggedInAccountId);
             var result = await _mediator.Send(query);
 
-            if (result == null)
-            {
-                return NotFound($"Kunne ikke finde medarbejderen.");
-            }
-
-            return Ok(result);
-        }
-
-        // GET: api/employee/{id}
-        // Denne rute henter en medarbejder baseret på ID
-        [HttpGet("{id}")]
-        public async Task<ActionResult<EmployeeDTO>> GetById(Guid id)
-        {
-            var result = await _mediator.Send(new GetEmployeeByIdQuery(id));
-
-            if (result == null)
-            {
-                return NotFound(new { Message = $"We couldn't find employee with ID: {id}" });
-            }
-
+            if (result == null) return NotFound();
             return Ok(result);
         }
 
@@ -74,8 +59,10 @@ namespace API.Controllers
         public async Task<ActionResult<EmployeeDTO>> Create([FromBody] CreateEmployeeCommand command)
         {
             EmployeeDTO result = await _mediator.Send(command);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+
+            return CreatedAtAction(nameof(GetDetailedEmployee), new { id = result.Id }, result);
         }
+
 
         // PUT: api/employee/company/employee/{id}
         // Opdaterer medarbejderens oplysninger
@@ -103,6 +90,29 @@ namespace API.Controllers
             }
 
             return NoContent();
+        }
+        // GET: api/employee/employee-company
+        // Denne rute henter alle medarbejdere i det firma, som den loggede ind medarbejder er tilknyttet
+        [HttpGet("employee-company")]
+        public async Task<IActionResult> GetMyCompanyEmployees()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid loggedInAccountId))
+            {
+                return Unauthorized("Ugyldig eller manglende token.");
+            }
+
+            var companyId = await _mediator.Send(new GetCompanyIdByAccountIdQuery(loggedInAccountId));
+
+            if (companyId == Guid.Empty)
+            {
+                return NotFound("Du er ikke tilknyttet et firma.");
+            }
+
+            var query = new GetEmployeesByCompanyQuery(companyId, loggedInAccountId);
+            var result = await _mediator.Send(query);
+
+            return Ok(result);
         }
     }
 }

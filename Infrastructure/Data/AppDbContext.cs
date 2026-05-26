@@ -21,6 +21,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using Activity = Domain.Entity.Item.Activities.Activity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data
 {
@@ -64,6 +65,7 @@ namespace Infrastructure.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
 
             modelBuilder.Entity<Registration>(entity =>
             {
@@ -228,6 +230,11 @@ namespace Infrastructure.Data
                 entity.Navigation(p => p.Urls)
                     .HasField("_urls")
                     .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+                entity.HasMany(p => p.Urls)
+                 .WithOne()
+                     .HasForeignKey(u => u.ProviderId)
+                     .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<ProviderEndpoint>(entity =>
@@ -306,6 +313,7 @@ namespace Infrastructure.Data
                     entity.HasIndex(m => new { m.IntegrationSettingId, m.ExternalId, m.EntityType })
                         .IsUnique();
                 });
+
 
             });
 

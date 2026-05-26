@@ -56,10 +56,7 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
             IntegrationEntityType entityType)
         {
 
-            try
-            {
-                await _unitOfWork.BeginTransactionAsync(
-                    System.Data.IsolationLevel.ReadCommitted);
+           
             var employee = await CreateEntity(syncEntity);
 
                 
@@ -72,14 +69,7 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
                         .WithObjectVersion(syncEntity.ObjectVersion));
                 await _unitOfWork.Mappings.AddAsync(mapping);
                 await _unitOfWork.Employees.AddAsync(employee);
-                await _unitOfWork.CompleteAsync();
-                await _unitOfWork.CommitTransactionAsync();
-            }
-            catch
-            {
-                await _unitOfWork.RollbackTransactionAsync();
-                throw;
-            }
+               
         }
 
 
@@ -96,42 +86,32 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
             var dto =
                 ((SyncEntity<EmployeeDTO>)syncEntity).Data;
 
-            try
-            {
-                await _unitOfWork.BeginTransactionAsync(
-                    System.Data.IsolationLevel.ReadCommitted);
+            
 
                 var local = await _unitOfWork.Employees
                     .GetByIdAsync(mapping.LocalId);
 
                 if (local == null)
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
+                   
                     return;
                 }
 
                 local.UpdateName(dto.Name);
 
-                if (dto.Email != null)
-                {
-                    local.UpdateEmail(
-                        new EmailAddress(dto.Email));
-                }
-                if (mapping.ExternalId != syncEntity.ExternalId)
+            var incomingEmail = dto.Email != null ? new EmailAddress(dto.Email) : null;
+            if (local.Email != incomingEmail)
+            {
+                local.UpdateEmail(incomingEmail); 
+            }
+            if (mapping.ExternalId != syncEntity.ExternalId)
                 {
                     mapping.UpdateExternalId(syncEntity.ExternalId);
                 }
                 
                 mapping.UpdateObjectVersion(syncEntity.ObjectVersion);
                
-                await _unitOfWork.CompleteAsync();
-                await _unitOfWork.CommitTransactionAsync();
-            }
-            catch
-            {
-                await _unitOfWork.RollbackTransactionAsync();
-                throw;
-            }
+               
         }
 
     }

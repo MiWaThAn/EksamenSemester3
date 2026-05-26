@@ -6,6 +6,7 @@
 @inject IAuthService AuthService
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize]
+@inject JwtAuthStateProvider AuthStateProvider
 
 <div class="admin-container">
     <div class="tab-header">
@@ -97,7 +98,6 @@
 
     private string? loggedInUserId;
     private string? dynamicCompanyId;
-    [Inject] private JwtAuthStateProvider AuthStateProvider { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -160,16 +160,15 @@
 
     private async Task LoadEmployeeData()
     {
-        if (string.IsNullOrEmpty(dynamicCompanyId) || !string.IsNullOrEmpty(errorString)) return;
+        if (!string.IsNullOrEmpty(errorString)) return;
+
         try
         {
-            employees = await Http.GetFromJsonAsync<List<CompanyEmployeeModel>>($"api/employee/company/{dynamicCompanyId}");
+            employees = await Http.GetFromJsonAsync<List<CompanyEmployeeModel>>("api/employee/employee-company");
         }
         catch (Exception ex)
         {
-            var errorHandler = ex.InnerException ?? ex;
-            errorString = $"Fejl ved hentning af medarbejdere: {errorHandler.Message}";
-            Console.WriteLine(errorString);
+            errorString = $"Fejl ved hentning af medarbejdere: {ex.Message}";
         }
     }
 

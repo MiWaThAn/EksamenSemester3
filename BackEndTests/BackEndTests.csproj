@@ -38,6 +38,7 @@
     <Folder Include="API\" />
     <Folder Include="Application\" />
     <Folder Include="Infrastructure\Services\Notification\" />
+    <Folder Include="Domain\" />
   </ItemGroup>
 
 </Project>

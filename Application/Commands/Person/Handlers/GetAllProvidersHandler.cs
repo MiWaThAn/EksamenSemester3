@@ -8,11 +8,12 @@ public class GetAllProvidersHandler(IUnitOfWork _unitOfWork)
 {
     public async Task<IEnumerable<ProviderModel>> Handle(GetAllProvidersQuery request, CancellationToken cancellationToken)
     {
-        var providers = await _unitOfWork.Providers.GetAllAsync(cancellationToken);
+        var providers = await _unitOfWork.Providers.GetAllWithUrlsAsync(cancellationToken);
         return providers.Select(p => new ProviderModel
         {
             Id = p.Id,
-            Name = p.Datasource.Value
+            Name = p.Datasource.Value,
+            SupportedEntityTypes = p.Urls.Select(u => u.EntityType.Value).ToList()
         });
     }
 }

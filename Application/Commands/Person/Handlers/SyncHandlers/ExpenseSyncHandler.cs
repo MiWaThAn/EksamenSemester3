@@ -57,9 +57,7 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
                 return;
             }
 
-            try
-            {
-                await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted);
+            
                 var expense = await CreateEntity(syncEntity);
                 var mapping = setting.CreateMapping(
                     new IntegrationMappingBuilder()
@@ -69,14 +67,7 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
                         .WithObjectVersion(syncEntity.ObjectVersion));
                 await _unitOfWork.Mappings.AddAsync(mapping);
                 await _unitOfWork.Expenses.AddAsync(expense);
-                await _unitOfWork.CompleteAsync();
-                await _unitOfWork.CommitTransactionAsync();
-            }
-            catch
-            {
-                await _unitOfWork.RollbackTransactionAsync();
-                throw;
-            }
+               
 
 
 
@@ -90,10 +81,7 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
             {
                 return;
             }
-            try
-            {
-
-                await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted);
+           
                 var local = await _unitOfWork.Expenses.GetByIdAsync(mapping.LocalId);
                 if (local == null)
                 {
@@ -109,14 +97,7 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
                 }
 
                 mapping.UpdateObjectVersion(syncEntity.ObjectVersion);
-               await _unitOfWork.CompleteAsync();
-                await _unitOfWork.CommitTransactionAsync();
-            }
-            catch
-            {
-                await _unitOfWork.RollbackTransactionAsync();
-                throw;
-            }
+              
         }
     }
 }

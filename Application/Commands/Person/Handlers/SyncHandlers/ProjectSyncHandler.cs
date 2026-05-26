@@ -55,10 +55,7 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
             IntegrationEntityType entityType)
         {
 
-            try
-            {
-                await _unitOfWork.BeginTransactionAsync(
-                    System.Data.IsolationLevel.ReadCommitted);
+           
             var project = await CreateEntity(syncEntity);
 
 
@@ -71,15 +68,10 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
                         .WithObjectVersion(syncEntity.ObjectVersion));
                 await _unitOfWork.Mappings.AddAsync(mapping);
                 await _unitOfWork.Projects.AddAsync(project);
-                await _unitOfWork.CompleteAsync();
-                await _unitOfWork.CommitTransactionAsync();
-            }
-            catch
-            {
-                await _unitOfWork.RollbackTransactionAsync();
-                throw;
-            }
+               
         }
+           
+        
 
         public async Task UpdateAsync(
             ISyncEntity syncEntity,
@@ -91,36 +83,32 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
             var dto =
                 ((SyncEntity<ProjectDTO>)syncEntity).Data;
 
-            try
-            {
-                await _unitOfWork.BeginTransactionAsync(
-                    System.Data.IsolationLevel.ReadCommitted);
+           
 
                 var local = await _unitOfWork.Projects
                     .GetByIdAsync(mapping.LocalId);
 
                 if (local == null)
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
+                   
                     return;
                 }
 
-                local.UpdateProjectName(dto.Name);
-                if (mapping.ExternalId != syncEntity.ExternalId)
-                {
-                    mapping.UpdateExternalId(syncEntity.ExternalId);
-                }
-               
-                mapping.UpdateObjectVersion(
-                    syncEntity.ObjectVersion);
-                await _unitOfWork.CompleteAsync();
-                await _unitOfWork.CommitTransactionAsync();
-            }
-            catch
+            local.UpdateProjectName(dto.Name);
+
+            
+            if (dto.IsClosed && local.Status != Status.Lukket)
             {
-                await _unitOfWork.RollbackTransactionAsync();
-                throw;
+                local.MarkAsClosed(); 
             }
+            else if (!dto.IsClosed && local.Status == Status.Lukket)
+            {
+                local.MarkAsOpen();  
+            }
+
+            mapping.UpdateObjectVersion(
+                    syncEntity.ObjectVersion);
+              
         }
 
 

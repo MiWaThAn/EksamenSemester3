@@ -37,7 +37,6 @@ namespace Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString)
         {
-
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(connectionString));
 
