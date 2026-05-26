@@ -35,57 +35,51 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
 
             var projectActivitySync =
                 (SyncEntity<ProjectActivityDTO>)syncEntity;
-            try
-            {
-
+          
                 var dto = projectActivitySync.Data;
                 if (dto.ProjectExternalId == null)
                 {
                     throw new Exception("Missing required external ID for project in projectactivity sync.");
 
                 }
-                var projectMapping = await _unitOfWork.Mappings.GetByExternalId(dto.ProjectExternalId, IntegrationEntityType.From("project"));
-                if (projectMapping == null)
-                {
-                    throw new Exception("Could not find mapping for project in projectactivity sync.");
-                }
-                var project = await _unitOfWork.Projects.GetByIdAsync(projectMapping.FirstOrDefault().LocalId);
-                if (project == null)
-                {
-                    throw new Exception("Could not find project for projectactivity sync.");
-                }
-                //Loading activity
+            var projectMappings = await _unitOfWork.Mappings.GetByExternalId(dto.ProjectExternalId, IntegrationEntityType.From("project"));
+            var projectMapping = projectMappings?.FirstOrDefault();
+            if (projectMapping == null)
+            {
+                throw new Exception($"Could not find mapping for project with external ID {dto.ProjectExternalId} in projectactivity sync.");
+            }
+            var project = await _unitOfWork.Projects.GetByIdAsync(projectMapping.LocalId);
+            if (project == null)
+            {
+                throw new Exception($"Could not find local project with ID {projectMapping.LocalId} for projectactivity sync.");
+            }
 
-                var activityMapping = await _unitOfWork.Mappings.GetByExternalId(dto.ActivityExternalId, IntegrationEntityType.From("activity"));
-                if (activityMapping == null)
-                {
-                    throw new Exception("Could not find mapping for activity in projectactivity sync.");
-                }
-                var activity = await _unitOfWork.Activities.GetByIdAsync(activityMapping.FirstOrDefault().LocalId);
-                if (activity == null)
-                {
-                    throw new Exception("Could not find activity for projectactivity sync.");
-                }
 
-                var projectActivityBuilder = new ProjectActivityBuilder()
+            var activityMappings = await _unitOfWork.Mappings.GetByExternalId(dto.ActivityExternalId, IntegrationEntityType.From("activity"));
+            var activityMapping = activityMappings?.FirstOrDefault();
+            if (activityMapping == null)
+            {
+                throw new Exception($"Could not find mapping for activity with external ID {dto.ActivityExternalId} in projectactivity sync.");
+            }
+
+            var activity = await _unitOfWork.Activities.GetByIdAsync(activityMapping.LocalId);
+            if (activity == null)
+            {
+                throw new Exception($"Could not find local activity with ID {activityMapping.LocalId} for projectactivity sync.");
+            }
+
+            var projectActivityBuilder = new ProjectActivityBuilder()
                     .WithStatus(dto.Completed ? Status.Lukket : Status.Åben)
                     .WithStartAndEndDates(dto.StartDate, dto.EndDate)
                     .WithActivity(activity);
                 return project.CreateProjectActivity(projectActivityBuilder);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error creating project activity builder in projectactivity sync.", ex);
-            }
+            
 
 
         }
         public async Task CreateAsync(ISyncEntity syncEntity, IntegrationSetting setting, IntegrationEntityType entityType)
         {
-            try
-            {
-                await _unitOfWork.BeginTransactionAsync(
-                    System.Data.IsolationLevel.ReadCommitted);
+           
 
                 var projectActivity = await CreateEntity(syncEntity);
 
@@ -121,14 +115,7 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
 
                 await _unitOfWork.Mappings.AddAsync(mapping);
                 await _unitOfWork.ProjectActivities.AddAsync(projectActivity);
-                await _unitOfWork.CompleteAsync();
-                await _unitOfWork.CommitTransactionAsync();
-            }
-            catch
-            {
-                await _unitOfWork.RollbackTransactionAsync();
-                throw;
-            }
+                
 
 
         }
@@ -146,9 +133,7 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
             {
                 return;
             }
-            try
-            {
-                await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted);
+          
 
 
                 if (projectActivity.StartDate != dto.StartDate || projectActivity.EndDate != dto.EndDate)
@@ -180,14 +165,7 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
 
 
                 mapping.UpdateObjectVersion(syncEntity.ObjectVersion);
-                await _unitOfWork.CompleteAsync();
-                await _unitOfWork.CommitTransactionAsync();
-            }
-            catch
-            {
-                await _unitOfWork.RollbackTransactionAsync();
-                throw;
-            }
+               
         }
 
 

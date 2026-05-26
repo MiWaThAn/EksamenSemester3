@@ -70,17 +70,43 @@ namespace Application.Services
                 _logger.LogWarning("No URL found for entity type: {entityType}", entityType);
                 return;
             }
-            var json =  await _externalAPIService.FetchFromAPI(url, setting.Credential);
-            
-            
-            
+            var json = await _externalAPIService.FetchFromAPI(url, setting.Credential);
+
+
+
             var adapter = _adapterRegistry.GetAdapter(setting.Provider.Datasource);
             var dtos = adapter.Map(json, entityType, setting.CompanyId);
-            foreach (var syncEntity in dtos)
-                await ProcessAsync(syncEntity, setting, entityType);
-            
+            var handler = _handlerRegistry.GetHandler(entityType);
+            await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted);
+            try
+            {
+                foreach (var syncEntity in dtos)
+                {
+                    var existing = await _unitOfWork.Mappings
+                        .GetByExternalId(syncEntity.ExternalId, entityType);
+
+                    if (!existing.Any())
+                    {
+
+                        await handler.CreateAsync(syncEntity, setting, entityType);
+                    }
+                    else
+                    {
+                        await handler.UpdateAsync(syncEntity, existing.First());
+                    }
+                }
 
 
+                await _unitOfWork.CompleteAsync();
+                await _unitOfWork.CommitTransactionAsync();
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex, "Sync failed for entity type {entityType}. Rolling back.", entityType);
+                await _unitOfWork.RollbackTransactionAsync();
+                throw;
+            }
         }
         private async Task ProcessAsync(ISyncEntity syncEntity,IntegrationSetting setting,IntegrationEntityType entityType)
         {

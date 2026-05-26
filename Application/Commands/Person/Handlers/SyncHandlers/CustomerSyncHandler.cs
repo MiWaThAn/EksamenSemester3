@@ -55,8 +55,7 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
 
         public async Task CreateAsync(ISyncEntity syncEntity,IntegrationSetting setting,IntegrationEntityType entityType)
         {
-            try {
-                await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted);
+            
             var customer = await CreateEntity(syncEntity);
                 var dto = ((SyncEntity<CustomerDTO>)syncEntity).Data;
 
@@ -83,27 +82,18 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
                     .WithObjectVersion(syncEntity.ObjectVersion));
                 await _unitOfWork.Mappings.AddAsync(mapping);
                 await _unitOfWork.Customers.AddAsync(customer);
-                await _unitOfWork.CompleteAsync();
-                await _unitOfWork.CommitTransactionAsync();
-            }
-            catch
-            {
-                await _unitOfWork.RollbackTransactionAsync();
-                throw;
-            }
+               
         }
         public async Task UpdateAsync(ISyncEntity syncEntity, IntegrationMapping mapping)
         {
             if (mapping.ObjectVersion == syncEntity.ObjectVersion)
                 return;
             var dto = ((SyncEntity<CustomerDTO>)syncEntity).Data;
-            try
-            {
-            await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted);
+            
               var local = await _unitOfWork.Customers.GetByIdAsync(mapping.LocalId);
                 if (local == null)
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
+                    
                     return;
                 }
 
@@ -119,14 +109,7 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
 
                 
                 mapping.UpdateObjectVersion(syncEntity.ObjectVersion);
-                await _unitOfWork.CompleteAsync();
-                await _unitOfWork.CommitTransactionAsync();
-            }
-            catch
-            {
-                await _unitOfWork.RollbackTransactionAsync();
-                throw;
-            }
+              
         }
 
 
