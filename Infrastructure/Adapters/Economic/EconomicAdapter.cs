@@ -82,7 +82,7 @@ namespace Infrastructure.Adapters.Economic
 
             return response!.Items.Select(dto => new SyncEntity<CustomerDTO>
             {
-                ExternalId = dto.Number.ToString(),
+                ExternalId = dto.CustomerNumber.ToString(),
                 ObjectVersion = dto.ObjectVersion,
                 CompanyId = companyId,
                 ObjectType = entityType,
