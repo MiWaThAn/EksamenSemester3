@@ -34,7 +34,7 @@ namespace Infrastructure.Service
             
             client.DefaultRequestHeaders.Add("X-AgreementGrantToken", decryptedValue);
 
-            
+            //TODO gør disse to generisk evt
             var appSecret = _configuration["ExternalProviders:Economic:X-AppSecretToken"];
             client.DefaultRequestHeaders.Add("X-AppSecretToken", appSecret);
 

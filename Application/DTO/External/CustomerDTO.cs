@@ -6,9 +6,10 @@ namespace Application.DTO.External
 {
     public class CustomerDTO
     {
-        public int Number { get; set; }
+        public int CustomerNumber { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Email { get; set; }
+        public string PhoneNumber { get; set; }
         public string Address { get; set; }
         public string PostCode { get; set; }
         public string City { get; set; }
