@@ -68,7 +68,11 @@ namespace Application.Requests.WorkLogHandlers
                 var activities = globalActivities.Where(a => logActivityIds.Contains(a.Id)).ToList();
                 var expenses = globalExpenses.Where(e => logExpenseIds.Contains(e.Id)).ToList();
 
-                var dto = worklog.ToDto(projects, activities, expenses);
+
+                var employee = await _unitOfWork.Employees.GetByIdWithDetailsAsync(worklog.EmployeeId, cancellationToken);
+                var employeeName = employee?.Name ?? "Ukendt Medarbejder";
+
+                var dto = worklog.ToDto(projects, activities, expenses, employeeName);
                 workLogDtos.Add(dto);
             }
 

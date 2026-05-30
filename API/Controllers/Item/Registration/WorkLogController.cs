@@ -123,7 +123,7 @@ namespace API.Controllers.Item.Registration
         [HttpPost("{accountId:guid}/worklog/{workLogId:guid}/submit")]
         public async Task<IActionResult> SubmitWorkLogForApproval(Guid workLogId, Guid accountId, CancellationToken ct)
         {
-            var command = new SubmitWorkLogCommand(accountId, workLogId);
+            var command = new SubmitWorkLogCommand(workLogId, accountId);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }
