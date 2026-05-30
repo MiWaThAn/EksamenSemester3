@@ -154,10 +154,3 @@ namespace Infrastructure.Adapters.Economic
         }
     }
 }
-
-
-
-
-
-
-    
