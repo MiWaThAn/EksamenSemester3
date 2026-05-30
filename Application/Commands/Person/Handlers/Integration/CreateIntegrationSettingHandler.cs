@@ -1,5 +1,7 @@
 ﻿using Application.Interfaces;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.Sync;
+using Application.Services;
 using Domain.Builders.Mapping;
 using Domain.Entity.Mapping.ValueObjects;
 using MediatR;
@@ -7,8 +9,7 @@ using Shared.Model.IntegrationSettings;
 
 namespace Application.Commands.Person.Handlers.Integration;
 
-public class CreateIntegrationSettingHandler(IUnitOfWork _unitOfWork, IEncryptionService _encryptionService)
-    : IRequestHandler<CreateIntegrationSettingCommand, CreateIntegrationSettingResponse>
+public class CreateIntegrationSettingHandler(IUnitOfWork _unitOfWork, IEncryptionService _encryptionService, ISyncService _syncService) : IRequestHandler<CreateIntegrationSettingCommand, CreateIntegrationSettingResponse>
 {
     public async Task<CreateIntegrationSettingResponse> Handle(CreateIntegrationSettingCommand request, CancellationToken cancellationToken)
     {
@@ -39,6 +40,7 @@ public class CreateIntegrationSettingHandler(IUnitOfWork _unitOfWork, IEncryptio
 
             var setting = company.CreateIntegrationSetting(builder);
             await _unitOfWork.IntegrationSettings.AddAsync(setting, cancellationToken);
+            await _syncService.SyncAllAsync(company);
             await _unitOfWork.CompleteAsync(cancellationToken);
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
 

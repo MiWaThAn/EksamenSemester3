@@ -86,10 +86,7 @@ else
                 }
             </div>
         }
-
-        <input type="text" class="form-control mb-2"
-               placeholder="Indtast navn på nøgle"
-               @bind="model.KeyName" />
+        <p>Nøgle Navn: @model.KeyName</p>
 
         <input type="text" class="form-control mb-2"
                placeholder="Indtast nøgle"
@@ -124,7 +121,7 @@ else
             model.KeyValue,
             model.SelectedEntityTypes);
 
-        
+
         existingSettings = await IntegrationService.GetMyIntegrationSettingsAsync();
         model = new();
     }
@@ -144,10 +141,12 @@ else
     }
     private List<string> availableEntityTypes = new();
 
-    
+
 
     private void OnProviderChanged()
     {
+        // TODO: Make it so providers have keynames attached to their class so we easily can pick the right one 
+        model.KeyName = "X-AgreementGrantToken";
         var selected = providers?.FirstOrDefault(p => p.Name == model.ProviderName);
         availableEntityTypes = selected?.SupportedEntityTypes ?? new();
         model.SelectedEntityTypes.Clear();
