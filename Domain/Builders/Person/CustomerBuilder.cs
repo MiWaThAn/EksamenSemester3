@@ -26,7 +26,7 @@ namespace Domain.Builders.Person
         }
         public CustomerBuilder WithPhoneNumber(PhoneNumber phoneNumber)
         {
-            Guard.AgainstNull(phoneNumber, nameof(phoneNumber));
+            
             PhoneNumber = phoneNumber;
             return this;
         }

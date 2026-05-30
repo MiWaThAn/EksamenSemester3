@@ -47,6 +47,7 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
                     dto.Email != null
                         ? new EmailAddress(dto.Email)
                         : null)
+                .WithPhoneNumber(dto.PhoneNumber != null ? new PhoneNumber(dto.PhoneNumber) : null)
                 .Build();
         }
 
@@ -100,7 +101,7 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
                 local.UpdateName(dto.Name);
                 if (dto.Email != null && (local.Email == null || dto.Email != local.Email.Value))
                 {
-                    local.UpdateContactInfo(new EmailAddress(dto.Email), local.PhoneNumber);
+                    local.UpdateContactInfo(new EmailAddress(dto.Email), new PhoneNumber(local.PhoneNumber.Value));
                 }
                 if (mapping.ExternalId != syncEntity.ExternalId)
                 { 
