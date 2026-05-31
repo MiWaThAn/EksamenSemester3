@@ -566,7 +566,8 @@ else
                                 Projekt
                             </label>
 
-                            <select @bind="manualSelectedProjectId"
+                            <select value="@manualSelectedProjectId"
+                                    @onchange="OnManualProjectChanged"
                                     class="form-select">
 
                                 <option value="@Guid.Empty">
@@ -739,7 +740,8 @@ else
                                 Projekt
                             </label>
 
-                            <select @bind="manualExpenseProjectId"
+                            <select value="@manualSelectedProjectId"
+                                    @onchange="OnManualProjectChanged"
                                     class="form-select">
 
                                 <option value="@Guid.Empty">
@@ -1026,6 +1028,7 @@ else
 
     private async Task HandleAddManualTime()
     {
+        // TODO: Lav en create or get active worklog ting så vi ikke behøver at 
         if (activeLog == null || selectedProjectId == Guid.Empty) return;
 
 
