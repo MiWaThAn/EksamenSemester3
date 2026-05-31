@@ -77,4 +77,17 @@ public class IntegrationService : IIntegrationService
         return await _http.GetFromJsonAsync<List<IntegrationSettingModel>>($"api/integrationsetting/company/{accountId}") ?? new();
     }
 
+    public async Task<bool> TriggerSyncAsync(Guid settingId)
+    {
+        await EnsureAuthorizationHeaderAsync();
+
+        var token = await _secureStorage.GetAsync("auth_token");
+        var accountId = _authService.GetUserId(token);
+
+        if (string.IsNullOrWhiteSpace(accountId)) return false;
+
+        var response = await _http.PostAsync($"api/integrationsetting/{settingId}/sync?accountId={accountId}", null);
+        return response.IsSuccessStatusCode;
+    }
+
 }

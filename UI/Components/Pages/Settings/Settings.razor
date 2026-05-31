@@ -7,121 +7,398 @@
 @inject IIntegrationService IntegrationService
 @attribute [Authorize(Roles ="Company")]
 
-<h3>Udsende Indstillinger</h3>
+<div class="container py-4">
 
-<div class="mb-3">
-    <label for="bgColorPicker" class="form-label">Vælg Baggrunds Farve:</label>
-    <input type="color" 
-           id="bgColorPicker" 
-           class="form-control form-control-color" 
-           value="@ThemeService.BackgroundColor" 
-           @onchange="HandleColorChange" />
-</div>
-<h3>Nuværende integrationsindstillinger</h3>
-@if (existingSettings == null)
-{
-    <p>Henter indstillinger...</p>
-}
-else if (!existingSettings.Any())
-{
-    <p>Ingen integrationsindstillinger fundet.</p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Udbyder</th>
-                <th>Nøgle navn</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var setting in existingSettings)
-            {
-                <tr>
-                    <td>@setting.ProviderName</td>
-                    <td>@setting.KeyName</td>
-                    <td>
-                        <button class="btn btn-danger btn-sm"
-                                @onclick="() => HandleDelete(setting.Id)">
-                            Slet
-                        </button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-@if (providers == null)
-{
-    <p>Henter udbydere...</p>
-}
-else
-{
-    <h3>Tilføj ekstern integration</h3>
-    <EditForm Model="model" OnValidSubmit="HandleSubmit">
-        <InputSelect class="form-select mb-3" @bind-Value="model.ProviderName"
-                     @bind-Value:after="OnProviderChanged">
-            <option value="">-- Vælg en udbyder --</option>
-            @foreach (var provider in providers)
-            {
-                <option value="@provider.Name">@provider.Name</option>
-            }
-        </InputSelect>
+    <div class="row g-4">
 
-        @if (availableEntityTypes.Any())
-        {
-            <div class="mb-3">
-                <label class="form-label">Vælg entitetstyper:</label>
-                @foreach (var entityType in availableEntityTypes)
-                {
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input"
-                               id="@entityType"
-                               checked="@model.SelectedEntityTypes.Contains(entityType)"
-                               @onchange="e => ToggleEntityType(entityType, (bool)e.Value!)" />
-                        <label class="form-check-label" for="@entityType">@entityType</label>
+        <div class="col-12">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-3 mb-3">
+
+                        <div class="bg-primary bg-opacity-10 rounded-3 d-flex align-items-center justify-content-center"
+                             style="width:56px;height:56px;">
+
+                            <span class="fs-4">🎨</span>
+
+                        </div>
+
+                        <div>
+
+                            <h4 class="fw-bold mb-1">
+                                Udseende
+                            </h4>
+
+                            <p class="text-muted mb-0">
+                                Tilpas systemets visuelle tema.
+                            </p>
+
+                        </div>
+
                     </div>
-                }
+
+                    <div class="row align-items-center">
+
+                        <div class="col-md-6">
+
+                            <label class="form-label fw-semibold">
+                                Baggrundsfarve
+                            </label>
+
+                            <input type="color"
+                                   id="bgColorPicker"
+                                   class="form-control form-control-color"
+                                   value="@ThemeService.BackgroundColor"
+                                   @onchange="HandleColorChange" />
+
+                        </div>
+
+                    </div>
+
+                </div>
+
             </div>
-        }
-        <p>Nøgle Navn: @model.KeyName</p>
 
-        <input type="text" class="form-control mb-2"
-               placeholder="Indtast nøgle"
-               @bind="model.KeyValue" />
+        </div>
 
-        <button type="submit"
-                class="btn btn-primary"
-                disabled="@isSaving">
-            @(isSaving ? "Opretter..." : "Gem")
-        </button>
-    </EditForm>
-}
+        <!-- Existing Integrations -->
+        <div class="col-12">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+
+                        <div>
+
+                            <h4 class="fw-bold mb-1">
+                                Aktive Integrationer
+                            </h4>
+
+                            <p class="text-muted mb-0">
+                                Administrer eksisterende integrationer.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    @if (existingSettings == null)
+                    {
+                        <div class="text-center py-5">
+
+                            <div class="spinner-border text-primary"></div>
+
+                            <div class="mt-3 text-muted">
+                                Henter integrationer...
+                            </div>
+
+                        </div>
+                    }
+                    else if (!existingSettings.Any())
+                    {
+                        <div class="alert alert-light border mb-0">
+
+                            Ingen integrationsindstillinger fundet.
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+
+                            <table class="table align-middle">
+
+                                <thead>
+
+                                    <tr>
+                                        <th>Udbyder</th>
+                                        <th>Nøgle Navn</th>
+                                        <th class="text-end">Handlinger</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    @foreach (var setting in existingSettings)
+                                    {
+                                        <tr>
+
+                                            <td>
+
+                                                <div class="fw-semibold">
+                                                    @setting.ProviderName
+                                                </div>
+
+                                            </td>
+
+                                            <td>
+
+                                                <code>
+                                                    @setting.KeyName
+                                                </code>
+
+                                            </td>
+
+                                            <td>
+
+                                                <div class="d-flex justify-content-end gap-2">
+
+                                                    <button class="btn btn-outline-primary btn-sm"
+                                                            @onclick="() => HandleSync(setting.Id)">
+
+                                                        🔄 Synkroniser
+
+                                                    </button>
+
+                                                    <button class="btn btn-outline-danger btn-sm"
+                                                            @onclick="() => HandleDelete(setting.Id)">
+
+                                                        🗑 Slet
+
+                                                    </button>
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+                                    }
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+        <div class="col-12">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-3 mb-4">
+
+                        <div class="bg-success bg-opacity-10 rounded-3 d-flex align-items-center justify-content-center"
+                             style="width:56px;height:56px;">
+
+                            <span class="fs-4">🔌</span>
+
+                        </div>
+
+                        <div>
+
+                            <h4 class="fw-bold mb-1">
+                                Tilføj Integration
+                            </h4>
+
+                            <p class="text-muted mb-0">
+                                Opret forbindelse til et eksternt system.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    @if (providers == null)
+                    {
+                        <div class="text-center py-4">
+
+                            <div class="spinner-border text-primary"></div>
+
+                        </div>
+                    }
+                    else
+                    {
+                        <EditForm Model="model"
+                                  OnValidSubmit="HandleSubmit">
+
+                            <div class="mb-4">
+
+                                <label class="form-label fw-semibold">
+                                    Udbyder
+                                </label>
+
+                                <InputSelect class="form-select"
+                                             @bind-Value="model.ProviderName"
+                                             @bind-Value:after="OnProviderChanged">
+
+                                    <option value="">
+                                        -- Vælg udbyder --
+                                    </option>
+
+                                    @foreach (var provider in providers)
+                                    {
+                                        <option value="@provider.Name">
+                                            @provider.Name
+                                        </option>
+                                    }
+
+                                </InputSelect>
+
+                            </div>
+
+                            @if (availableEntityTypes.Any())
+                            {
+                                <div class="mb-4">
+
+                                    <label class="form-label fw-semibold">
+                                        Entitetstyper
+                                    </label>
+
+                                    <div class="row g-2">
+
+                                        @foreach (var entityType in availableEntityTypes)
+                                        {
+                                            <div>
+
+                                                <div class="form-check border rounded p-3">
+
+                                                    <input type="checkbox"
+                                                           class="form-check-input"
+                                                           id="@entityType"
+                                                           checked="@model.SelectedEntityTypes.Contains(entityType)"
+                                                           @onchange="e => ToggleEntityType(entityType, (bool)e.Value!)" />
+
+                                                    <label class="form-check-label ms-1"
+                                                           for="@entityType">
+
+                                                        @entityType
+
+                                                    </label>
+
+                                                </div>
+
+                                            </div>
+                                        }
+
+                                    </div>
+
+                                </div>
+                            }
+
+                            <div class="mb-3">
+
+                                <label class="form-label fw-semibold">
+                                    Nøglenavn
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       value="@model.KeyName"
+                                       readonly />
+
+                            </div>
+
+                            <div class="mb-4">
+
+                                <label class="form-label fw-semibold">
+                                    API Nøgle
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="Indsæt nøgle..."
+                                       @bind="model.KeyValue" />
+
+                            </div>
+
+                            <button type="submit"
+                                    class="btn btn-primary px-4"
+                                    disabled="@isSaving">
+
+                                @(isSaving ? "Opretter..." : "Gem Integration")
+
+                            </button>
+
+                        </EditForm>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 @if (isSaving)
 {
-    <div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
-         style="background-color: rgba(0,0,0,0.6); z-index: 9999;">
+    <div class="modal fade show d-block"
+         tabindex="-1"
+         style="background-color: rgba(0,0,0,.5);">
 
-        <div class="card shadow-lg border-0 p-4 text-center"
-             style="min-width: 350px;">
+        <div class="modal-dialog modal-dialog-centered">
 
-            <div class="spinner-border text-primary mb-3"
-                 role="status">
-                <span class="visually-hidden">Loading...</span>
+            <div class="modal-content border-0 shadow-lg">
+
+                <div class="modal-body text-center p-5">
+
+                    <div class="spinner-border text-primary mb-3"
+                         role="status">
+                    </div>
+
+                    <h5 class="fw-bold">
+                        Opretter integration...
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        Vent venligst mens nøglen bliver oprettet.
+                    </p>
+
+                </div>
+
             </div>
-
-            <h5>Opretter integration...</h5>
-
-            <p class="text-muted mb-0">
-                Vent venligst mens nøglen bliver oprettet.
-            </p>
 
         </div>
 
     </div>
 }
+@if (isSyncing)
+{
+    <div class="modal fade show d-block"
+         tabindex="-1"
+         style="background-color: rgba(0,0,0,.5);">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content border-0 shadow-lg">
+
+                <div class="modal-body text-center p-5">
+
+                    <div class="spinner-border text-primary mb-3"
+                         role="status">
+                    </div>
+
+                    <h5 class="fw-bold">
+                        Synkronisere din integration...
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        Vent venligst mens din data bliver hentet.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+}
+
 @code {
     private void HandleColorChange(ChangeEventArgs e)
     {
@@ -134,6 +411,7 @@ else
     private List<ProviderModel>? providers;
     private List<IntegrationSettingModel>? existingSettings;
     private bool isSaving;
+    private bool isSyncing;
 
     protected override async Task OnInitializedAsync()
     {
@@ -166,6 +444,19 @@ else
     {
         await IntegrationService.DeleteIntegrationSettingAsync(settingId);
         existingSettings = await IntegrationService.GetMyIntegrationSettingsAsync();
+    }
+
+    private async Task HandleSync(Guid settingId)
+    {
+        try
+        {
+            isSyncing = true;
+            await IntegrationService.TriggerSyncAsync(settingId);
+        }
+        finally
+        {
+            isSyncing = false;
+        }
     }
 
     private class FormModel
