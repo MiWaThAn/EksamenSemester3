@@ -77,11 +77,13 @@ namespace Infrastructure.Repositories.Person
         public async Task<Company?> GetByAccountIdAsync(Guid accountId)
         {
             return await _context.Companies
-                .Include(c => c.Settings)
+                .Include(c => c.Settings.Where(s => s.IsDeleted != true))
                     .ThenInclude(s => s.Provider)
                         .ThenInclude(p => p.Urls)
-                .Include(c => c.Settings)
+                .Include(c => c.Settings.Where(s => s.IsDeleted != true))
                     .ThenInclude(s => s.EntityTypes)
+                .Include(c => c.Settings.Where(s => s.IsDeleted != true))
+                    .ThenInclude(s => s.Mappings)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(c => c.AccountId == accountId);
         }

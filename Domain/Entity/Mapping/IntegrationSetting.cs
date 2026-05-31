@@ -114,5 +114,14 @@ namespace Domain.Entity.Mapping
             _mappings.Add(mapping);
             return mapping;
         }
+
+        public void RemoveAllMappings()
+        {
+            foreach (var mapping in _mappings.Where(m => !m.IsDeleted))
+            {
+                mapping.SoftDelete();
+            }
+            UpdatedAt = DateTime.UtcNow;
+        }
     }
 }

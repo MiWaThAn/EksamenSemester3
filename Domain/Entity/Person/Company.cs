@@ -140,9 +140,14 @@ namespace Domain.Entity.Person
         }
         public void RemoveIntegrationSetting(Guid settingId)
         {
-            var setting = _settings.Find(s => s.Id == settingId);
+            var setting = _settings.Find(s => s.Id == settingId && !s.IsDeleted);
             if (setting == null) throw new ArgumentException("Denne integrationsindstilling blev ikke fundet for dette firma.");
-            _settings.Remove(setting);
+
+
+            setting.RemoveAllMappings();
+
+
+            setting.SoftDelete();
             UpdatedAt = DateTime.UtcNow;
         }
         public void UpdateCompanyName(string newName)
