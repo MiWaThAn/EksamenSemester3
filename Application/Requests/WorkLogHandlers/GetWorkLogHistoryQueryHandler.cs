@@ -28,6 +28,7 @@ namespace Application.Requests.WorkLogHandlers
                 return Enumerable.Empty<WorkLogDto>();
 
             var employeeId = account.EmployeeId.Value;
+            var emp = await _unitOfWork.Employees.GetByIdAsync(employeeId);
 
             var worklogs = await _unitOfWork.WorkLogs.GetQueryable()
                 .Include(w => w.Registrations)
@@ -78,7 +79,8 @@ namespace Application.Requests.WorkLogHandlers
                 var activities = globalActivities.Where(a => logActivityIds.Contains(a.Id)).ToList();
                 var expenses = globalExpenses.Where(e => logExpenseIds.Contains(e.Id)).ToList();
 
-                var dto = worklog.ToDto(projects, activities, expenses);
+
+                var dto = worklog.ToDto(projects, activities, expenses, emp.Name);
                 workLogDtos.Add(dto);
             }
 

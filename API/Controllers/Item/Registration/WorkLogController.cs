@@ -123,7 +123,7 @@ namespace API.Controllers.Item.Registration
         [HttpPost("{accountId:guid}/worklog/{workLogId:guid}/submit")]
         public async Task<IActionResult> SubmitWorkLogForApproval(Guid workLogId, Guid accountId, CancellationToken ct)
         {
-            var command = new SubmitWorkLogCommand(accountId, workLogId);
+            var command = new SubmitWorkLogCommand(workLogId, accountId);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }
@@ -131,7 +131,7 @@ namespace API.Controllers.Item.Registration
         [HttpPost("{accountId:guid}/worklog/{workLogId:guid}/approve")]
         public async Task<IActionResult> ApproveWorkLog(Guid workLogId, Guid accountId, CancellationToken ct)
         {
-            var command = new ApproveWorkLogCommand(accountId, workLogId);
+            var command = new ApproveWorkLogCommand(workLogId, accountId);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }
@@ -139,7 +139,7 @@ namespace API.Controllers.Item.Registration
         [HttpPost("{accountId:guid}/worklog/{workLogId:guid}/reject")]
         public async Task<IActionResult> RejectWorkLog(Guid workLogId, Guid accountId, [FromBody] RejectWorkLogRequest request, CancellationToken ct)
         {
-            var command = new RejectWorkLogCommand(accountId, workLogId, request.Reason);
+            var command = new RejectWorkLogCommand(workLogId, accountId, request.Reason);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }
@@ -163,7 +163,7 @@ namespace API.Controllers.Item.Registration
         [HttpDelete("{accountId:guid}/worklog/{workLogId:guid}/time-registration/{registrationId:guid}")]
         public async Task<IActionResult> RemoveTimeRegistration(Guid accountId, Guid workLogId, Guid registrationId, CancellationToken ct)
         {
-            var command = new DeleteTimeRegistrationCommand(accountId, registrationId);
+            var command = new DeleteTimeRegistrationCommand(registrationId, accountId);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }

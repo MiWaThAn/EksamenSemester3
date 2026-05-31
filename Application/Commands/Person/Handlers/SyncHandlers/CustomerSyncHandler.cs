@@ -112,10 +112,5 @@ namespace Application.Commands.Person.Handlers.SyncHandlers
                 mapping.UpdateObjectVersion(syncEntity.ObjectVersion);
               
         }
-
-
-
-
-
     }
 }

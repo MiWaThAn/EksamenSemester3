@@ -24,7 +24,7 @@ namespace Application.Commands.Item.Registrations
             {
                 await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted, cancellationToken);
                 var account = await _unitOfWork.Accounts.GetByIdAsync(request.AccountId, cancellationToken);
-                if (account != null)
+                if (account == null)
                     return BaseRegistrationResponse.Fail("Account not found.");
                 if(!account.CompanyId.HasValue)
                     return BaseRegistrationResponse.Fail("Account is not associated with a company.");

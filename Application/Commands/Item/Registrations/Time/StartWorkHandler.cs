@@ -45,7 +45,8 @@ namespace Application.Commands.Item.Registrations.Time
                 var activity = await _unitOfWork.ProjectActivities.GetByIdAsync(request.projectActivityId, cancellationToken);
                 if (activity == null)
                     return new BaseRegistrationResponse { Success = false, Message = "Projektaktivitet ikke fundet." };
-                Worklog.StartWork(project, activity,employee);
+                var reg = Worklog.StartWork(project, activity,employee);
+                await _unitOfWork.HourRegistrations.AddAsync(reg);
                 await _unitOfWork.CompleteAsync(cancellationToken);
                 await _unitOfWork.CommitTransactionAsync(cancellationToken);
                 return new BaseRegistrationResponse { Success = true, Message = "Arbejdet er startet." };

@@ -39,7 +39,6 @@ namespace UI.Services.Auth
                 //hvis de har en token sætter vi den på deres client så api kald altid har dem med.
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var claims = ParseClaimsFromJwt(token);
-                // Notice the two extra parameters at the end!
                 var identity = new ClaimsIdentity(claims, "jwt", "name", ClaimTypes.Role);
                 return new AuthenticationState(new ClaimsPrincipal(identity));
             }
@@ -77,7 +76,6 @@ namespace UI.Services.Auth
 
             var claims = new List<Claim>();
 
-            // 1. UNIFY ROLE PARSING (Check both "role" and the long XML URI string)
             string roleKey = keyValuePairs.ContainsKey("role") ? "role" : ClaimTypes.Role;
 
             if (keyValuePairs.TryGetValue(roleKey, out var roles))
@@ -98,7 +96,6 @@ namespace UI.Services.Auth
                 if (keyValuePairs.ContainsKey(ClaimTypes.Role)) keyValuePairs.Remove(ClaimTypes.Role);
             }
 
-            // 2. PARSE PERMISSIONS
             if (keyValuePairs.TryGetValue("permission", out var perms))
             {
                 if (perms.ToString()!.Trim().StartsWith("["))
@@ -111,7 +108,6 @@ namespace UI.Services.Auth
                 keyValuePairs.Remove("permission");
             }
 
-            // Add remaining fields (sub, exp, etc.)
             claims.AddRange(keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString()!)));
 
             return claims;

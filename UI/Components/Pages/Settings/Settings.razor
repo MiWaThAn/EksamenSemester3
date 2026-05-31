@@ -86,17 +86,41 @@ else
                 }
             </div>
         }
-
-        <input type="text" class="form-control mb-2"
-               placeholder="Indtast navn på nøgle"
-               @bind="model.KeyName" />
+        <p>Nøgle Navn: @model.KeyName</p>
 
         <input type="text" class="form-control mb-2"
                placeholder="Indtast nøgle"
                @bind="model.KeyValue" />
 
-        <button type="submit" class="btn btn-primary">Gem</button>
+        <button type="submit"
+                class="btn btn-primary"
+                disabled="@isSaving">
+            @(isSaving ? "Opretter..." : "Gem")
+        </button>
     </EditForm>
+}
+@if (isSaving)
+{
+    <div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+         style="background-color: rgba(0,0,0,0.6); z-index: 9999;">
+
+        <div class="card shadow-lg border-0 p-4 text-center"
+             style="min-width: 350px;">
+
+            <div class="spinner-border text-primary mb-3"
+                 role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+
+            <h5>Opretter integration...</h5>
+
+            <p class="text-muted mb-0">
+                Vent venligst mens nøglen bliver oprettet.
+            </p>
+
+        </div>
+
+    </div>
 }
 @code {
     private void HandleColorChange(ChangeEventArgs e)
@@ -109,6 +133,7 @@ else
     private FormModel model = new();
     private List<ProviderModel>? providers;
     private List<IntegrationSettingModel>? existingSettings;
+    private bool isSaving;
 
     protected override async Task OnInitializedAsync()
     {
@@ -118,15 +143,23 @@ else
 
     private async Task HandleSubmit()
     {
-        await IntegrationService.CreateIntegrationSettingAsync(
-            model.ProviderName,
-            model.KeyName,
-            model.KeyValue,
-            model.SelectedEntityTypes);
+        try
+        {
+            isSaving = true;
 
-        
-        existingSettings = await IntegrationService.GetMyIntegrationSettingsAsync();
-        model = new();
+            await IntegrationService.CreateIntegrationSettingAsync(
+                model.ProviderName,
+                model.KeyName,
+                model.KeyValue,
+                model.SelectedEntityTypes);
+
+            existingSettings = await IntegrationService.GetMyIntegrationSettingsAsync();
+            model = new();
+        }
+        finally
+        {
+            isSaving = false;
+        }
     }
 
     private async Task HandleDelete(Guid settingId)
@@ -144,10 +177,12 @@ else
     }
     private List<string> availableEntityTypes = new();
 
-    
+
 
     private void OnProviderChanged()
     {
+        // TODO: Make it so providers have keynames attached to their class so we easily can pick the right one 
+        model.KeyName = "X-AgreementGrantToken";
         var selected = providers?.FirstOrDefault(p => p.Name == model.ProviderName);
         availableEntityTypes = selected?.SupportedEntityTypes ?? new();
         model.SelectedEntityTypes.Clear();

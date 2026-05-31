@@ -1,6 +1,8 @@
 ﻿@page "/company/pending-approvals"
 @inject RegistrationService RegistrationService
+@inject IAuthService authService
 @using UI.Services.Registration
+@using UI.Services.Auth
 @using Shared.Item.Registrations.DTOs
 @using Shared.Item.Registrations.Commands
 @using Shared.Item.Registrations.Commands.Time
@@ -9,125 +11,489 @@
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize]
 
-<div class="container mx-auto p-4 max-w-4xl">
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-slate-800">Afventende Godkendelser</h2>
-        <button @onclick="LoadPendingLogs" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition">
-            Opdater Liste
-        </button>
-    </div>
+<div class="container py-4">
 
-    @if (isLoading)
-    {
-        <div class="flex justify-center my-12">
-            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
-        </div>
-    }
-    else if (pendingLogs == null || !pendingLogs.Any())
-    {
-        <div class="bg-slate-50 border border-dashed rounded-xl p-8 text-center text-slate-500">
-            Der er i øjeblikket ingen tidsregistreringer, der venter på godkendelse.
-        </div>
-    }
-    else
-    {
-        <div class="space-y-4">
-            @foreach (var log in pendingLogs)
+    <div class="row justify-content-center">
+
+        <div class="col-xl-10">
+
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+
+                <div>
+                    <h2 class="fw-bold mb-1">
+                        Afventende Godkendelser
+                    </h2>
+
+                    <p class="text-muted mb-0">
+                        Gennemgå og godkend medarbejdernes tidsregistreringer.
+                    </p>
+                </div>
+
+                <button @onclick="LoadPendingLogs"
+                        class="btn btn-outline-secondary">
+
+                    Opdater Liste
+
+                </button>
+
+            </div>
+
+            @if (isLoading)
             {
-                <div class="bg-white rounded-xl shadow border border-slate-100 overflow-hidden">
-                    <div class="bg-slate-50 p-4 border-b border-slate-100 flex justify-between items-center flex-wrap gap-2">
-                        <div>
-                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Medarbejder ID</span>
-                            <span class="font-medium text-slate-700 text-sm">@log.AccountId</span>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Dato Oprettet</span>
-                            <span class="text-sm text-slate-600">@log.ClockInTime.ToString("dd-MM-yyyy HH:mm")</span>
-                        </div>
+                <div class="text-center py-5">
+
+                    <div class="spinner-border text-primary"
+                         role="status">
+                        <span class="visually-hidden">Loading...</span>
                     </div>
 
-                    <div class="p-4 space-y-4">
-                        <div>
-                            <h4 class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-2">Tidsregistreringer</h4>
-                            <div class="bg-slate-50 rounded-lg p-2 divide-y divide-slate-200">
-                                @foreach (var t in log.TimeRegistrations)
-                                {
-                                    <div class="p-2 text-sm flex justify-between">
-                                        <div>
-                                            <span class="font-semibold text-slate-700">@t.ProjectName</span>
-                                            <span class="text-slate-400 mx-1">|</span>
-                                            <span class="text-slate-600">@t.ProjectActivityName</span>
-                                        </div>
-                                        <span class="italic text-slate-500 text-xs">@t.Description</span>
-                                    </div>
-                                }
-                            </div>
-                        </div>
-
-                        @if (log.ExpenseRegistrations?.Any() == true)
-                        {
-                            <div>
-                                <h4 class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-2">Udlæg & Udgifter</h4>
-                                <div class="bg-amber-50/50 rounded-lg p-2 divide-y divide-amber-100">
-                                    @foreach (var e in log.ExpenseRegistrations)
-                                    {
-                                        <div class="p-2 text-sm flex justify-between">
-                                            <div>
-                                                <span class="font-medium text-amber-900">@e.ExpenseName</span>
-                                                <span class="text-xs text-amber-600 block">@e.Description</span>
-                                            </div>
-                                            <span class="font-bold text-amber-700">@e.Amount.ToString("C")</span>
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                        }
-
-                        <div class="flex justify-end gap-2 border-t pt-4 mt-2">
-                            <button @onclick="() => PromptRejection(log.Id)" class="px-4 py-2 bg-rose-50 text-rose-600 hover:bg-rose-100 font-medium text-sm rounded-lg transition">
-                                Afvis
-                            </button>
-                            <button @onclick="() => HandleApprove(log.Id)" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm rounded-lg transition shadow-sm">
-                                Godkend
-                            </button>
-                        </div>
-
-                        @if (activeRejectionLogId == log.Id)
-                        {
-                            <div class="bg-rose-50/50 p-3 rounded-lg border border-rose-100 mt-2 space-y-2">
-                                <label class="text-xs font-bold text-rose-800 block">Årsag til afvisning:</label>
-                                <input type="text" @bind="rejectionReason" placeholder="Indtast begrundelse..." class="w-full p-2 text-sm border border-rose-200 rounded-md bg-white" />
-                                <div class="flex justify-end gap-2">
-                                    <button @onclick="CancelRejection" class="px-3 py-1 text-xs text-slate-500 hover:text-slate-700">Annuller</button>
-                                    <button @onclick="SubmitRejection" class="px-3 py-1 text-xs bg-rose-600 text-white rounded hover:bg-rose-700">Bekræft Afvisning</button>
-                                </div>
-                            </div>
-                        }
-                    </div>
                 </div>
             }
-        </div>
-    }
+            else if (pendingLogs == null || !pendingLogs.Any())
+            {
+                <div class="card border-0 shadow-sm">
 
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <div class="mt-4 p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg text-sm">
-            @errorMessage
+                    <div class="card-body text-center py-5">
+
+                        <h5 class="text-muted mb-0">
+                            Der er i øjeblikket ingen tidsregistreringer, der venter på godkendelse.
+                        </h5>
+
+                    </div>
+
+                </div>
+            }
+            else
+            {
+                <div class="d-flex flex-column gap-4">
+
+                    @foreach (var log in pendingLogs)
+                    {
+                        <div class="card border-0 shadow-sm">
+
+                            <div class="card-header bg-light">
+
+                                <div class="row g-3 align-items-center">
+
+                                    <div class="col-md-6">
+
+                                        <div class="small text-uppercase text-muted fw-bold">
+                                            Medarbejder
+                                        </div>
+
+                                        <div class="fw-semibold">
+                                            @log.EmployeeName
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 text-md-end">
+
+                                        <div class="small text-uppercase text-muted fw-bold">
+                                            Dato Oprettet
+                                        </div>
+
+                                        <div>
+                                            @log.ClockInTime.ToString("dd-MM-yyyy HH:mm")
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3">
+                                    ⏱ Tidsregistreringer
+                                </h6>
+
+                                <div class="list-group mb-4">
+
+                                    @foreach (var t in log.TimeRegistrations)
+                                    {
+                                        <button type="button"
+                                                class="list-group-item list-group-item-action"
+                                                @onclick="() => OpenTimeRegistration(t)">
+
+                                            <div class="d-flex justify-content-between align-items-center">
+
+                                                <div>
+
+                                                    <div class="fw-semibold">
+                                                        @t.ProjectName
+                                                    </div>
+
+                                                    <div class="small text-muted">
+                                                        @t.ProjectActivityName
+                                                    </div>
+
+                                                </div>
+
+                                                <div class="text-end">
+
+                                                    @if (!string.IsNullOrWhiteSpace(t.Description))
+                                                    {
+                                                        <div class="small text-muted">
+                                                            @t.Description
+                                                        </div>
+                                                    }
+
+                                                    <span class="badge bg-primary">
+                                                        Vis detaljer
+                                                    </span>
+
+                                                </div>
+
+                                            </div>
+
+                                        </button>
+                                    }
+
+                                </div>
+
+                                @if (log.ExpenseRegistrations?.Any() == true)
+                                {
+                                    <h6 class="fw-bold mb-3">
+                                        💳 Udlæg & Udgifter
+                                    </h6>
+
+                                    <div class="list-group mb-4">
+
+                                        @foreach (var e in log.ExpenseRegistrations)
+                                        {
+                                            <button type="button"
+                                                    class="list-group-item list-group-item-action"
+                                                    @onclick="() => OpenExpenseRegistration(e)">
+
+                                                <div class="d-flex justify-content-between align-items-center">
+
+                                                    <div>
+
+                                                        <div class="fw-semibold">
+                                                            @e.ExpenseName
+                                                        </div>
+
+                                                        <div class="small text-muted">
+                                                            @e.Description
+                                                        </div>
+
+                                                    </div>
+
+                                                    <div class="text-end">
+
+                                                        <div class="fw-bold text-success">
+                                                            @e.Amount.ToString("C")
+                                                        </div>
+
+                                                        <span class="badge bg-warning text-dark">
+                                                            Vis detaljer
+                                                        </span>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </button>
+                                        }
+
+                                    </div>
+                                }
+
+                                <div class="border-top pt-3">
+
+                                    <div class="d-flex justify-content-end gap-2">
+
+                                        <button @onclick="() => PromptRejection(log.Id)"
+                                                class="btn btn-outline-danger">
+
+                                            Afvis
+
+                                        </button>
+
+                                        <button @onclick="() => HandleApprove(log.Id)"
+                                                class="btn btn-success">
+
+                                            Godkend
+
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(errorMessage))
+            {
+                <div class="alert alert-danger mt-4">
+
+                    @errorMessage
+
+                </div>
+            }
+
         </div>
-    }
+
+    </div>
+
 </div>
 
+@if (showTimeDetailsModal && selectedTimeRegistration != null)
+{
+    <div class="modal fade show d-block"
+         tabindex="-1"
+         style="background-color:rgba(0,0,0,.5)">
+
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title">
+                        Registreringsdetaljer
+                    </h5>
+
+                    <button class="btn-close"
+                            @onclick="() => showTimeDetailsModal = false">
+                    </button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <dl class="row">
+
+                        <dt class="col-sm-4">Projekt</dt>
+                        <dd class="col-sm-8">@selectedTimeRegistration.ProjectName</dd>
+
+                        <dt class="col-sm-4">Aktivitet</dt>
+                        <dd class="col-sm-8">@selectedTimeRegistration.ProjectActivityName</dd>
+
+                        <dt class="col-sm-4">Beskrivelse</dt>
+                        <dd class="col-sm-8">@selectedTimeRegistration.Description</dd>
+
+                    </dl>
+
+                    <hr />
+
+                    <h6>Intervaller</h6>
+
+                    <div class="list-group">
+
+                        @foreach (var interval in selectedTimeRegistration.Intervals)
+                        {
+                            <div class="list-group-item">
+
+                                <div class="d-flex justify-content-between">
+
+                                    <div>
+                                        @interval.StartTime.ToString("dd-MM-yyyy HH:mm")
+                                        →
+                                        @interval.EndTime?.ToString("dd-MM-yyyy HH:mm")
+                                    </div>
+
+                                    <div>
+
+                                        @if (interval.IsBreak)
+                                        {
+                                            <span class="badge bg-secondary">
+                                                Pause
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">
+                                                Arbejde
+                                            </span>
+                                        }
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+}
+@if (showExpenseDetailsModal && selectedExpenseRegistration != null)
+{
+    <div class="modal fade show d-block"
+         tabindex="-1"
+         style="background-color:rgba(0,0,0,.5)">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title">
+                        Udgiftsdetaljer
+                    </h5>
+
+                    <button class="btn-close"
+                            @onclick="() => showExpenseDetailsModal = false">
+                    </button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <dl class="row">
+
+                        <dt class="col-sm-4">Udgift</dt>
+                        <dd class="col-sm-8">@selectedExpenseRegistration.ExpenseName</dd>
+
+                        <dt class="col-sm-4">Beløb</dt>
+                        <dd class="col-sm-8">
+                            @selectedExpenseRegistration.Amount.ToString("C")
+                        </dd>
+
+                        <dt class="col-sm-4">Dato</dt>
+                        <dd class="col-sm-8">
+                            @selectedExpenseRegistration.Date.ToShortDateString()
+                        </dd>
+
+                        <dt class="col-sm-4">Beskrivelse</dt>
+                        <dd class="col-sm-8">
+                            @selectedExpenseRegistration.Description
+                        </dd>
+
+                    </dl>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+}
+@if (activeRejectionLogId.HasValue)
+{
+    <div class="modal fade show d-block"
+         tabindex="-1"
+         style="background-color:rgba(0,0,0,.5);">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content border-0 shadow-lg">
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title text-danger">
+                        Afvis Registrering
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            @onclick="CancelRejection">
+                    </button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="alert alert-warning mb-3">
+
+                        Du er ved at afvise denne tidsregistrering.
+                        Angiv venligst en begrundelse.
+
+                    </div>
+
+                    <label class="form-label fw-semibold">
+                        Årsag til afvisning
+                    </label>
+
+                    <textarea @bind="rejectionReason"
+                              class="form-control"
+                              rows="4"
+                              placeholder="Indtast begrundelse...">
+                    </textarea>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button class="btn btn-outline-secondary"
+                            @onclick="CancelRejection">
+
+                        Annuller
+
+                    </button>
+
+                    <button class="btn btn-danger"
+                            @onclick="SubmitRejection">
+
+                        Bekræft Afvisning
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+}
 @code {
     private bool isLoading = true;
     private string errorMessage = string.Empty;
     private IEnumerable<WorkLogDto>? pendingLogs;
 
-    private Guid companyAccountId = Guid.Parse("2ce98f72-7157-4562-b3fc-2c963f66af00");
+    private Guid companyAccountId;
     private Guid? activeRejectionLogId;
     private string rejectionReason = string.Empty;
+    private TimeRegistrationDto? selectedTimeRegistration;
+    private ExpenseRegistrationDto? selectedExpenseRegistration;
 
+    private bool showTimeDetailsModal;
+    private bool showExpenseDetailsModal;
+
+    private void PromptRejection(Guid logId)
+    {
+        activeRejectionLogId = logId;
+        rejectionReason = string.Empty;
+    }
+
+    private void CancelRejection()
+    {
+        activeRejectionLogId = null;
+        rejectionReason = string.Empty;
+    }
+
+    private void OpenTimeRegistration(TimeRegistrationDto registration)
+    {
+        selectedTimeRegistration = registration;
+        showTimeDetailsModal = true;
+    }
+
+    private void OpenExpenseRegistration(ExpenseRegistrationDto registration)
+    {
+        selectedExpenseRegistration = registration;
+        showExpenseDetailsModal = true;
+    }
     protected override async Task OnInitializedAsync()
     {
+        var guid = await authService.GetUserIdAsync();
+        companyAccountId = Guid.Parse(guid);
         await LoadPendingLogs();
     }
 
@@ -156,17 +522,6 @@
         else errorMessage = result.Message;
     }
 
-    private void PromptRejection(Guid logId)
-    {
-        activeRejectionLogId = logId;
-        rejectionReason = string.Empty;
-    }
-
-    private void CancelRejection()
-    {
-        activeRejectionLogId = null;
-        rejectionReason = string.Empty;
-    }
 
     private async Task SubmitRejection()
     {

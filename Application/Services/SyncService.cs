@@ -40,7 +40,7 @@ namespace Application.Services
 
 
 
-            foreach (var setting in company.Settings)
+            foreach (var setting in company.Settings.Where(s=>!s.IsDeleted))
             {
                 foreach (var entityType in setting.EntityTypes.OrderBy(selEn => selEn.EntityType.SyncPriority))
                 {

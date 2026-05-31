@@ -55,6 +55,7 @@ namespace Shared.Item.Registrations.DTOs
     public record WorkLogDto(
         Guid Id,
         Guid AccountId,
+        string EmployeeName,
         string Status,
         DateTime ClockInTime,
         DateTime? ClockOutTime,

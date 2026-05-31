@@ -14,7 +14,8 @@ namespace Application.Requests.WorkLogHandlers
             this WorkLog workLog,
             IEnumerable<Project> projects,
             IEnumerable<ProjectActivity> activities,
-            IEnumerable<Expense> expenses) // Replace 'Expense' with your actual expense domain class
+            IEnumerable<Expense> expenses,
+            string employeeName)
         {
             if (workLog == null) return null!;
 
@@ -31,6 +32,7 @@ namespace Application.Requests.WorkLogHandlers
             return new WorkLogDto(
                 Id: workLog.Id,
                 AccountId: workLog.EmployeeId,
+                EmployeeName: employeeName,
                 Status: workLog.Status.ToString(),
                 ClockInTime: workLog.DateCreated,
                 ClockOutTime: workLog.IsClosed ? workLog.DateClosed : null,

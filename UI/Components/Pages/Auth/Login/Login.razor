@@ -6,156 +6,311 @@
 @inject NavigationManager Navigation
 @inject HttpClient Http
 
-<div class="container max-w-md mx-auto p-6 flex flex-col justify-center min-h-screen">
-    <div class="bg-white p-8 rounded-xl shadow-md border border-gray-100">
+<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light">
 
-        @if (!_showForgotPassword)
-        {
-            <div class="text-center mb-8">
-                <h3 class="text-3xl font-bold text-gray-800">Log ind</h3>
-                <p class="text-gray-500 text-sm mt-2">Indtast dit brugernavn og din adgangskode</p>
-            </div>
+    <div class="container py-5">
 
-            <EditForm Model="@_loginModel" OnValidSubmit="HandleLoginAsync">
-                <DataAnnotationsValidator />
+        <div class="row justify-content-center">
 
-                @if (!string.IsNullOrWhiteSpace(_errorMessage))
-                {
-                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm" role="alert">
-                        <span>@_errorMessage</span>
+            <div class="col-12 col-md-8 col-lg-5">
+
+                <div class="text-center mb-4">
+
+                    <h1 class="fw-bold mb-2">
+                        FAST
+                    </h1>
+
+                    <p class="text-muted mb-0">
+                        Tidsregistrering gjort enkelt
+                    </p>
+
+                </div>
+
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+
+                    <div class="card-body p-4 p-lg-5">
+
+                        @if (!_showForgotPassword)
+                        {
+                            <div class="text-center mb-4">
+
+                                <h3 class="fw-bold">
+                                    Log ind
+                                </h3>
+
+                                <p class="text-muted mb-0">
+                                    Indtast dine loginoplysninger
+                                </p>
+
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(_errorMessage))
+                            {
+                                <div class="alert alert-danger">
+
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+
+                                    @_errorMessage
+
+                                </div>
+                            }
+
+                            <EditForm Model="@_loginModel"
+                                      OnValidSubmit="HandleLoginAsync">
+
+                                <DataAnnotationsValidator />
+
+                                <div class="mb-3">
+
+                                    <label class="form-label fw-semibold">
+                                        Brugernavn
+                                    </label>
+
+                                    <InputText class="form-control form-control-lg"
+                                               autocomplete="username"
+                                               placeholder="Indtast brugernavn"
+                                               @bind-Value="_loginModel.Username" />
+
+                                    <ValidationMessage For="@(() => _loginModel.Username)" />
+
+                                </div>
+
+                                <div class="mb-3">
+
+                                    <label class="form-label fw-semibold">
+                                        Adgangskode
+                                    </label>
+
+                                    <InputText type="password"
+                                               class="form-control form-control-lg"
+                                               autocomplete="current-password"
+                                               placeholder="••••••••"
+                                               @bind-Value="_loginModel.Password" />
+
+                                    <ValidationMessage For="@(() => _loginModel.Password)" />
+
+                                </div>
+
+                                <div class="text-end mb-4">
+
+                                    <button type="button"
+                                            class="btn btn-link p-0 text-decoration-none"
+                                            @onclick="PrepareForgotPassword">
+
+                                        Glemt adgangskode?
+
+                                    </button>
+
+                                </div>
+
+                                @if (_isBusy)
+                                {
+                                    <button class="btn btn-primary btn-lg w-100"
+                                            disabled>
+
+                                        <span class="spinner-border spinner-border-sm me-2"></span>
+
+                                        Logger ind...
+
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="submit"
+                                            class="btn btn-primary btn-lg w-100">
+
+                                        Log ind
+
+                                    </button>
+                                }
+
+                            </EditForm>
+                        }
+
+                        @if (_showForgotPassword && !_isEmailSent)
+                        {
+                            <div class="text-center mb-4">
+
+                                <div class="mb-3">
+
+                                    <span class="badge bg-primary-subtle text-primary px-3 py-2">
+                                        Trin 1 af 2
+                                    </span>
+
+                                </div>
+
+                                <h3 class="fw-bold">
+                                    Nulstil kodeord
+                                </h3>
+
+                                <p class="text-muted">
+                                    Indtast din e-mailadresse
+                                </p>
+
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(_errorMessage))
+                            {
+                                <div class="alert alert-danger">
+
+                                    @_errorMessage
+
+                                </div>
+                            }
+
+                            <div class="mb-4">
+
+                                <label class="form-label fw-semibold">
+                                    E-mail
+                                </label>
+
+                                <input type="email"
+                                       class="form-control form-control-lg"
+                                       placeholder="navn@firma.dk"
+                                       @bind="_forgotPasswordEmail" />
+
+                            </div>
+
+                            <div class="d-grid gap-2">
+
+                                @if (_isBusy)
+                                {
+                                    <button class="btn btn-primary btn-lg"
+                                            disabled>
+
+                                        <span class="spinner-border spinner-border-sm me-2"></span>
+
+                                        Sender...
+
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-primary btn-lg"
+                                            @onclick="HandleForgotPasswordAsync">
+
+                                        Send Token
+
+                                    </button>
+                                }
+
+                                <button class="btn btn-outline-secondary"
+                                        @onclick="ResetToLogin">
+
+                                    Tilbage
+
+                                </button>
+
+                            </div>
+                        }
+
+                        @if (_showForgotPassword && _isEmailSent)
+                        {
+                            <div class="text-center mb-4">
+
+                                <div class="mb-3">
+
+                                    <span class="badge bg-success-subtle text-success px-3 py-2">
+                                        Trin 2 af 2
+                                    </span>
+
+                                </div>
+
+                                <h3 class="fw-bold">
+                                    Indtast Token
+                                </h3>
+
+                                <p class="text-muted">
+                                    Angiv token og nyt kodeord
+                                </p>
+
+                            </div>
+
+                            <div class="alert alert-success">
+
+                                Hvis e-mailen findes i systemet, er der sendt en token.
+
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(_errorMessage))
+                            {
+                                <div class="alert alert-danger">
+
+                                    @_errorMessage
+
+                                </div>
+                            }
+
+                            <EditForm Model="@_resetPasswordModel"
+                                      OnValidSubmit="HandleResetPasswordAsync">
+
+                                <DataAnnotationsValidator />
+
+                                <div class="mb-3">
+
+                                    <label class="form-label fw-semibold">
+                                        Token
+                                    </label>
+
+                                    <InputText class="form-control form-control-lg"
+                                               placeholder="Indsæt token"
+                                               @bind-Value="_resetPasswordModel.Token" />
+
+                                </div>
+
+                                <div class="mb-4">
+
+                                    <label class="form-label fw-semibold">
+                                        Nyt kodeord
+                                    </label>
+
+                                    <InputText type="password"
+                                               class="form-control form-control-lg"
+                                               placeholder="••••••••"
+                                               @bind-Value="_resetPasswordModel.NewPassword" />
+
+                                </div>
+
+                                <div class="d-grid gap-2">
+
+                                    <button type="submit"
+                                            class="btn btn-success btn-lg">
+
+                                        Opdater kodeord
+
+                                    </button>
+
+                                    <button type="button"
+                                            class="btn btn-outline-secondary"
+                                            @onclick="ResetToLogin">
+
+                                        Tilbage til login
+
+                                    </button>
+
+                                </div>
+
+                            </EditForm>
+                        }
+
                     </div>
-                }
 
-                <div class="mb-4">
-                    <label class="block font-semibold mb-1 text-gray-700" for="username">Brugernavn</label>
-                    <InputText id="username" autocomplete="username"
-                               class="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
-                               placeholder="Indtast brugernavn"
-                               @bind-Value="_loginModel.Username" />
-                    <div class="text-red-500 text-xs mt-1 font-semibold">
-                        <ValidationMessage For="@(() => _loginModel.Username)" />
+                    <div class="card-footer bg-light border-0 text-center py-3">
+
+                        <small class="text-muted">
+                            Oplever du problemer? Kontakt din administrator.
+                        </small>
+
                     </div>
+
                 </div>
 
-                <div class="mb-4">
-                    <label class="block font-semibold mb-1 text-gray-700" for="password">Adgangskode</label>
-                    <InputText id="password" type="password" autocomplete="current-password"
-                               class="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
-                               placeholder="••••••••"
-                               @bind-Value="_loginModel.Password" />
-                    <div class="text-red-500 text-xs mt-1 font-semibold">
-                        <ValidationMessage For="@(() => _loginModel.Password)" />
-                    </div>
-                </div>
-
-                <div class="text-right mb-6">
-                    <button type="button" @onclick="PrepareForgotPassword" class="text-sm text-blue-600 hover:underline font-semibold">
-                        Glemt adgangskode?
-                    </button>
-                </div>
-
-                <div class="mt-6">
-                    @if (_isBusy)
-                    {
-                        <button class="w-full bg-blue-400 text-white font-bold py-3 px-4 rounded cursor-not-allowed flex justify-center items-center" disabled>
-                            <span class="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"></span>
-                            Logger ind...
-                        </button>
-                    }
-                    else
-                    {
-                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition duration-200 shadow shadow-blue-200">
-                            Log ind
-                        </button>
-                    }
-                </div>
-            </EditForm>
-        }
-        @if (_showForgotPassword && !_isEmailSent)
-        {
-            <div class="text-center mb-8">
-                <h3 class="text-3xl font-bold text-gray-800">Nulstil kodeord</h3>
-                <p class="text-gray-500 text-sm mt-2">Indtast din e-mail, så sender vi dig en sikkerhedstoken</p>
             </div>
 
-            @if (!string.IsNullOrWhiteSpace(_errorMessage))
-            {
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm" role="alert">
-                    <span>@_errorMessage</span>
-                </div>
-            }
-
-            <div class="mb-6">
-                <label class="block font-semibold mb-1 text-gray-700">E-mail adresse</label>
-                <input type="email" class="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
-                       placeholder="placeholder@virksomhed.dk" @bind="_forgotPasswordEmail" />
-            </div>
-
-            <div class="flex flex-col gap-3">
-                @if (_isBusy)
-                {
-                    <button class="w-full bg-blue-400 text-white font-bold py-3 px-4 rounded cursor-not-allowed text-center" disabled>
-                        Sender anmodning...
-                    </button>
-                }
-                else
-                {
-                    <button @onclick="HandleForgotPasswordAsync" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition duration-200">
-                        Anmod om token
-                    </button>
-                }
-                <button @onclick="ResetToLogin" class="text-sm text-gray-500 hover:underline text-center mt-2">
-                    Tilbage til login
-                </button>
-            </div>
-        }
-        @if (_showForgotPassword && _isEmailSent)
-        {
-            <div class="text-center mb-8">
-                <h3 class="text-3xl font-bold text-gray-800">Indtast Token</h3>
-                <p class="text-sm mt-2 text-green-600 font-semibold bg-green-50 p-3 rounded border border-green-200">
-                    Hvis du indsatte en valid email, vil du modtage en e-mail med en token om et øjeblik.
-                </p>
-            </div>
-
-            @if (!string.IsNullOrWhiteSpace(_errorMessage))
-            {
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm" role="alert">
-                    <span>@_errorMessage</span>
-                </div>
-            }
-
-            <EditForm Model="@_resetPasswordModel" OnValidSubmit="HandleResetPasswordAsync">
-                <DataAnnotationsValidator />
-
-                <div class="mb-4">
-                    <label class="block font-semibold mb-1 text-gray-700">Sikkerhedstoken fra mail:</label>
-                    <InputText @bind-Value="_resetPasswordModel.Token" class="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none transition" placeholder="Indsæt token her..." />
-                </div>
-
-                <div class="mb-4">
-                    <label class="block font-semibold mb-1 text-gray-700">Nyt Kodeord:</label>
-                    <InputText @bind-Value="_resetPasswordModel.NewPassword" type="password" class="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none transition" placeholder="••••••••" />
-                </div>
-
-                <div class="flex flex-col gap-3 mt-6">
-                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded transition duration-200">
-                        Opdater kodeord
-                    </button>
-                    <button type="button" @onclick="ResetToLogin" class="text-sm text-gray-500 hover:underline text-center mt-2">
-                        Annuller og gå til login
-                    </button>
-                </div>
-            </EditForm>
-        }
-
-        <div class="text-center mt-6">
-            <p class="text-xs text-gray-400">
-                Oplever du problemer? Kontakt venligst din administrator.
-            </p>
         </div>
 
     </div>
+
 </div>
 
 @code {
