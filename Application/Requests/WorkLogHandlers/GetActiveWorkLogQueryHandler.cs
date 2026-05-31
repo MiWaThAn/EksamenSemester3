@@ -24,6 +24,7 @@ namespace Application.Requests.WorkLogHandlers
             var account = await _unitOfWork.Accounts.GetByIdAsync(request.accountId);
             if (account == null) return null;
             if (account.EmployeeId == null) return null;
+            var emp = await _unitOfWork.Employees.GetByIdAsync(account.EmployeeId.Value);
             var activeWorkLog = await _unitOfWork.WorkLogs.GetActiveWorkLogAsNoTrackingAsync(account.EmployeeId.Value);
             if (activeWorkLog == null)
                 return null;
@@ -35,7 +36,7 @@ namespace Application.Requests.WorkLogHandlers
             List<Project> projects = await _unitOfWork.Projects.GetQueryable().Where(p => projectIds.Contains(p.Id)).ToListAsync();
             List<Expense> expenses = await _unitOfWork.Expenses.GetQueryable().Where(e => expenseIds.Contains(e.Id)).ToListAsync();
 
-            var dto = activeWorkLog.ToDto(projects, activities, expenses);
+            var dto = activeWorkLog.ToDto(projects, activities, expenses,emp.Name);
 
             return dto;
         }

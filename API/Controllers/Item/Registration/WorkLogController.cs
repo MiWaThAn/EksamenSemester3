@@ -131,7 +131,7 @@ namespace API.Controllers.Item.Registration
         [HttpPost("{accountId:guid}/worklog/{workLogId:guid}/approve")]
         public async Task<IActionResult> ApproveWorkLog(Guid workLogId, Guid accountId, CancellationToken ct)
         {
-            var command = new ApproveWorkLogCommand(accountId, workLogId);
+            var command = new ApproveWorkLogCommand(workLogId, accountId);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }
@@ -139,7 +139,7 @@ namespace API.Controllers.Item.Registration
         [HttpPost("{accountId:guid}/worklog/{workLogId:guid}/reject")]
         public async Task<IActionResult> RejectWorkLog(Guid workLogId, Guid accountId, [FromBody] RejectWorkLogRequest request, CancellationToken ct)
         {
-            var command = new RejectWorkLogCommand(accountId, workLogId, request.Reason);
+            var command = new RejectWorkLogCommand(workLogId, accountId, request.Reason);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }

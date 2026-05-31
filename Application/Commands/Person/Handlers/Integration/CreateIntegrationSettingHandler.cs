@@ -40,10 +40,9 @@ public class CreateIntegrationSettingHandler(IUnitOfWork _unitOfWork, IEncryptio
 
             var setting = company.CreateIntegrationSetting(builder);
             await _unitOfWork.IntegrationSettings.AddAsync(setting, cancellationToken);
-            await _syncService.SyncAllAsync(company);
             await _unitOfWork.CompleteAsync(cancellationToken);
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
-
+            await _syncService.SyncAllAsync(company);
             return new CreateIntegrationSettingResponse { Success = true, Id = setting.Id };
         }
         catch (Exception)
