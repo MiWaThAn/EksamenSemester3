@@ -163,7 +163,7 @@ namespace API.Controllers.Item.Registration
         [HttpDelete("{accountId:guid}/worklog/{workLogId:guid}/time-registration/{registrationId:guid}")]
         public async Task<IActionResult> RemoveTimeRegistration(Guid accountId, Guid workLogId, Guid registrationId, CancellationToken ct)
         {
-            var command = new DeleteTimeRegistrationCommand(accountId, registrationId);
+            var command = new DeleteTimeRegistrationCommand(registrationId, accountId);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }

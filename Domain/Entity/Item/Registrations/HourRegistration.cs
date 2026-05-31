@@ -35,7 +35,8 @@ namespace Domain.Entity.Item.Registrations
             if (existingRegistrations.Any(r => r.Id == this.Id))
                 throw new ArgumentException("Denne registrering er allerede tilføjet.");
             var otherTimes = existingRegistrations.OfType<HourRegistration>();
-            if (otherTimes.Any(r => OverlapsWith(r)))
+            var overLap = otherTimes.FirstOrDefault(r => OverlapsWith(r));
+            if (overLap != null)
                 throw new ArgumentException("Overlappende tidsregistrering fundet.");
         }
 

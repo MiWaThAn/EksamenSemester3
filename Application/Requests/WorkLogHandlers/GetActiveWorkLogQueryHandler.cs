@@ -1,6 +1,7 @@
 ﻿using Application.Interfaces;
 using Domain.Entity.Item;
 using Domain.Entity.Item.Registrations;
+using Domain.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Shared.Item.Registrations.DTOs;
@@ -25,9 +26,18 @@ namespace Application.Requests.WorkLogHandlers
             if (account == null) return null;
             if (account.EmployeeId == null) return null;
             var emp = await _unitOfWork.Employees.GetByIdAsync(account.EmployeeId.Value);
-            var activeWorkLog = await _unitOfWork.WorkLogs.GetActiveWorkLogAsNoTrackingAsync(account.EmployeeId.Value);
+            var activeWorkLog = await _unitOfWork.WorkLogs.GetActiveWorkLogAsNoTrackingAsync(account.EmployeeId.Value, cancellationToken);
             if (activeWorkLog == null)
-                return null;
+            {
+                var builder = new WorkLogBuilder();
+                var created = emp.CreateWorkLog(builder);
+                await _unitOfWork.WorkLogs.AddAsync(created, cancellationToken);
+                await _unitOfWork.CompleteAsync(cancellationToken);
+
+                activeWorkLog = await _unitOfWork.WorkLogs.GetActiveWorkLogAsNoTrackingAsync(account.EmployeeId.Value, cancellationToken);
+                if (activeWorkLog == null)
+                    return null;
+            }
             var projectIds = activeWorkLog.Registrations.Select(r => r.ProjectId).Distinct().ToList();
             var activityIds = activeWorkLog.Registrations.Where(r => r.ProjectActivityId.HasValue).Select(r => r.ProjectActivityId!.Value).Distinct().ToList();
             var expenseIds = activeWorkLog.Registrations.OfType<ExpenseRegistration>().Select(r => r.ExpenseId).Distinct().ToList();

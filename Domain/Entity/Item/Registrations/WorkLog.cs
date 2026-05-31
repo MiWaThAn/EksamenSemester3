@@ -36,7 +36,7 @@ namespace Domain.Entity.Item.Registrations
 
         //Business Methods (UI) 
         //Method for when the user wants to start work on an activity
-        public void StartWork(Project project, ProjectActivity activity, Employee employee)
+        public HourRegistration StartWork(Project project, ProjectActivity activity, Employee employee)
         {
             if (Status == ApprovalStatus.Approved)
                 throw new InvalidOperationException("Du kan ikke redigere en godkendt log.");
@@ -53,8 +53,10 @@ namespace Domain.Entity.Item.Registrations
                 .WithType(TimeType.Work)
                 .WithWorkLog(this);
 
-            ActiveRegistrationId = CreateRegistration(builder).Id;
+            var reg = CreateRegistration(builder);
+            ActiveRegistrationId = reg.Id;
             UpdatedAt = DateTime.UtcNow;
+            return reg;
         }
         //metode til når en bruger vil have en pause
         public void TakeBreak(Employee employee)
@@ -156,7 +158,7 @@ namespace Domain.Entity.Item.Registrations
         public void Remind() => LastRemindedAt = DateTime.UtcNow;
         public HourRegistration GetActiveHourRegistration()
         {
-            var active = _registrations.OfType<HourRegistration>().FirstOrDefault(r => !r.IsDeleted && !r.IsFinished);
+            var active = _registrations.OfType<HourRegistration>().FirstOrDefault(r => !r.IsDeleted && !r.IsFinished && r.Id == ActiveRegistrationId);
             if (active == null)
                 throw new InvalidOperationException("Ingen aktiv registrering fundet.");
             return active;
