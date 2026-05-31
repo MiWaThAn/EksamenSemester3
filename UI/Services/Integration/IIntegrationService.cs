@@ -11,5 +11,6 @@ namespace UI.Services.Integration
         Task<bool> CreateIntegrationSettingAsync(string providerName, string keyName, string keyValue, List<string> entityTypes);
         Task<bool> DeleteIntegrationSettingAsync(Guid settingId);
         Task<List<IntegrationSettingModel>> GetMyIntegrationSettingsAsync();
+        Task<bool> TriggerSyncAsync(Guid settingId);
     }
 }
