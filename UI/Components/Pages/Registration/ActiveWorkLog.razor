@@ -9,6 +9,7 @@
 @using Shared.Item.Registrations.Commands.Expenses
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Authorization
+@using System.Globalization
 @using UI.Services.Auth
 @using Shared.Model
 @attribute [Authorize]
@@ -21,193 +22,58 @@
 }
 else
 {
-    <div class="lg:col-span-2 space-y-6">
+    <div class="container-fluid px-2 px-md-4">
+
         <div class="
-            relative
+            position-relative
             overflow-hidden
-            rounded-3xl
+            rounded-4
             bg-gradient-to-br
             from-indigo-600
             via-indigo-700
             to-violet-700
-            p-8
-            shadow-xl
-        ">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
+            p-3 p-md-5
+            shadow-lg
+            mb-4">
+            @if (activeLog == null || !activeLog.TimeRegistrations.Any())
+            {
+                    <div class="mx-auto">
+                        <div class="card bg-dark bg-opacity-25 border-light border-opacity-25 mb-3">
 
-                    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-700 p-8 shadow-2xl">
+                            <div class="card-body p-3">
 
-                        <div>
+                                <div class="d-flex align-items-center mb-2">
 
-                            <div class="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
-                            <div class="absolute -left-20 -bottom-20 h-72 w-72 rounded-full bg-cyan-400/10 blur-3xl"></div>
-
-                            @if (activeLog == null || !activeLog.TimeRegistrations.Any())
-                            {
-                                <div class="container-fluid px-0">
-
-                                    <div class="mb-3">
-                                        <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis px-3 py-2">
-                                            <span class="me-2">●</span>
-                                            Ikke stemplet ind
-                                        </span>
+                                    <div class="bg-danger rounded-circle me-2"
+                                         style="width:10px;height:10px">
                                     </div>
 
-                                    <h2 class="display-5 fw-bold text-white mb-2">
-                                        Start arbejdsdag
-                                    </h2>
-
-                                    <p class="lead text-light opacity-75 mb-4">
-                                        Vælg projekt og aktivitet for at begynde registrering.
-                                    </p>
-
-                                    <div class="card border-0 shadow-lg bg-white bg-opacity-10">
-
-                                        <div class="card-body p-4 p-lg-5">
-
-                                            <div class="row g-4">
-
-                                                <div class="col-12 col-lg-6">
-
-                                                    <label class="form-label fw-semibold text-white">
-                                                        Projekt
-                                                    </label>
-
-                                                    <select value="@selectedProjectId"
-                                                    @onchange="OnProjectChanged"
-                                                    class="form-select form-select-lg">
-
-                                                        <option value="@Guid.Empty">
-                                                            -- Vælg Projekt --
-                                                        </option>
-
-                                                        @foreach (var project in Projects)
-                                                        {
-                                                            <option value="@project.ProjectId">
-                                                                @project.ProjectName
-                                                            </option>
-                                                        }
-
-                                                    </select>
-
-                                                </div>
-
-                                                <div class="col-12 col-lg-6">
-
-                                                    <label class="form-label fw-semibold text-white">
-                                                        Aktivitet
-                                                    </label>
-
-                                                    <select @bind="selectedActivityId"
-                                                    class="form-select form-select-lg">
-
-                                                        <option value="@Guid.Empty">
-                                                            -- Vælg Aktivitet --
-                                                        </option>
-
-                                                        @foreach (var activity in ProjectActivities)
-                                                        {
-                                                            <option value="@activity.ProjectActivityId">
-                                                                @activity.ActivityName
-                                                            </option>
-                                                        }
-
-                                                    </select>
-
-                                                </div>
-
-                                            </div>
-
-                                            <div class="mt-4">
-
-                                                <button @onclick="HandleStartWork"
-                                                disabled="@(selectedProjectId == Guid.Empty || selectedActivityId == Guid.Empty)"
-                                                class="btn btn-success btn-lg px-5 shadow">
-
-                                                    <span class="me-2">▶</span>
-
-                                                    Start Registrering
-
-                                                </button>
-
-                                            </div>
-
-                                        </div>
-
-                                    </div>
+                                    <span class="badge bg-success-subtle text-success-emphasis">
+                                        Ikke stemplet ind
+                                    </span>
 
                                 </div>
-                            }
-                            else
-                            {
-                                <div class="relative z-10 flex flex-col gap-8">
+                                <h2 class="h3 fw-bold text-white mb-1">
+                                    Start arbejdsdag
+                                </h2>
 
-                                    <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                                <p class="text-light opacity-75 mb-0">
+                                    Vælg projekt og aktivitet for at begynde registrering.
+                                </p>
 
-                                        <div class="card bg-dark bg-opacity-25 border-light border-opacity-25 shadow-sm  mb-4 mt-4">
+                            </div>
+                        </div>
 
-                                            <div class="card-body">
 
-                                                <div class="d-flex align-items-center mb-3">
+                        <div class="card border-0 shadow-sm">
 
-                                                    <div class="bg-success rounded-circle me-3"
-                                                         style="width:12px;height:12px;">
-                                                    </div>
+                            <div class="card-body">
 
-                                                    <span class="badge bg-success-subtle text-success-emphasis px-3 py-2">
-                                                        Aktiv Registrering
-                                                    </span>
+                                <div class="row g-3">
 
-                                                </div>
+                                    <div class="col-12">
 
-                                                <h2 class="display-4 fw-bold text-white mb-2">
-                                                    @activeLog.Status
-                                                </h2>
-
-                                                <p class="text-light opacity-75 mb-0">
-                                                    Din arbejdsregistrering er aktiv og klar til registrering af timer og udlæg.
-                                                </p>
-
-                                            </div>
-
-                                        </div>
-                                        <div class="row g-3">
-
-                                            <div class="col-12 col-md-6 col-lg-3">
-                                                <button class="btn btn-secondary w-100"
-                                                @onclick="HandleTakeBreak">
-                                                    ⏸ Pause
-                                                </button>
-                                            </div>
-
-                                            <div class="col-12 col-md-6 col-lg-3">
-                                                <button class="btn btn-primary w-100"
-                                                @onclick="HandleResumeWork">
-                                                    ▶ Genoptag
-                                                </button>
-                                            </div>
-
-                                            <div class="col-12 col-md-6 col-lg-3">
-                                                <button class="btn btn-warning w-100"
-                                                @onclick="HandleStopWork">
-                                                    ■ Stop
-                                                </button>
-                                            </div>
-
-                                            <div class="col-12 col-md-6 col-lg-3">
-                                                <button class="btn btn-danger w-100"
-                                                @onclick="HandleClockOut">
-                                                    ⏻ Stempel Ud
-                                                </button>
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-                                    <div class="alert alert-primary d-flex flex-column flex-lg-row align-items-lg-end gap-3 mt-4">
-
-                                        <div class="flex-grow-1">
+                                        <div>
 
                                             <label class="form-label fw-semibold">
                                                 Projekt
@@ -232,7 +98,7 @@ else
 
                                         </div>
 
-                                        <div class="flex-grow-1">
+                                        <div class="col-12">
 
                                             <label class="form-label fw-semibold">
                                                 Aktivitet
@@ -256,186 +122,105 @@ else
 
                                         </div>
 
-                                        <div>
+                                        <button @onclick="HandleStartWork"
+                                                disabled="@(selectedProjectId == Guid.Empty || selectedActivityId == Guid.Empty)"
+                                                class="btn btn-success btn-lg w-100 mt-2">
 
-                                            <button class="btn btn-primary"
-                                                    @onclick="HandleSwitchProject"
-                                                    disabled="@(selectedProjectId == Guid.Empty || selectedActivityId == Guid.Empty)">
+                                            ▶ Start Registrering
 
-                                                🔄 Skift
-
-                                            </button>
-
-                                        </div>
+                                        </button>
 
                                     </div>
 
-                                    <div class="row g-3 mt-2 mb-4">
-
-                                        <div class="col-md-4">
-
-                                            <div class="card bg-dark bg-opacity-25 border-light border-opacity-25 h-100 shadow-sm">
-
-                                                <div class="card-body d-flex align-items-center">
-
-                                                    <div class="me-3 fs-1">
-                                                        🕒
-                                                    </div>
-
-                                                    <div>
-
-                                                        <div class="small text-uppercase text-light opacity-75">
-                                                            Startet
-                                                        </div>
-
-                                                        <div class="fs-3 fw-bold text-white">
-                                                            @activeLog.ClockInTime.ToShortTimeString()
-                                                        </div>
-
-                                                    </div>
-
-                                                </div>
-
-                                            </div>
-
-                                        </div>
-
-                                        <div class="col-md-4">
-
-                                            <div class="card bg-dark bg-opacity-25 border-light border-opacity-25 h-100 shadow-sm">
-
-                                                <div class="card-body d-flex align-items-center">
-
-                                                    <div class="me-3 fs-1">
-                                                        ⏱
-                                                    </div>
-
-                                                    <div>
-
-                                                        <div class="small text-uppercase text-light opacity-75">
-                                                            Registreringer
-                                                        </div>
-
-                                                        <div class="fs-3 fw-bold text-white">
-                                                            @activeLog.TimeRegistrations.Count
-                                                        </div>
-
-                                                    </div>
-
-                                                </div>
-
-                                            </div>
-
-                                        </div>
-
-                                        <div class="col-md-4">
-
-                                            <div class="card bg-dark bg-opacity-25 border-light border-opacity-25 h-100 shadow-sm">
-
-                                                <div class="card-body d-flex align-items-center">
-
-                                                    <div class="me-3 fs-1">
-                                                        💳
-                                                    </div>
-
-                                                    <div>
-
-                                                        <div class="small text-uppercase text-light opacity-75">
-                                                            Udlæg
-                                                        </div>
-
-                                                        <div class="fs-3 fw-bold text-white">
-                                                            @(activeLog.ExpenseRegistrations?.Count ?? 0)
-                                                        </div>
-
-                                                    </div>
-
-                                                </div>
-
-                                            </div>
-
-                                        </div>
-
-                                    </div>
                                 </div>
-                            }
+
+                            </div>
+
                         </div>
                     </div>
+
+            }
+            @if (activeLog != null && activeLog.TimeRegistrations.Any())
+            {
+
+                <div class="card bg-dark bg-opacity-25 border-light border-opacity-25 mb-3">
+
+                    <div class="card-body p-3">
+
+                        <div class="d-flex align-items-center mb-2">
+
+                            <div class="bg-success rounded-circle me-2"
+                                 style="width:10px;height:10px">
+                            </div>
+
+                            <span class="badge bg-success-subtle text-success-emphasis">
+                                Aktiv Registrering
+                            </span>
+
+                        </div>
+
+                        <h2 class="h3 fw-bold text-white mb-1">
+                            @activeLog.Status
+                        </h2>
+
+                        <p class="text-light opacity-75 mb-0">
+                            Registrering aktiv
+                        </p>
+
+                    </div>
+
                 </div>
-            </div>
-            <div class="row g-4">
-
-                <div class="col-lg-8">
 
 
-                    <div class="card border-0 shadow-sm mb-4">
+                <div class="row g-2 mb-3">
 
-                        <div class="card-body p-4">
+                    <div class="col-6">
+                        <button class="btn btn-secondary w-100 py-3"
+                                @onclick="HandleTakeBreak">
+                            ⏸ Pause
+                        </button>
+                    </div>
 
-                            <h3 class="card-title fw-bold mb-1">
-                                Hurtige Handlinger
-                            </h3>
+                    <div class="col-6">
+                        <button class="btn btn-primary w-100 py-3"
+                                @onclick="HandleResumeWork">
+                            ▶ Genoptag
+                        </button>
+                    </div>
 
-                            <p class="text-muted mb-4">
-                                Efterregistrer timer eller udlæg.
-                            </p>
+                    <div class="col-6">
+                        <button class="btn btn-warning w-100 py-3"
+                                @onclick="HandleStopWork">
+                            ■ Stop
+                        </button>
+                    </div>
 
-                            <div class="row g-3">
+                    <div class="col-6">
+                        <button class="btn btn-danger w-100 py-3"
+                                @onclick="HandleClockOut">
+                            ⏻ Stempel Ud
+                        </button>
+                    </div>
 
-                                <div class="col-md-6">
+                </div>
 
-                                    <button @onclick="() => showManualTimeModal = true"
-                                    class="btn btn-light border w-100 text-start p-4 h-100">
 
-                                        <div class="d-flex align-items-center gap-3">
+                <div class="row g-2 mb-3">
 
-                                            <div class="rounded-3 bg-primary bg-opacity-10 d-flex align-items-center justify-content-center"
-                                            style="width:60px;height:60px;">
-                                                <span class="fs-3">⏱</span>
-                                            </div>
+                    <div class="col-4">
 
-                                            <div>
-                                                <div class="fw-semibold fs-5">
-                                                    Registrer Tid
-                                                </div>
+                        <div class="card bg-dark bg-opacity-25 border-light border-opacity-25">
 
-                                                <div class="text-muted">
-                                                    Tilføj arbejdstimer
-                                                </div>
-                                            </div>
+                            <div class="card-body text-center p-2">
 
-                                        </div>
+                                <div class="fs-4">🕒</div>
 
-                                    </button>
-
+                                <div class="small text-light opacity-75">
+                                    Start
                                 </div>
 
-                                <div class="col-md-6">
-
-                                    <button @onclick="() => showExpenseModal = true"
-                                    class="btn btn-light border w-100 text-start p-4 h-100">
-
-                                        <div class="d-flex align-items-center gap-3">
-
-                                            <div class="rounded-3 bg-success bg-opacity-10 d-flex align-items-center justify-content-center"
-                                            style="width:60px;height:60px;">
-                                                <span class="fs-3">💳</span>
-                                            </div>
-
-                                            <div>
-                                                <div class="fw-semibold fs-5">
-                                                    Registrer Udlæg
-                                                </div>
-
-                                                <div class="text-muted">
-                                                    Tilføj udgift
-                                                </div>
-                                            </div>
-
-                                        </div>
-
-                                    </button>
-
+                                <div class="fw-bold text-white">
+                                    @activeLog.ClockInTime.ToShortTimeString()
                                 </div>
 
                             </div>
@@ -444,71 +229,353 @@ else
 
                     </div>
 
+                    <div class="col-4">
+
+                        <div class="card bg-dark bg-opacity-25 border-light border-opacity-25">
+
+                            <div class="card-body text-center p-2">
+
+                                <div class="fs-4">⏱</div>
+
+                                <div class="small text-light opacity-75">
+                                    Registreringer
+                                </div>
+
+                                <div class="fw-bold text-white">
+                                    @activeLog.TimeRegistrations.Count
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-4">
+
+                        <div class="card bg-dark bg-opacity-25 border-light border-opacity-25">
+
+                            <div class="card-body text-center p-2">
+
+                                <div class="fs-4">💳</div>
+
+                                <div class="small text-light opacity-75">
+                                    Udgifter
+                                </div>
+
+                                <div class="fw-bold text-white">
+                                    @(activeLog.ExpenseRegistrations?.Count ?? 0)
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="card border-0 shadow-sm">
+
+                    <div class="card-body">
+
+                        <div class="row g-3">
+
+                            <div class="col-12">
+
+                                <label class="form-label fw-semibold">
+                                    Projekt
+                                </label>
+
+                                <select class="form-select"
+                                        value="@selectedProjectId"
+                                        @onchange="OnProjectChanged">
+
+                                    <option value="@Guid.Empty">
+                                        Vælg projekt
+                                    </option>
+
+                                    @foreach (var project in Projects)
+                                    {
+                                        <option value="@project.ProjectId">
+                                            @project.ProjectName
+                                        </option>
+                                    }
+
+                                </select>
+
+                            </div>
+
+                            <div class="col-12">
+
+                                <label class="form-label fw-semibold">
+                                    Aktivitet
+                                </label>
+
+                                <select class="form-select"
+                                        @bind="selectedActivityId">
+
+                                    <option value="@Guid.Empty">
+                                        Vælg aktivitet
+                                    </option>
+
+                                    @foreach (var activity in ProjectActivities)
+                                    {
+                                        <option value="@activity.ProjectActivityId">
+                                            @activity.ActivityName
+                                        </option>
+                                    }
+
+                                </select>
+
+                            </div>
+
+                            <div class="col-12">
+
+                                <button class="btn btn-primary w-100"
+                                        @onclick="HandleSwitchProject"
+                                        disabled="@(selectedProjectId == Guid.Empty || selectedActivityId == Guid.Empty)">
+
+                                    🔄 Skift Projekt
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+        </div>
+
+
+        <div class="row g-4">
+
+            <div class="col-12 col-xl-8">
+
+
+                <div class="card border-0 shadow-sm mb-4">
+
+                    <div class="card-body">
+
+                        <h3 class="fw-bold mb-3">
+                            Hurtige Handlinger
+                        </h3>
+
+                        <div class="d-flex flex-column gap-3">
+
+                            <button @onclick="() => showManualTimeModal = true"
+                                    class="btn btn-light border text-start p-3">
+
+                                ⏱ Registrer Tid
+
+                            </button>
+
+                            <button @onclick="() => showExpenseModal = true"
+                                    class="btn btn-light border text-start p-3">
+
+                                💳 Registrer Udlæg
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+                <div class="card border-0 shadow-sm">
+
+                    <div class="card-body">
+
+                        <h3 class="fw-bold mb-4">
+                            Registrerede intervaller i dag
+                        </h3>
+                        @if (activeLog == null || !activeLog.TimeRegistrations.Any())
+                        {
+                            <div class="alert alert-light border mb-0">
+                                Ingen registreringer fundet.
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="d-flex rounded overflow-hidden border mb-3">
+                                @{
+                                    var allIntervals = activeLog.TimeRegistrations
+                                        .SelectMany(r => r.Intervals)
+                                        .OrderBy(i => i.StartTime)
+                                        .ToList();
+
+                                    var totalLogMinutes = allIntervals.Sum(i =>
+                                        ((i.EndTime ?? DateTime.UtcNow) - i.StartTime).TotalMinutes);
+                                }
+
+
+                                    @foreach (var interval in allIntervals)
+                                    {
+                                        var dur =
+                                            ((interval.EndTime ?? DateTime.UtcNow) -
+                                             interval.StartTime).TotalMinutes;
+
+                                        var widt = dur / totalLogMinutes * 100;
+
+                                        <div class="@GetIntervalClass(interval.IsBreak)"
+                                             style="width:@widt.ToString("F2", CultureInfo.InvariantCulture)%;height:24px"
+                                             title="@($"{(interval.IsBreak ? "Pause" : "Arbejde")} - {dur:F0} min")">
+                                        </div>
+                                    }
+                            </div>
+                            <div class="d-flex flex-column gap-3">
+
+                                @foreach (var timeReg in activeLog.TimeRegistrations)
+                                {
+                                    <div class="card border">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+
+                                                <div>
+                                                    <h5 class="mb-1">
+                                                        @timeReg.ProjectName
+                                                    </h5>
+
+                                                    <div class="text-muted small">
+                                                        @timeReg.ProjectActivityName
+                                                    </div>
+                                                </div>
+
+                                                <button @onclick="() => HandleRemoveRegistration(timeReg.Id)"
+                                                        class="btn btn-outline-danger btn-sm">
+                                                    Slet
+                                                </button>
+
+                                            </div>
+
+                                            <hr />
+
+                                            <div class="d-flex flex-column gap-2">
+
+                                                @foreach (var inter in timeReg.Intervals)
+                                                {
+                                                    <div class="d-flex justify-content-between align-items-center border rounded p-3">
+
+                                                        <div class="fw-medium">
+                                                            @(inter.IsBreak ? "⏸ Pause" : "▶ Arbejde")
+                                                        </div>
+
+                                                        <div class="text-muted">
+                                                            @inter.StartTime.ToShortTimeString()
+                                                            →
+                                                            @inter.EndTime?.ToShortTimeString()
+                                                        </div>
+
+                                                    </div>
+                                                }
+
+                                            </div>
+
+                                        </div>
+                                        <div class="d-flex rounded overflow-hidden border m-2">
+                                            @{
+                                                var totalMinutes = timeReg.Intervals
+                                                    .Sum(i => ((i.EndTime ?? DateTime.UtcNow) - i.StartTime).TotalMinutes);
+                                            }
+                                            @foreach (var interval in timeReg.Intervals)
+                                            {
+                                                var duration =
+                                                    ((interval.EndTime ?? DateTime.UtcNow) -
+                                                     interval.StartTime).TotalMinutes;
+
+                                                var width = duration / totalMinutes * 100;
+                                                <div class="@GetIntervalClass(interval.IsBreak)"
+                                                     style="width:@width.ToString("F2", CultureInfo.InvariantCulture)%;height:24px"
+                                                     title="@($"{timeReg.ProjectActivityName} • {(interval.IsBreak ? "Pause" : "Arbejde")} • {duration:F0} min")">
+                                                </div>
+                                            }
+
+                                        </div>
+                                    </div>
+                                }
+
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-12 col-xl-4">
+
+                <div class="d-flex flex-column gap-4">
+
                     <div class="card border-0 shadow-sm">
 
-                        <div class="card-body p-4">
+                        <div class="card-body">
 
-                            <h3 class="fw-bold mb-4">
-                                Registrerede intervaller i dag
-                            </h3>
+                            <h4 class="fw-bold mb-3">
+                                Oversigt
+                            </h4>
+                            @if (activeLog != null && activeLog.TimeRegistrations.Any())
+                            {
+                                <p class="fw-semibold">
+                                    Arbejde:
+                                    <span class="badge bg-secondary">
+                                        @TotalWorkedTime.ToString(@"hh\:mm")
+                                    </span>
+                                </p>
+                                <p class="fw-semibold">
+                                    Pause:
+                                    <span class="badge bg-secondary">
+                                        @TotalBreakTime.ToString(@"hh\:mm")
+                                    </span>
+                                </p>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">
+                                    Nej
+                                </span>
+                            }
 
-                            @if (activeLog == null || !activeLog.TimeRegistrations.Any())
+                        </div>
+
+                    </div>
+
+                    <div class="card border-0 shadow-sm">
+
+                        <div class="card-body">
+
+                            <h4 class="fw-bold mb-3">
+                                Udgifter
+                            </h4>
+
+                            @if (activeLog == null ||
+                                                                            activeLog.ExpenseRegistrations == null ||
+                                                                            !activeLog.ExpenseRegistrations.Any())
                             {
                                 <div class="alert alert-light border mb-0">
-                                    Ingen registreringer fundet.
+                                    Ingen udlæg registreret.
                                 </div>
                             }
                             else
                             {
-                                <div class="d-flex flex-column gap-3">
+                                <div class="list-group list-group-flush">
 
-                                    @foreach (var timeReg in activeLog.TimeRegistrations)
+                                    @foreach (var ex in activeLog.ExpenseRegistrations)
                                     {
-                                        <div class="card border">
+                                        <div class="list-group-item px-0">
 
-                                            <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center">
 
-                                                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                                                <span>
+                                                    @ex.ExpenseName
+                                                </span>
 
-                                                    <div>
-                                                        <h5 class="mb-1">
-                                                            @timeReg.ProjectName
-                                                        </h5>
-
-                                                        <div class="text-muted small">
-                                                            @timeReg.ProjectActivityName
-                                                        </div>
-                                                    </div>
-
-                                                    <button @onclick="() => HandleRemoveRegistration(timeReg.Id)"
-                                                    class="btn btn-outline-danger btn-sm">
-                                                        Slet
-                                                    </button>
-
-                                                </div>
-
-                                                <hr />
-
-                                                <div class="d-flex flex-column gap-2">
-
-                                                    @foreach (var inter in timeReg.Intervals)
-                                                    {
-                                                        <div class="d-flex justify-content-between align-items-center border rounded p-3">
-
-                                                            <div class="fw-medium">
-                                                                @(inter.IsBreak ? "⏸ Pause" : "▶ Arbejde")
-                                                            </div>
-
-                                                            <div class="text-muted">
-                                                                @inter.StartTime.ToShortTimeString()
-                                                                →
-                                                                @inter.EndTime?.ToShortTimeString()
-                                                            </div>
-
-                                                        </div>
-                                                    }
-
-                                                </div>
+                                                <span class="fw-semibold text-success">
+                                                    @ex.Amount.ToString("C2")
+                                                </span>
 
                                             </div>
 
@@ -524,107 +591,10 @@ else
 
                 </div>
 
-                <div class="col-lg-4">
-
-                    <div class="d-flex flex-column gap-4">
-
-                        <div class="card border-0 shadow-sm">
-
-                            <div class="card-body">
-
-                                <h4 class="fw-bold mb-3">
-                                    Oversigt
-                                </h4>
-
-                                <div class="d-flex flex-column gap-3">
-
-                                    <div class="d-flex justify-content-between">
-                                        <span class="text-muted">
-                                            Aktiv registrering
-                                        </span>
-
-                                        @if (activeLog != null && activeLog.TimeRegistrations.Any())
-                                        {
-                                            <span class="badge bg-success">
-                                                Ja
-                                            </span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-secondary">
-                                                Nej
-                                            </span>
-                                        }
-                                    </div>
-
-                                    <div class="d-flex justify-content-between">
-                                        <span class="text-muted">
-                                            Registreringer i dag
-                                        </span>
-
-                                        <strong>
-                                            @(activeLog?.TimeRegistrations.Count ?? 0)
-                                        </strong>
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        <div class="card border-0 shadow-sm">
-
-                            <div class="card-body">
-
-                                <h4 class="fw-bold mb-3">
-                                    Udgifter
-                                </h4>
-
-                                @if (activeLog == null ||
-                                                                                activeLog.ExpenseRegistrations == null ||
-                                                                                !activeLog.ExpenseRegistrations.Any())
-                                {
-                                    <div class="alert alert-light border mb-0">
-                                        Ingen udlæg registreret.
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="list-group list-group-flush">
-
-                                        @foreach (var ex in activeLog.ExpenseRegistrations)
-                                        {
-                                            <div class="list-group-item px-0">
-
-                                                <div class="d-flex justify-content-between align-items-center">
-
-                                                    <span>
-                                                        @ex.ExpenseName
-                                                    </span>
-
-                                                    <span class="fw-semibold text-success">
-                                                        @ex.Amount.ToString("C2")
-                                                    </span>
-
-                                                </div>
-
-                                            </div>
-                                        }
-
-                                    </div>
-                                }
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
             </div>
+
         </div>
+
     </div>
 }
 
@@ -1009,6 +979,8 @@ else
     private Guid manualSelectedProjectId = Guid.Empty;
     private Guid manualSelectedActivityId = Guid.Empty;
     private List<ProjectActivityDto> ManualProjectActivities = new();
+    private TimeSpan TotalWorkedTime => TimeSpan.FromTicks(activeLog?.TimeRegistrations.SelectMany(r => r.Intervals).Where(i => i.IsBreak == false).Sum(i => ((i.EndTime ?? DateTime.Now) - i.StartTime).Ticks) ?? 0);
+    private TimeSpan TotalBreakTime => TimeSpan.FromTicks(activeLog?.TimeRegistrations.SelectMany(r => r.Intervals).Where(i => i.IsBreak == true).Sum(i => ((i.EndTime ?? DateTime.Now) - i.StartTime).Ticks) ?? 0);
 
     private Guid manualExpenseProjectId = Guid.Empty;
     private Guid manualExpenseActivityId = Guid.Empty;
@@ -1028,6 +1000,23 @@ else
         Projects = fetchedProjects?.ToList() ?? new();
         var fetchedExpenses = await RegistrationService.GetCompanyExpenses(CompanyId, CancellationToken.None);
         CompanyExpenses = fetchedExpenses?.ToList() ?? new();
+    }
+    private string GetIntervalClass(bool workType)
+    {
+        return workType switch
+        {
+            false => "interval-block bg-success",
+            true => "interval-block bg-warning"
+        };
+    }
+    private double GetWidth(TimeIntervalDto interval, double totalMinutes)
+    {
+        var duration = ((interval.EndTime ?? DateTime.Now) - interval.StartTime).TotalMinutes;
+        return duration / totalMinutes * 100;
+    }
+    private double GetTotalMinutes(TimeRegistrationDto timeReg)
+    {
+        return timeReg.Intervals.Sum(i => ((i.EndTime ?? DateTime.Now) - i.StartTime).TotalMinutes);
     }
 
     private async Task OnManualProjectChanged(ChangeEventArgs e)
@@ -1143,7 +1132,7 @@ else
 
     private async Task HandleAddManualTime()
     {
-        // TODO: Lav en create or get active worklog ting så vi ikke behøver at 
+        // TODO: Lav en create or get active worklog ting så vi ikke behøver at
         if (activeLog == null || manualSelectedProjectId == Guid.Empty) return;
 
 
@@ -1234,7 +1223,6 @@ else
         var result = await RegistrationService.ClockOut(UserId, CancellationToken.None);
         if (result.Success)
         {
-            if (activeLog != null) await RegistrationService.SubmitWorkLogForApproval(UserId, activeLog.Id, CancellationToken.None);
             activeLog = null;
             ResetSelection();
             await LoadActiveWorkLog();

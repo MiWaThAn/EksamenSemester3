@@ -35,7 +35,7 @@ namespace Infrastructure.Repositories.Item.Registrations
         }
         public async Task<WorkLog?> GetActiveWorkLogAsNoTrackingAsync(Guid EmployeeId, CancellationToken cancellationToken = default)
         {
-            return await _context.WorkLogs.AsNoTracking().Include(wl => wl.Registrations).FirstOrDefaultAsync(wl => wl.EmployeeId == EmployeeId && wl.IsClosed == false, cancellationToken);
+            return await _context.WorkLogs.AsNoTracking().Include(wl => wl.Registrations).ThenInclude(r => ((HourRegistration)r).Intervals).FirstOrDefaultAsync(wl => wl.EmployeeId == EmployeeId && wl.IsClosed == false && wl.Status == ApprovalStatus.Draft, cancellationToken);
         }
         public async Task<IEnumerable<WorkLog>> GetPendingWorkLogsAsNoTrackingAsync(Guid companyId, CancellationToken cancellationToken = default)
         {

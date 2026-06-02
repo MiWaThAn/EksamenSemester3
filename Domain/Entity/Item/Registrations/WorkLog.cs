@@ -41,8 +41,11 @@ namespace Domain.Entity.Item.Registrations
             if (Status == ApprovalStatus.Approved)
                 throw new InvalidOperationException("Du kan ikke redigere en godkendt log.");
             Guard.AgainstNull(activity, nameof(activity));
-            if (ActiveRegistrationId != null && ActiveRegistrationId != Guid.Empty)
-                throw new InvalidOperationException("Der er allerede en aktiv registrering.");
+            if (ActiveRegistrationId != null)
+            {
+                EndWork(EmployeeId);
+                ActiveRegistrationId = null;
+            }
             if (employee.Id != EmployeeId)
                 throw new InvalidOperationException("Kun den tilhørende medarbejder kan starte arbejde på denne log.");
 
@@ -141,15 +144,19 @@ namespace Domain.Entity.Item.Registrations
         //metode for at stoppe arbejde.
         public void EndWork(Employee employee)
         {
+            EndWork(employee.Id);
+        }
+        private void EndWork(Guid employeeId)
+        {
             if (Status == ApprovalStatus.Approved || Status == ApprovalStatus.Pending)
                 throw new InvalidOperationException("Du kan ikke redigere en godkendt log.");
-            if (employee.Id != EmployeeId)
+            if (employeeId != EmployeeId)
                 throw new InvalidOperationException("Kun den tilhørende medarbejder kan afslutte arbejdet på denne log.");
 
-            if(ActiveRegistrationId != null)
+            if (ActiveRegistrationId != null)
             {
                 var active = GetActiveHourRegistration();
-                if(active.HasActive())
+                if (active.HasActive())
                     active.EndWork();
             }
             UpdatedAt = DateTime.UtcNow;
@@ -326,12 +333,20 @@ namespace Domain.Entity.Item.Registrations
                 throw new InvalidOperationException("Kun kladder kan sendes til godkendelse.");
             if (employee.Id != EmployeeId)
                 throw new InvalidOperationException("Kun den tilhørende medarbejder kan sende denne log til godkendelse.");
+            if(IsClosed != true)
+            {
+                if (ActiveRegistrationId != null)
+                    EndWork(EmployeeId);
+                ActiveRegistrationId = null;
+                ClockOut(EmployeeId);
+                IsClosed = true;
+            }
             Status = ApprovalStatus.Pending;
-            UpdatedAt = DateTime.UtcNow;
             foreach (var reg in _registrations.Where(r => !r.IsDeleted))
             {
                 reg.MarkAsPending();
             }
+            UpdatedAt = DateTime.UtcNow;
         }
         //hjælpe metode til når en medarbejder vil tilføje en tidsregistrering der overlapper med andre (hvis de tilføjer en manuelt)
         private void AdjustForOverlap(HourRegistration newReg)
@@ -386,7 +401,6 @@ namespace Domain.Entity.Item.Registrations
 
                     var splitReg = splitBuilder.Build();
 
-                    // If there are any remaining trailing intervals, add them safely
                     if (extractedIntervals.Count > 1)
                     {
                         splitReg.AddIntervals(extractedIntervals.Skip(1));
@@ -399,8 +413,12 @@ namespace Domain.Entity.Item.Registrations
         //metode til at lukke workloggen aka. sendregistreing 
         public void ClockOut(Employee employee)
         {
+            ClockOut(employee.Id);
+        }
+        private void ClockOut(Guid employeeId)
+        {
             if (IsClosed) throw new InvalidOperationException("Arbejdspasset er allerede lukket.");
-            if (employee.Id != EmployeeId)
+            if (employeeId != EmployeeId)
                 throw new InvalidOperationException("Kun den tilhørende medarbejder kan lukke denne log.");
             if (ActiveRegistrationId != null)
             {
@@ -408,6 +426,7 @@ namespace Domain.Entity.Item.Registrations
                 active.ClockOut();
                 ActiveRegistrationId = null;
             }
+            MarkAsDraft();
             IsClosed = true;
             DateClosed = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
