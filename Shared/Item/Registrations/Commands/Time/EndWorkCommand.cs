@@ -6,5 +6,5 @@ using System.Text;
 
 namespace Shared.Item.Registrations.Commands.Time
 {
-    public record EndWorkCommand(Guid AccountId) : IRequest<BaseRegistrationResponse>;
+    public record EndWorkCommand(Guid EmployeeId) : IRequest<BaseRegistrationResponse>;
 }

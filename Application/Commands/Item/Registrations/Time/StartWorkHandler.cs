@@ -22,12 +22,7 @@ namespace Application.Commands.Item.Registrations.Time
             try
             {
                 await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted, cancellationToken);
-                var account = await _unitOfWork.Accounts.GetByIdAsync(request.AccountId, cancellationToken);
-                if(account == null)
-                    return new BaseRegistrationResponse { Success = false, Message = "Konto ikke fundet." };
-                if(!account.EmployeeId.HasValue)
-                    return new BaseRegistrationResponse { Success = false, Message = "Konto er allerede tilknyttet en medarbejder." };
-                var employee = await _unitOfWork.Employees.GetByIdAsync(account.EmployeeId.Value, cancellationToken);
+                var employee = await _unitOfWork.Employees.GetByIdAsync(request.EmployeeId, cancellationToken);
                 if (employee == null)
                     return new BaseRegistrationResponse { Success = false, Message = "Medarbejder ikke fundet." };
                 var Worklog = await _unitOfWork.WorkLogs.GetActiveByEmployeeIdAsync(employee.Id, cancellationToken);

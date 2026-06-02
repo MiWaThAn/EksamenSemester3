@@ -6,6 +6,7 @@ using Shared.Item.Registrations.Commands.Time;
 using Shared.Item.Registrations.DTOs;
 using Shared.Item.Registrations.Responses;
 using Shared.Person.Auth.Responses;
+using Shared.Requests;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -28,11 +29,11 @@ namespace UI.Services.Registration
 
         //QUERIES (GET)
 
-        public async Task<WorkLogDto?> GetActiveWorkLog(Guid accountId, CancellationToken ct)
+        public async Task<WorkLogDto?> GetActiveWorkLog(CancellationToken ct)
         {
             try
             {
-                return await _http.GetFromJsonAsync<WorkLogDto>($"{BasePath}/active/{accountId}", ct);
+                return await _http.GetFromJsonAsync<WorkLogDto>($"{BasePath}/active", ct);
             }
             catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
@@ -40,9 +41,9 @@ namespace UI.Services.Registration
             }
         }
 
-        public async Task<IEnumerable<WorkLogDto>?> GetWorkLogHistory(Guid accountId, CancellationToken ct)
+        public async Task<IEnumerable<WorkLogDto>?> GetWorkLogHistory(CancellationToken ct)
         {
-            return await _http.GetFromJsonAsync<IEnumerable<WorkLogDto>>($"{BasePath}/history/{accountId}", ct);
+            return await _http.GetFromJsonAsync<IEnumerable<WorkLogDto>>($"{BasePath}/history", ct);
         }
 
         public async Task<WorkLogDto?> GetWorkLogById(Guid workLogId, CancellationToken ct)
@@ -50,9 +51,9 @@ namespace UI.Services.Registration
             return await _http.GetFromJsonAsync<WorkLogDto>($"{BasePath}/{workLogId}", ct);
         }
 
-        public async Task<IEnumerable<WorkLogDto>?> GetPendingWorkLogs(Guid accountId, CancellationToken ct)
+        public async Task<IEnumerable<WorkLogDto>?> GetPendingWorkLogs(CancellationToken ct)
         {
-            return await _http.GetFromJsonAsync<IEnumerable<WorkLogDto>>($"{BasePath}/pending-approval/{accountId}", ct);
+            return await _http.GetFromJsonAsync<IEnumerable<WorkLogDto>>($"{BasePath}/pending-approval", ct);
         }
 
         public async Task<IEnumerable<ProjectActivityDto>?> GetProjectActivities(Guid ProjectId, CancellationToken ct)
@@ -72,23 +73,19 @@ namespace UI.Services.Registration
 
         //COMMANDS
 
-        public async Task<ServiceResult> StartWork(StartWorkCommand command, CancellationToken ct)
+        public async Task StartWork(Guid ProjectId, Guid ProjectActivityId, CancellationToken ct)
         {
-            var url = $"{BasePath}/{command.AccountId}/start-work/{command.projectId}/{command.projectActivityId}";
-            return await SendRequestAsync(HttpMethod.Post, url, command, ct);
+            await _http.PostAsJsonAsync($"{BasePath}/start-work", new StartWorkRequest(ProjectId, ProjectActivityId), ct);
         }
 
-        public async Task<ServiceResult> TakeBreak(Guid accountId, CancellationToken ct)
+        public async Task TakeBreak(CancellationToken ct)
         {
-            var url = $"{BasePath}/{accountId}/take-break";
-            return await SendRequestAsync<object>(HttpMethod.Post, url, null, ct);
+            await _http.PostAsJsonAsync($"{BasePath}/take-break", ct);
         }
 
-        public async Task<ServiceResult> ResumeWork(Guid accountId, CancellationToken ct)
+        public async Task ResumeWork(CancellationToken ct)
         {
-            var url = $"{BasePath}/{accountId}/resume-work";
-            var result = await SendRequestAsync<object>(HttpMethod.Post, url, null, ct);
-            return result;
+            await _http.PostAsJsonAsync($"{BasePath}/resume-work", ct);
         }
 
         public async Task<ServiceResult> SwitchActivity(Guid accountId, Guid projectId, Guid projectActivityId, CancellationToken ct)

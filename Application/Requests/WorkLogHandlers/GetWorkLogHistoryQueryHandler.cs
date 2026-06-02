@@ -23,17 +23,12 @@ namespace Application.Requests.WorkLogHandlers
 
         public async Task<IEnumerable<WorkLogDto>> Handle(GetWorkLogHistoryQuery request, CancellationToken cancellationToken)
         {
-            var account = await _unitOfWork.Accounts.GetByIdAsync(request.AccountId, cancellationToken);
-            if (account == null || !account.EmployeeId.HasValue)
-                return Enumerable.Empty<WorkLogDto>();
-
-            var employeeId = account.EmployeeId.Value;
-            var emp = await _unitOfWork.Employees.GetByIdAsync(employeeId);
+            var emp = await _unitOfWork.Employees.GetByIdAsync(request.employeeId);
 
             var worklogs = await _unitOfWork.WorkLogs.GetQueryable()
                 .Include(w => w.Registrations)
                 .AsNoTracking()
-                .Where(w => w.EmployeeId == employeeId)
+                .Where(w => w.EmployeeId == request.employeeId)
                 .OrderByDescending(w => w.DateCreated)
                 .ToListAsync(cancellationToken);
 

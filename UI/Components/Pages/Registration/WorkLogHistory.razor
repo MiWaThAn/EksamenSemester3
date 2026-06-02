@@ -341,7 +341,7 @@
         errorMessage = string.Empty;
         try
         {
-            var result = await RegistrationService.GetWorkLogHistory(userId, CancellationToken.None);
+            var result = await RegistrationService.GetWorkLogHistory(CancellationToken.None);
             WorkLogs = result?.ToList() ?? new();
         }
         catch (Exception)

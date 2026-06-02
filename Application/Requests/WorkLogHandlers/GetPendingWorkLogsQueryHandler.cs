@@ -23,11 +23,7 @@ namespace Application.Requests.WorkLogHandlers
         public async Task<IEnumerable<WorkLogDto>> Handle(GetPendingWorkLogsQuery request, CancellationToken cancellationToken)
         {
 
-            var account = await _unitOfWork.Accounts.GetByIdAsync(request.accountId);
-            if (account == null || !account.CompanyId.HasValue)
-                return Enumerable.Empty<WorkLogDto>();
-
-            var worklogs = (await _unitOfWork.WorkLogs.GetPendingWorkLogsAsNoTrackingAsync(account.CompanyId.Value))?.ToList();
+            var worklogs = (await _unitOfWork.WorkLogs.GetPendingWorkLogsAsNoTrackingAsync(request.companyId))?.ToList();
             if (worklogs == null || !worklogs.Any())
                 return Enumerable.Empty<WorkLogDto>();
 

@@ -10,6 +10,8 @@ using Shared.Item.Registrations.Commands.Time;
 using Shared.Item.Registrations.DTOs;
 using Shared.Item.Registrations.Queries;
 using Shared.Person.Auth.Commands;
+using Shared.Requests;
+using System.Security.Claims;
 
 namespace API.Controllers.Item.Registration
 {
@@ -24,23 +26,32 @@ namespace API.Controllers.Item.Registration
             _mediator = mediator;
         }
         //QUERIES (GET)
-        [HttpGet("active/{accountId:guid}")]
+        [HttpGet("active")]
         [ProducesResponseType(typeof(WorkLogDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetActiveWorkLog(Guid accountId, CancellationToken ct)
+        public async Task<IActionResult> GetActiveWorkLog(CancellationToken ct)
         {
-            var query = new GetActiveWorkLogQuery(accountId);
+            var employeeId = User.GetEmployeeId();
+
+            var query = new GetActiveWorkLogQuery(employeeId);
+
             var response = await _mediator.Send(query, ct);
-            return response != null ? Ok(response) : NotFound();
+
+            return response != null
+                ? Ok(response)
+                : NotFound();
         }
 
-        [HttpGet("history/{accountId:guid}")]
+        [HttpGet("history")]
         [ProducesResponseType(typeof(IEnumerable<WorkLogDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetWorkLogHistory(Guid accountId, CancellationToken ct)
+        public async Task<IActionResult> GetWorkLogHistory(CancellationToken ct)
         {
-            var query = new GetWorkLogHistoryQuery(accountId);
+            var employeeId = User.GetEmployeeId();
+            var query = new GetWorkLogHistoryQuery(employeeId);
             var response = await _mediator.Send(query, ct);
-            return Ok(response);
+            return response != null
+                ? Ok(response)
+                : NotFound();
         }
 
         [HttpGet("{workLogId:guid}")]
@@ -54,169 +65,187 @@ namespace API.Controllers.Item.Registration
         }
 
         [Authorize(Roles = "Company")]
-        [HttpGet("pending-approval/{accountId:guid}")]
+        [HttpGet("pending-approval")]
         [ProducesResponseType(typeof(IEnumerable<WorkLogDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetPendingWorkLogs(Guid accountId, CancellationToken ct)
+        public async Task<IActionResult> GetPendingWorkLogs(CancellationToken ct)
         {
-            var query = new GetPendingWorkLogsQuery(accountId);
+            var companyId = User.GetCompanyId();
+            var query = new GetPendingWorkLogsQuery(companyId);
             var response = await _mediator.Send(query, ct);
             return Ok(response);
         }
 
         //WORKFLOW COMMANDS (POST)
-
-        [HttpPost("{accountId:guid}/start-work/{projectId:guid}/{projectActivityId:guid}")]
-        public async Task<IActionResult> StartWork(Guid accountId, Guid projectId, Guid projectActivityId, CancellationToken ct)
+        [HttpPost("start-work")]
+        public async Task<IActionResult> StartWork(StartWorkRequest request, CancellationToken ct)
         {
-            var command = new StartWorkCommand(accountId, projectId, projectActivityId);
+            var employeeId = User.GetEmployeeId();
+            var command = new StartWorkCommand(employeeId, request.ProjectId, request.ProjectActivityId);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }
-        [HttpPost("{accountId:guid}/take-break")]
-        public async Task<IActionResult> TakeBreak(Guid accountId, CancellationToken ct)
+        [HttpPost("take-break")]
+        public async Task<IActionResult> TakeBreak(CancellationToken ct)
         {
-            var command = new TakeBreakCommand(accountId);
-            var response = await _mediator.Send(command, ct);
-            return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
-        }
-
-        [HttpPost("{accountId:guid}/resume-work")]
-        public async Task<IActionResult> ResumeWork(Guid accountId, CancellationToken ct)
-        {
-            var command = new ResumeWorkCommand(accountId);
+            var employeeId = User.GetEmployeeId();
+            var command = new TakeBreakCommand(employeeId);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }
 
-        [HttpPost("{accountId:guid}/switch-activity/{projectId:guid}/{projectActivityId:guid}")]
-        public async Task<IActionResult> SwitchActivity(Guid accountId, Guid projectId, Guid projectActivityId, CancellationToken ct)
+        [HttpPost("resume-work")]
+        public async Task<IActionResult> ResumeWork(CancellationToken ct)
         {
-            var command = new SwitchActivityCommand(accountId, projectId, projectActivityId);
+            var employeeId = User.GetEmployeeId();
+            var command = new ResumeWorkCommand(employeeId);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }
 
-        [HttpPost("{accountId:guid}/switch-project/{workLogId:guid}/{projectId:guid}/{projectActivityId:guid}")]
-        public async Task<IActionResult> SwitchProject(Guid accountId, Guid workLogId, Guid projectId, Guid projectActivityId, CancellationToken ct)
+        [HttpPost("switch-activity/{projectId:guid}/{projectActivityId:guid}")]
+        public async Task<IActionResult> SwitchActivity(Guid projectId, Guid projectActivityId, CancellationToken ct)
         {
-            var command = new SwitchProjectCommand(accountId, workLogId, projectId, projectActivityId);
+            var employeeId = User.GetEmployeeId();
+            var command = new SwitchActivityCommand(employeeId, projectId, projectActivityId);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }
 
-        [HttpPost("{accountId:guid}/end-work")]
-        public async Task<IActionResult> EndWork(Guid accountId, CancellationToken ct)
+        [HttpPost("switch-project/{workLogId:guid}/{projectId:guid}/{projectActivityId:guid}")]
+        public async Task<IActionResult> SwitchProject(Guid workLogId, Guid projectId, Guid projectActivityId, CancellationToken ct)
         {
-            var command = new EndWorkCommand(accountId);
+            var employeeId = User.GetEmployeeId();
+            var command = new SwitchProjectCommand(employeeId, workLogId, projectId, projectActivityId);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }
 
-        [HttpPost("{accountId:guid}/clock-out")]
-        public async Task<IActionResult> ClockOut(Guid accountId, CancellationToken ct)
+        [HttpPost("end-work")]
+        public async Task<IActionResult> EndWork(CancellationToken ct)
         {
-            var command = new ClockOutCommand(accountId);
+            var employeeId = User.GetEmployeeId();
+            var command = new EndWorkCommand(employeeId);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }
 
-        [HttpPost("{accountId:guid}/worklog/{workLogId:guid}/submit")]
-        public async Task<IActionResult> SubmitWorkLogForApproval(Guid workLogId, Guid accountId, CancellationToken ct)
+        [HttpPost("clock-out")]
+        public async Task<IActionResult> ClockOut(CancellationToken ct)
         {
-            var command = new SubmitWorkLogCommand(workLogId, accountId);
+            var employeeId = User.GetEmployeeId();
+            var command = new ClockOutCommand(employeeId);
+            var response = await _mediator.Send(command, ct);
+            return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
+        }
+
+        [HttpPost("worklog/{workLogId:guid}/submit")]
+        public async Task<IActionResult> SubmitWorkLogForApproval(Guid workLogId, CancellationToken ct)
+        {
+            var employeeId = User.GetEmployeeId();
+            var command = new SubmitWorkLogCommand(workLogId, employeeId);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }
         [Authorize(Roles = "Company")]
-        [HttpPost("{accountId:guid}/worklog/{workLogId:guid}/approve")]
-        public async Task<IActionResult> ApproveWorkLog(Guid workLogId, Guid accountId, CancellationToken ct)
+        [HttpPost("worklog/{workLogId:guid}/approve")]
+        public async Task<IActionResult> ApproveWorkLog(Guid workLogId, CancellationToken ct)
         {
-            var command = new ApproveWorkLogCommand(workLogId, accountId);
+            var companyId = User.GetCompanyId();
+            var command = new ApproveWorkLogCommand(workLogId, companyId);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }
         [Authorize(Roles = "Company")]
-        [HttpPost("{accountId:guid}/worklog/{workLogId:guid}/reject")]
-        public async Task<IActionResult> RejectWorkLog(Guid workLogId, Guid accountId, [FromBody] RejectWorkLogRequest request, CancellationToken ct)
+        [HttpPost("worklog/{workLogId:guid}/reject")]
+        public async Task<IActionResult> RejectWorkLog(Guid workLogId, [FromBody] RejectWorkLogRequest request, CancellationToken ct)
         {
-            var command = new RejectWorkLogCommand(workLogId, accountId, request.Reason);
+            var companyId = User.GetCompanyId();
+            var command = new RejectWorkLogCommand(workLogId, companyId, request.Reason);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }
 
 
         //REGISTRATIONS MANAGEMENT (POST/PUT/DELETE)
-        [HttpPost("{accountId:guid}/worklog/{workLogId:guid}/time-registration")]
+        [HttpPost("worklog/{workLogId:guid}/time-registration")]
         public async Task<IActionResult> CreateTimeRegistration([FromBody] ManualTimeRegistrationCommand command, CancellationToken ct)
         {
+            var accountId = User.GetEmployeeId();
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }
 
-        [HttpPost("{accountId:guid}/worklog/{workLogId:guid}/expense-registration")]
+        [HttpPost("worklog/{workLogId:guid}/expense-registration")]
         public async Task<IActionResult> CreateExpenseRegistration([FromBody] CreateExpenseCommand command, CancellationToken ct)
         {
+            var accountId = User.GetAccountId();
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }
 
-        [HttpDelete("{accountId:guid}/worklog/{workLogId:guid}/time-registration/{registrationId:guid}")]
-        public async Task<IActionResult> RemoveTimeRegistration(Guid accountId, Guid workLogId, Guid registrationId, CancellationToken ct)
+        [HttpDelete("worklog/{workLogId:guid}/time-registration/{registrationId:guid}")]
+        public async Task<IActionResult> RemoveTimeRegistration(Guid workLogId, Guid registrationId, CancellationToken ct)
         {
+            var accountId = User.GetAccountId();
             var command = new DeleteTimeRegistrationCommand(registrationId, accountId);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }
 
-        [HttpDelete("{accountId:guid}/worklog/{workLogId:guid}/expense-registration/{registrationId:guid}")]
-        public async Task<IActionResult> RemoveExpenseRegistration(Guid accountId, Guid workLogId, Guid registrationId, CancellationToken ct)
+        [HttpDelete("worklog/{workLogId:guid}/expense-registration/{registrationId:guid}")]
+        public async Task<IActionResult> RemoveExpenseRegistration(Guid workLogId, Guid registrationId, CancellationToken ct)
         {
+            var accountId = User.GetAccountId();
             var command = new DeleteExpenseRegistrationCommand(accountId, registrationId);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }
 
-        [HttpPut("{accountId:guid}/worklog/{workLogId:guid}/registration/{registrationId:guid}/description")]
-        public async Task<IActionResult> UpdateRegistrationDescription(Guid accountId, Guid workLogId, Guid registrationId, [FromBody] UpdateDescriptionRequest request, CancellationToken ct)
+        [HttpPut("worklog/{workLogId:guid}/registration/{registrationId:guid}/description")]
+        public async Task<IActionResult> UpdateRegistrationDescription(Guid workLogId, Guid registrationId, [FromBody] UpdateDescriptionRequest request, CancellationToken ct)
         {
+            var accountId = User.GetAccountId();
             var command = new UpdateRegistrationDescriptionCommand(accountId, registrationId, request.Description);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }
 
-        [HttpPut("{accountId:guid}/worklog/{workLogId:guid}/registration/{registrationId:guid}/interval/{timeIntervalId:guid}")]
-        public async Task<IActionResult> UpdateTimeRegistrationInterval(Guid accountId, Guid workLogId, Guid registrationId, Guid timeIntervalId, [FromBody] UpdateTimeIntervalRequest request, CancellationToken ct)
+        [HttpPut("worklog/{workLogId:guid}/registration/{registrationId:guid}/interval/{timeIntervalId:guid}")]
+        public async Task<IActionResult> UpdateTimeRegistrationInterval(Guid workLogId, Guid registrationId, Guid timeIntervalId, [FromBody] UpdateTimeIntervalRequest request, CancellationToken ct)
         {
+            var accountId = User.GetAccountId();
             var command = new UpdateTimeRegistrationIntervalCommand(accountId, workLogId, timeIntervalId, registrationId, request.IsBreak, request.Start, request.End);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }
-        [HttpPut("{accountId:guid}/worklog/{workLogId:guid}/registration/{registrationId:guid}/project")]
-        public async Task<IActionResult> UpdateRegistrationProject(Guid accountId, Guid workLogId, Guid registrationId, [FromBody] UpdateRegistrationProjectRequest request, CancellationToken ct)
+        [HttpPut("worklog/{workLogId:guid}/registration/{registrationId:guid}/project")]
+        public async Task<IActionResult> UpdateRegistrationProject(Guid workLogId, Guid registrationId, [FromBody] UpdateRegistrationProjectRequest request, CancellationToken ct)
         {
+            var accountId = User.GetAccountId();
             var command = new UpdateRegistrationProjectCommand(accountId, workLogId, registrationId, request.NewProjectId, request.NewProjectActivityId);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }
 
-        [HttpPut("{accountId:guid}/worklog/{workLogId:guid}/registration/{registrationId:guid}/activity")]
-        public async Task<IActionResult> UpdateRegistrationActivity(Guid workLogId, Guid accountId, Guid registrationId, [FromBody] UpdateRegistrationActivityRequest request, CancellationToken ct)
+        [HttpPut("worklog/{workLogId:guid}/registration/{registrationId:guid}/activity")]
+        public async Task<IActionResult> UpdateRegistrationActivity(Guid workLogId, Guid registrationId, [FromBody] UpdateRegistrationActivityRequest request, CancellationToken ct)
         {
+            var accountId = User.GetAccountId();
             var command = new UpdateRegistrationActivityCommand(accountId, workLogId, registrationId, request.NewProjectActivityId);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }
 
-        [HttpPut("{accountId:guid}/registration/{registrationId:guid}/expense")]
-        public async Task<IActionResult> UpdateRegistrationExpense(Guid accountId, Guid registrationId, [FromBody] UpdateRegistrationExpenseRequest request, CancellationToken ct)
+        [HttpPut("registration/{registrationId:guid}/expense")]
+        public async Task<IActionResult> UpdateRegistrationExpense(Guid registrationId, [FromBody] UpdateRegistrationExpenseRequest request, CancellationToken ct)
         {
+            var accountId = User.GetAccountId();
             var command = new UpdateRegistrationExpenseCommand(accountId, registrationId, request.NewExpenseId, request.Amount, request.Description, request.Date);
             var response = await _mediator.Send(command, ct);
             return response.Success ? Ok(new { id = response.Id }) : BadRequest(new ProblemDetails { Detail = response.Message });
         }
 
     }
-
 
     public record RejectWorkLogRequest(string Reason = "");
     public record UpdateDescriptionRequest(string Description = "");

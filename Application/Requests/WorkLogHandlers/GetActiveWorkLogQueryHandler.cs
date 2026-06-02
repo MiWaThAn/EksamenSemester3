@@ -22,11 +22,8 @@ namespace Application.Requests.WorkLogHandlers
         }
         public async Task<WorkLogDto?> Handle(GetActiveWorkLogQuery request, CancellationToken cancellationToken)
         {
-            var account = await _unitOfWork.Accounts.GetByIdAsync(request.accountId);
-            if (account == null) return null;
-            if (account.EmployeeId == null) return null;
-            var emp = await _unitOfWork.Employees.GetByIdAsync(account.EmployeeId.Value);
-            var activeWorkLog = await _unitOfWork.WorkLogs.GetActiveWorkLogAsNoTrackingAsync(account.EmployeeId.Value, cancellationToken);
+            var emp = await _unitOfWork.Employees.GetByIdAsync(request.employeeId);
+            var activeWorkLog = await _unitOfWork.WorkLogs.GetActiveWorkLogAsNoTrackingAsync(request.employeeId, cancellationToken);
             if (activeWorkLog == null)
             {
                 var builder = new WorkLogBuilder();
@@ -34,7 +31,7 @@ namespace Application.Requests.WorkLogHandlers
                 await _unitOfWork.WorkLogs.AddAsync(created, cancellationToken);
                 await _unitOfWork.CompleteAsync(cancellationToken);
 
-                activeWorkLog = await _unitOfWork.WorkLogs.GetActiveWorkLogAsNoTrackingAsync(account.EmployeeId.Value, cancellationToken);
+                activeWorkLog = await _unitOfWork.WorkLogs.GetActiveWorkLogAsNoTrackingAsync(request.employeeId, cancellationToken);
                 if (activeWorkLog == null)
                     return null;
             }

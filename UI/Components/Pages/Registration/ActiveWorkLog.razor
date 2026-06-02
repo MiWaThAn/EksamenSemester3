@@ -1073,7 +1073,7 @@ else
         errorMessage = string.Empty;
         try
         {
-            activeLog = await RegistrationService.GetActiveWorkLog(UserId, CancellationToken.None);
+            activeLog = await RegistrationService.GetActiveWorkLog(CancellationToken.None);
         }
         catch (Exception)
         {

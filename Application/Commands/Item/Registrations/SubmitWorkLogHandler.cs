@@ -24,12 +24,7 @@ namespace Application.Commands.Item.Registrations
             try
             {
                 await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted, cancellationToken);
-                var account = await _unitOfWork.Accounts.GetByIdAsync(request.AccountId, cancellationToken);
-                if (account == null)
-                    return BaseRegistrationResponse.Fail("Account not found.");
-                if(!account.EmployeeId.HasValue)
-                    return BaseRegistrationResponse.Fail("Account is not associated with an employee.");
-                var emp = await _unitOfWork.Employees.GetByIdAsync(account.EmployeeId.Value, cancellationToken);
+                var emp = await _unitOfWork.Employees.GetByIdAsync(request.EmployeeId, cancellationToken);
                 if (emp == null)
                     return BaseRegistrationResponse.Fail("Employee not found.");
                 var workLog = await _unitOfWork.WorkLogs.GetByIdWithRegistrationsAsync(request.WorkLogId, cancellationToken);

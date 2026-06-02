@@ -23,20 +23,15 @@ namespace Application.Commands.Item.Registrations
             try
             {
                 await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted, cancellationToken);
-                var account = await _unitOfWork.Accounts.GetByIdAsync(request.AccountId, cancellationToken);
-                if (account == null)
-                    return BaseRegistrationResponse.Fail("Account not found.");
-                if(!account.CompanyId.HasValue)
-                    return BaseRegistrationResponse.Fail("Account is not associated with a company.");
                 var workLog = await _unitOfWork.WorkLogs.GetByIdWithRegistrationsAsync(request.WorkLogId, cancellationToken);
                 if (workLog == null)
                     return BaseRegistrationResponse.Fail("Work log not found.");
                 var emp = await _unitOfWork.Employees.GetByIdAsync(workLog.EmployeeId, cancellationToken);
                 if (emp == null)
                     return BaseRegistrationResponse.Fail("Employee not found.");
-                if (emp.CompanyId != account.CompanyId.Value)
+                if (emp.CompanyId != request.CompanyId)
                     return BaseRegistrationResponse.Fail("Work log does not belong to the specified company.");
-                var company = await _unitOfWork.Companies.GetByIdAsync(account.CompanyId.Value, cancellationToken);
+                var company = await _unitOfWork.Companies.GetByIdAsync(request.CompanyId, cancellationToken);
                 if (company == null)
                     return BaseRegistrationResponse.Fail("Company not found.");
                 workLog.Approve(company);

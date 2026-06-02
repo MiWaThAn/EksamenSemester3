@@ -6,5 +6,5 @@ using System.Text;
 
 namespace Shared.Item.Registrations.Commands.Time
 {
-    public record TakeBreakCommand(Guid AccountId) : IRequest<BaseRegistrationResponse>;
+    public record TakeBreakCommand(Guid EmployeeId) : IRequest<BaseRegistrationResponse>;
 }

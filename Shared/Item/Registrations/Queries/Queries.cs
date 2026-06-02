@@ -7,8 +7,8 @@ using System.Text;
 
 namespace Shared.Item.Registrations.Queries
 {
-    public record GetActiveWorkLogQuery(Guid accountId) : IRequest<WorkLogDto>;
-    public record GetWorkLogHistoryQuery(Guid AccountId) : IRequest<IEnumerable<WorkLogDto>>;
+    public record GetActiveWorkLogQuery(Guid employeeId) : IRequest<WorkLogDto>;
+    public record GetWorkLogHistoryQuery(Guid employeeId) : IRequest<IEnumerable<WorkLogDto>>;
     public record GetWorkLogByIdQuery(Guid LogId) : IRequest<WorkLogDto>;
-    public record GetPendingWorkLogsQuery(Guid accountId) : IRequest<IEnumerable<WorkLogDto>>;
+    public record GetPendingWorkLogsQuery(Guid companyId) : IRequest<IEnumerable<WorkLogDto>>;
 }
