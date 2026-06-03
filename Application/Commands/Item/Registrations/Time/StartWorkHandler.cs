@@ -21,6 +21,7 @@ namespace Application.Commands.Item.Registrations.Time
         {
             try
             {
+                // TODO: Put this logic into the start work methods to incapsulate the logic that only the owner employee can controll the worklog (employee as input on public id as input in private)
                 await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted, cancellationToken);
                 var employee = await _unitOfWork.Employees.GetByIdAsync(request.EmployeeId, cancellationToken);
                 if (employee == null)
